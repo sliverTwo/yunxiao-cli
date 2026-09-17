@@ -1,0 +1,89 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            archive: tar.gz
+          - goos: linux
+            goarch: arm64
+            archive: tar.gz
+          - goos: darwin
+            goarch: amd64
+            archive: tar.gz
+          - goos: darwin
+            goarch: arm64
+            archive: tar.gz
+          - goos: windows
+            goarch: amd64
+            archive: zip
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: "0"
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          EXT=""
+          if [ "$GOOS" = "windows" ]; then EXT=".exe"; fi
+          OUT="yunxiao${EXT}"
+          go build -trimpath -ldflags "-s -w -X github.com/yunxiao-cli/yunxiao/internal/version.Version=${VERSION}" -o "${OUT}" .
+          STAGE="dist/yunxiao-cli-${VERSION}-${GOOS}-${GOARCH}"
+          mkdir -p "${STAGE}"
+          mv "${OUT}" "${STAGE}/"
+          cp README.md LICENSE "${STAGE}/" 2>/dev/null || true
+          cp -a skills "${STAGE}/skills" 2>/dev/null || true
+          mkdir -p dist/out
+          if [ "${{ matrix.archive }}" = "zip" ]; then
+            (cd "${STAGE}" && zip -qr "../../dist/out/yunxiao-cli-${VERSION}-${GOOS}-${GOARCH}.zip" .)
+          else
+            tar -C "${STAGE}" -czf "dist/out/yunxiao-cli-${VERSION}-${GOOS}-${GOARCH}.tar.gz" .
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bin-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/out/*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Checksums
+        run: |
+          set -euo pipefail
+          cd artifacts
+          sha256sum yunxiao-cli-* > checksums.txt
+          ls -la
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
