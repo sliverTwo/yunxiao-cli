@@ -60,7 +60,7 @@ var workitemEffortsMineCmd = &cobra.Command{
 var workitemEffortsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List effort records for a work item",
-	Long:  "Risk: read\nHTTP: GET .../workitems/{id}/effortRecords",
+	Long:  "Risk: read\nHTTP: GET .../workitems/{id}/effortRecords\n\nDefault order: newest first by update/create time. Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		id, _ := cmd.Flags().GetString("id")
@@ -78,7 +78,13 @@ var workitemEffortsListCmd = &cobra.Command{
 			handleErr(err)
 			return
 		}
-		handleErr(runRead(cmd.Context(), c, "GET", path, nil, nil, map[string]any{"risk": risk.Read}, nil))
+		sortFlag, _ := cmd.Flags().GetString("sort")
+		after, err := afterSortByTime(sortFlag, nil)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		handleErr(runRead(cmd.Context(), c, "GET", path, nil, nil, map[string]any{"risk": risk.Read}, after))
 	},
 }
 
@@ -176,7 +182,7 @@ var workitemEffortsUpdateCmd = &cobra.Command{
 var workitemEstimatedListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List estimated efforts for a work item",
-	Long:  "Risk: read\nHTTP: GET .../workitems/{id}/estimatedEfforts",
+	Long:  "Risk: read\nHTTP: GET .../workitems/{id}/estimatedEfforts\n\nDefault order: newest first by update/create time. Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		id, _ := cmd.Flags().GetString("id")
@@ -194,7 +200,13 @@ var workitemEstimatedListCmd = &cobra.Command{
 			handleErr(err)
 			return
 		}
-		handleErr(runRead(cmd.Context(), c, "GET", path, nil, nil, map[string]any{"risk": risk.Read}, nil))
+		sortFlag, _ := cmd.Flags().GetString("sort")
+		after, err := afterSortByTime(sortFlag, nil)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		handleErr(runRead(cmd.Context(), c, "GET", path, nil, nil, map[string]any{"risk": risk.Read}, after))
 	},
 }
 
@@ -301,6 +313,7 @@ func init() {
 	workitemEffortsMineCmd.Flags().String("start-date", "", "yyyy-MM-dd (required)")
 	workitemEffortsMineCmd.Flags().String("end-date", "", "yyyy-MM-dd (required)")
 	workitemEffortsListCmd.Flags().String("id", "", "work item id (required)")
+	addSortFlag(workitemEffortsListCmd)
 	workitemEffortsCreateCmd.Flags().String("id", "", "work item id (required)")
 	workitemEffortsCreateCmd.Flags().Float64("actual-time", 0, "actual hours (required, >0)")
 	workitemEffortsCreateCmd.Flags().String("gmt-start", "", "start date (required)")
@@ -317,6 +330,7 @@ func init() {
 	workitemEffortsUpdateCmd.Flags().String("operator-id", "", "operator user id")
 	workitemEffortsUpdateCmd.Flags().String("work-type", "", "work type")
 	workitemEstimatedListCmd.Flags().String("id", "", "work item id (required)")
+	addSortFlag(workitemEstimatedListCmd)
 	workitemEstimatedCreateCmd.Flags().String("id", "", "work item id (required)")
 	workitemEstimatedCreateCmd.Flags().String("owner", "", "owner user id or self (required)")
 	workitemEstimatedCreateCmd.Flags().Float64("spent-time", 0, "estimated hours (required, >0)")

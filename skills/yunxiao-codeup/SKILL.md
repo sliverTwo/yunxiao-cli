@@ -73,7 +73,7 @@ yunxiao codeup mrs create \
 ## MR 评论与标签
 
 ```bash
-yunxiao codeup mrs comments list --repo <id> --local-id 1
+yunxiao codeup mrs comments list --repo <id> --local-id 1   # newest first; --sort asc
 yunxiao codeup mrs comments create --repo <id> --local-id 1 --content "LGTM" --patchset-biz-id <biz> --dry-run
 yunxiao codeup mrs labels list --repo <id> --local-id 1
 yunxiao codeup mrs labels attach --repo <id> --local-id 1 --label-ids 1,2 --dry-run
