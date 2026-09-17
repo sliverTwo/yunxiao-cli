@@ -474,3 +474,29 @@ func profileSpaceID() string {
 	}
 	return pf.SpaceID
 }
+
+// afterSortByTime sorts list payloads by time (default newest-first) then calls next.
+// sortFlag is the --sort value (asc|desc); empty defaults to desc.
+func afterSortByTime(sortFlag string, next func(out any, meta map[string]any) (any, map[string]any)) func(out any, meta map[string]any) (any, map[string]any) {
+	desc := client.SortDescending(sortFlag)
+	return func(out any, meta map[string]any) (any, map[string]any) {
+		out = client.SortListByTime(out, desc)
+		if meta == nil {
+			meta = map[string]any{}
+		}
+		if desc {
+			meta["sort"] = "desc"
+		} else {
+			meta["sort"] = "asc"
+		}
+		if next != nil {
+			return next(out, meta)
+		}
+		return out, meta
+	}
+}
+
+// addSortFlag registers --sort with default newest-first (desc).
+func addSortFlag(c *cobra.Command) {
+	c.Flags().String("sort", "desc", "asc|desc (default newest first by time)")
+}

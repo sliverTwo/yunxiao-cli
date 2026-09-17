@@ -33,7 +33,7 @@ yunxiao project list --name demo
 yunxiao workitem search --assigned-to self --category Req
 yunxiao workitem search --subject "登录" --status-stage 1,2
 yunxiao workitem get --id <workItemId>
-yunxiao workitem comments list --id <id>
+yunxiao workitem comments list --id <id>   # newest first; --sort asc for oldest
 yunxiao workitem search --creator self --category Task --status-stage 1,2
 yunxiao workitem comment --id <id> --content "进度更新" --dry-run   # write
 yunxiao workitem comment --id <id> --content "进度更新"             # write

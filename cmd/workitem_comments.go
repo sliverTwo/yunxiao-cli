@@ -12,12 +12,13 @@ var workitemCommentsCmd = &cobra.Command{Use: "comments", Short: "Work item comm
 var workitemCommentsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List comments on a work item",
-	Long:  "Risk: read\nHTTP: GET .../workitems/{id}/comments",
+	Long:  "Risk: read\nHTTP: GET .../workitems/{id}/comments\n\nDefault order: newest first (by gmtModified/gmtCreate). Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		id, _ := cmd.Flags().GetString("id")
 		page, _ := cmd.Flags().GetInt("page")
 		perPage, _ := cmd.Flags().GetInt("per-page")
+		sortFlag, _ := cmd.Flags().GetString("sort")
 		if err := requireFlags("id", id); err != nil {
 			handleErr(err)
 			return
@@ -33,7 +34,7 @@ var workitemCommentsListCmd = &cobra.Command{
 			return
 		}
 		q := map[string]string{"page": strconv.Itoa(page), "perPage": strconv.Itoa(perPage)}
-		handleErr(runRead(cmd.Context(), c, "GET", path, q, nil, map[string]any{"risk": risk.Read}, nil))
+		handleErr(runRead(cmd.Context(), c, "GET", path, q, nil, map[string]any{"risk": risk.Read}, afterSortByTime(sortFlag, nil)))
 	},
 }
 

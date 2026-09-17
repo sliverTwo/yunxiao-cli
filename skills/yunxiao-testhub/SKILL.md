@@ -20,7 +20,7 @@ yunxiao testhub plans progress --plan-id <planId>
 yunxiao testhub plans directories --plan-id <planId>
 yunxiao testhub results list --plan-id <planId> --directory-id <dirId>
 yunxiao testhub results update --plan-id <planId> --testcase-id <id> --status PASSED --dry-run
-yunxiao testhub plan-comments list --plan-id <planId> --testcase-id <id>
+yunxiao testhub plan-comments list --plan-id <planId> --testcase-id <id>   # newest first; --sort asc
 yunxiao testhub plan-comments create --plan-id <planId> --testcase-id <id> --content "note" --dry-run
 yunxiao testhub repos list
 ```

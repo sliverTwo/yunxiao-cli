@@ -60,10 +60,11 @@ var workitemWorkflowCmd = &cobra.Command{
 var workitemActivitiesCmd = &cobra.Command{
 	Use:   "activities",
 	Short: "List work item activities",
-	Long:  "Risk: read\nHTTP: GET .../workitems/{id}/activities\nSource: listWorkitemActivitiesFunc",
+	Long:  "Risk: read\nHTTP: GET .../workitems/{id}/activities\nSource: listWorkitemActivitiesFunc\n\nDefault order: newest first. Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		id, _ := cmd.Flags().GetString("id")
+		sortFlag, _ := cmd.Flags().GetString("sort")
 		if err := requireFlags("id", id); err != nil {
 			handleErr(err)
 			return
@@ -78,7 +79,7 @@ var workitemActivitiesCmd = &cobra.Command{
 			handleErr(err)
 			return
 		}
-		handleErr(runRead(cmd.Context(), c, "GET", path, nil, nil, map[string]any{"risk": risk.Read}, nil))
+		handleErr(runRead(cmd.Context(), c, "GET", path, nil, nil, map[string]any{"risk": risk.Read}, afterSortByTime(sortFlag, nil)))
 	},
 }
 

@@ -243,7 +243,7 @@ var testhubPlanCommentsCmd = &cobra.Command{Use: "plan-comments", Short: "Commen
 var testhubPlanCommentsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List comments on a plan testcase",
-	Long:  "Risk: read\nHTTP: GET .../testPlans/{plan}/testcases/{id}/comments",
+	Long:  "Risk: read\nHTTP: GET .../testPlans/{plan}/testcases/{id}/comments\n\nDefault order: newest first. Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		planID, _ := cmd.Flags().GetString("plan-id")
@@ -262,7 +262,8 @@ var testhubPlanCommentsListCmd = &cobra.Command{
 			handleErr(err)
 			return
 		}
-		handleErr(runRead(cmd.Context(), c, "GET", path, nil, nil, map[string]any{"risk": risk.Read}, nil))
+		sortFlag, _ := cmd.Flags().GetString("sort")
+		handleErr(runRead(cmd.Context(), c, "GET", path, nil, nil, map[string]any{"risk": risk.Read}, afterSortByTime(sortFlag, nil)))
 	},
 }
 
@@ -504,7 +505,7 @@ var testhubCasesDeleteCmd = &cobra.Command{
 var testhubCaseCommentsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List comments on a repo testcase",
-	Long:  "Risk: read\nHTTP: GET .../testRepos/{repo}/testcases/{id}/comments",
+	Long:  "Risk: read\nHTTP: GET .../testRepos/{repo}/testcases/{id}/comments\n\nDefault order: newest first. Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		repoID, _ := cmd.Flags().GetString("repo-id")
@@ -523,7 +524,8 @@ var testhubCaseCommentsListCmd = &cobra.Command{
 			handleErr(err)
 			return
 		}
-		handleErr(runRead(cmd.Context(), c, "GET", path, nil, nil, map[string]any{"risk": risk.Read}, nil))
+		sortFlag, _ := cmd.Flags().GetString("sort")
+		handleErr(runRead(cmd.Context(), c, "GET", path, nil, nil, map[string]any{"risk": risk.Read}, afterSortByTime(sortFlag, nil)))
 	},
 }
 
@@ -575,6 +577,7 @@ func init() {
 	testhubResultsUpdateCmd.Flags().String("executor", "", "executor user id or self")
 	testhubPlanCommentsListCmd.Flags().String("plan-id", "", "test plan id (required)")
 	testhubPlanCommentsListCmd.Flags().String("testcase-id", "", "testcase id (required)")
+	addSortFlag(testhubPlanCommentsListCmd)
 	testhubPlanCommentsCreateCmd.Flags().String("plan-id", "", "test plan id (required)")
 	testhubPlanCommentsCreateCmd.Flags().String("testcase-id", "", "testcase id (required)")
 	testhubPlanCommentsCreateCmd.Flags().String("content", "", "comment content (required)")
@@ -602,6 +605,7 @@ func init() {
 	testhubCasesDeleteCmd.Flags().String("id", "", "testcase id (required)")
 	testhubCaseCommentsListCmd.Flags().String("repo-id", "", "test repo id (required)")
 	testhubCaseCommentsListCmd.Flags().String("id", "", "testcase id (required)")
+	addSortFlag(testhubCaseCommentsListCmd)
 	testhubCaseCommentsCreateCmd.Flags().String("repo-id", "", "test repo id (required)")
 	testhubCaseCommentsCreateCmd.Flags().String("id", "", "testcase id (required)")
 	testhubCaseCommentsCreateCmd.Flags().String("content", "", "comment (required)")

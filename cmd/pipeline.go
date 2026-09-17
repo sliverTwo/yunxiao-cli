@@ -87,7 +87,7 @@ var pipelineJobCmd = &cobra.Command{
 var pipelineRunListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List pipeline runs",
-	Long:  "Risk: read\nHTTP: GET .../pipelines/{id}/runs",
+	Long:  "Risk: read\nHTTP: GET .../pipelines/{id}/runs\n\nDefault order: newest first. Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		pid, _ := cmd.Flags().GetString("pipeline-id")
@@ -112,9 +112,10 @@ var pipelineRunListCmd = &cobra.Command{
 		if status != "" {
 			q["status"] = status
 		}
-		handleErr(runRead(cmd.Context(), c, "GET", path, q, nil, map[string]any{"risk": risk.Read}, func(out any, meta map[string]any) (any, map[string]any) {
+		sortFlag, _ := cmd.Flags().GetString("sort")
+		handleErr(runRead(cmd.Context(), c, "GET", path, q, nil, map[string]any{"risk": risk.Read}, afterSortByTime(sortFlag, func(out any, meta map[string]any) (any, map[string]any) {
 			return zhiyi.AttachPipelineRunURLs(out, pid), meta
-		}))
+		})))
 	},
 }
 
@@ -894,6 +895,7 @@ func init() {
 	pipelineRunListCmd.Flags().String("status", "", "run status filter e.g. FAIL|SUCCESS|RUNNING")
 	pipelineRunListCmd.Flags().Int("page", 1, "page")
 	pipelineRunListCmd.Flags().Int("per-page", 20, "per page")
+	addSortFlag(pipelineRunListCmd)
 	pipelineRunLatestCmd.Flags().String("pipeline-id", "", "pipeline id (required)")
 	pipelineRunGetCmd.Flags().String("pipeline-id", "", "pipeline id (required)")
 	pipelineRunGetCmd.Flags().String("run-id", "", "pipeline run id (required)")

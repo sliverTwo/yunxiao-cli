@@ -110,7 +110,7 @@ var codeupBranchesListCmd = &cobra.Command{
 var codeupMrsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List merge requests",
-	Long:  "Risk: read\nHTTP: GET .../changeRequests\n\nUse --all to follow pages via client.ListAll (cap 50).",
+	Long:  "Risk: read\nHTTP: GET .../changeRequests\n\nUse --all to follow pages via client.ListAll (cap 50).\nDefault order: newest first by update/create time. Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		state, _ := cmd.Flags().GetString("state")
@@ -119,6 +119,7 @@ var codeupMrsListCmd = &cobra.Command{
 		page, _ := cmd.Flags().GetInt("page")
 		perPage, _ := cmd.Flags().GetInt("per-page")
 		allPages, _ := cmd.Flags().GetBool("all")
+		sortFlag, _ := cmd.Flags().GetString("sort")
 		c, _, err := mustClient()
 		if err != nil {
 			handleErr(err)
@@ -144,9 +145,9 @@ var codeupMrsListCmd = &cobra.Command{
 			}
 			q["projectIds"] = resolved
 		}
-		after := func(out any, meta map[string]any) (any, map[string]any) {
+		after := afterSortByTime(sortFlag, func(out any, meta map[string]any) (any, map[string]any) {
 			return zhiyi.AttachMergeRequestURLs(out), meta
-		}
+		})
 		if allPages {
 			handleErr(runReadAll(cmd.Context(), c, "GET", path, q, perPage, map[string]any{"risk": risk.Read}, after))
 			return
@@ -631,7 +632,7 @@ var codeupFilesDeleteCmd = &cobra.Command{
 var codeupCommitsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List commits on a ref",
-	Long:  "Risk: read\nHTTP: GET .../repositories/{repo}/commits",
+	Long:  "Risk: read\nHTTP: GET .../repositories/{repo}/commits\n\nDefault order: newest first. Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		repo, _ := cmd.Flags().GetString("repo")
@@ -640,6 +641,7 @@ var codeupCommitsListCmd = &cobra.Command{
 		pathArg, _ := cmd.Flags().GetString("path")
 		page, _ := cmd.Flags().GetInt("page")
 		perPage, _ := cmd.Flags().GetInt("per-page")
+		sortFlag, _ := cmd.Flags().GetString("sort")
 		if err := requireFlags("repo", repo, "ref", ref); err != nil {
 			handleErr(err)
 			return
@@ -668,7 +670,7 @@ var codeupCommitsListCmd = &cobra.Command{
 		if pathArg != "" {
 			q["path"] = pathArg
 		}
-		handleErr(runRead(cmd.Context(), c, "GET", path, q, nil, map[string]any{"risk": risk.Read}, nil))
+		handleErr(runRead(cmd.Context(), c, "GET", path, q, nil, map[string]any{"risk": risk.Read}, afterSortByTime(sortFlag, nil)))
 	},
 }
 
@@ -934,7 +936,7 @@ var codeupMrsCommentsCmd = &cobra.Command{Use: "comments", Short: "MR comments"}
 var codeupMrsCommentsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List MR comments",
-	Long:  "Risk: read\nHTTP: POST .../changeRequests/{localId}/comments/list",
+	Long:  "Risk: read\nHTTP: POST .../changeRequests/{localId}/comments/list\n\nDefault order: newest first. Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		repo, _ := cmd.Flags().GetString("repo")
@@ -944,6 +946,7 @@ var codeupMrsCommentsListCmd = &cobra.Command{
 		resolved, _ := cmd.Flags().GetBool("resolved")
 		filePath, _ := cmd.Flags().GetString("file-path")
 		patchSets, _ := cmd.Flags().GetString("patchset-biz-ids")
+		sortFlag, _ := cmd.Flags().GetString("sort")
 		if err := requireFlags("repo", repo, "local-id", localID); err != nil {
 			handleErr(err)
 			return
@@ -976,7 +979,7 @@ var codeupMrsCommentsListCmd = &cobra.Command{
 		if filePath != "" {
 			body["filePath"] = filePath
 		}
-		handleErr(runRead(cmd.Context(), c, "POST", path, nil, body, map[string]any{"risk": risk.Read}, nil))
+		handleErr(runRead(cmd.Context(), c, "POST", path, nil, body, map[string]any{"risk": risk.Read}, afterSortByTime(sortFlag, nil)))
 	},
 }
 
@@ -1135,6 +1138,7 @@ func init() {
 	codeupMrsListCmd.Flags().Int("page", 1, "page")
 	codeupMrsListCmd.Flags().Int("per-page", 20, "per page")
 	codeupMrsListCmd.Flags().Bool("all", false, "follow all pages (ListAll, max 50)")
+	addSortFlag(codeupMrsListCmd)
 	codeupMrsCreateCmd.Flags().String("repo", "", "repository id or alias (required)")
 	codeupMrsCreateCmd.Flags().String("source", "", "source branch (required)")
 	codeupMrsCreateCmd.Flags().String("target", "", "target branch (required)")
@@ -1162,6 +1166,7 @@ func init() {
 	codeupCommitsListCmd.Flags().String("path", "", "file path filter")
 	codeupCommitsListCmd.Flags().Int("page", 1, "page")
 	codeupCommitsListCmd.Flags().Int("per-page", 20, "per page")
+	addSortFlag(codeupCommitsListCmd)
 
 	codeupReposCmd.AddCommand(codeupReposListCmd, codeupReposGetCmd)
 	codeupReposGetCmd.Flags().String("repo", "", "repository id, alias, or path (required)")
@@ -1223,6 +1228,7 @@ func init() {
 	codeupMrsCommentsListCmd.Flags().Bool("resolved", false, "filter resolved")
 	codeupMrsCommentsListCmd.Flags().String("file-path", "", "filter by file path")
 	codeupMrsCommentsListCmd.Flags().String("patchset-biz-ids", "", "comma-separated patchset biz ids")
+	addSortFlag(codeupMrsCommentsListCmd)
 	codeupMrsCommentsCreateCmd.Flags().String("repo", "", "repository id or alias (required)")
 	codeupMrsCommentsCreateCmd.Flags().String("local-id", "", "MR local id (required)")
 	codeupMrsCommentsCreateCmd.Flags().String("content", "", "comment content (required)")

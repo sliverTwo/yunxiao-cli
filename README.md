@@ -92,7 +92,7 @@ make install               # installs to ~/.local/bin/yunxiao
 go install github.com/yunxiao-cli/yunxiao@latest   # when published
 ```
 
-Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Version=$(VERSION)` (`VERSION` defaults to `git describe` or `0.15.5`).
+Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Version=$(VERSION)` (`VERSION` defaults to `git describe` or `0.15.6`).
 
 **Known limitation:** `go install` / a lone binary does **not** ship the repo `skills/` tree, so `yunxiao skills list|read|install` will not find skills unless you use the npm installer (which extracts `skills/`), run from a source checkout, or copy/`npx skills add` the tree. Prefer `npx sanzhi-yunxiao-cli@latest install` or `make build` from a checkout for skills-aware workflows.
 
@@ -406,6 +406,7 @@ See [AGENTS.md](AGENTS.md) for contributor / AI-agent conventions.
 
 ### Changelog
 
+- **0.15.6** — default newest-first for comment/activity/history-style lists (`--sort asc|desc`); client.SortListByTime
 - **0.15.5** — `--data-file` and `--data @file.json` for long JSON payloads (`api`, appstack, testhub, …)
 - **0.15.2** — companion skills refresh for CLI 0.15.x (`has_more` / `meta.url` / `refresh_ok`); `client.ListAll` + `--all` on `pipeline list` & `codeup mrs list`; `scripts/flow-ci.sh` (Alibaba golang mirror + `GOPROXY=goproxy.cn`)
 - **0.15.1** — B5 wave2: more cmds on `runRead`/`runJSONMutating` (workitem update/relations list; codeup writes; pipeline mutations + remaining reads; org/project/sprint/versions/packages/testhub/appstack/effort/programs reads + simple writes). Still custom: multipart attachments, cancel-reason soft-warn dry-run envelope, pipeline create/update YAML redaction preview, multi-step shortcuts (+transition/+bug*/+explore-workflow, MR create, testhub results fallback, sprint +bugs aggregate)
@@ -459,12 +460,12 @@ yunxiao --version          # yunxiao 0.15.5
 ```bash
 make build          # 生成 ./yunxiao（-ldflags 注入 Version）
 make install        # 安装到 ~/.local/bin/yunxiao
-go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.15.5
+go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.15.6
 # 显式注入：
 # go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.15.5" -o yunxiao .
 ```
 
-需要 Go 1.24.4+。`make build` / `make ci` 通过 `-ldflags -X …version.Version=$(VERSION)` 注入版本（`VERSION` 默认 `git describe` 或 `0.15.5`）。
+需要 Go 1.24.4+。`make build` / `make ci` 通过 `-ldflags -X …version.Version=$(VERSION)` 注入版本（`VERSION` 默认 `git describe` 或 `0.15.6`）。
 
 **已知限制：** `go install` / 单独二进制**不包含**仓库 `skills/` 目录；请用 npm 安装器（会解压 `skills/`）、在源码检出目录运行，或另行复制 / `npx skills add`。需要技能时优先 `npx sanzhi-yunxiao-cli@latest install` 或检出目录 `make build`。
 
