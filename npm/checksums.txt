@@ -1,5 +1,5 @@
-f4fa157db30f343ee92b1ac7398097f5cd0980799e529b398702cc4bdb5445f4  yunxiao-cli-0.15.6-darwin-amd64.tar.gz
-652020cb7f4525ac807aadd4d6c4390a8646a59a15a8ed6b24ebdccfeb04bd7c  yunxiao-cli-0.15.6-darwin-arm64.tar.gz
-49116f72f6a417236157f2635ef403e2c93d1d93e3c31844c24dcefc26348d60  yunxiao-cli-0.15.6-linux-amd64.tar.gz
-0acdfad80779797be353e78431dc48c41af9237f7946125a77d5a4efa243e1b6  yunxiao-cli-0.15.6-linux-arm64.tar.gz
-cf398a10be11b3c17edc32714d11c23b114aaeb91b014f6f759fd0c526bb15f3  yunxiao-cli-0.15.6-windows-amd64.zip
+2a3a395a192e661b61d00b57db7159a256fac201ce07793722501e7abf6362bb  yunxiao-cli-0.15.7-darwin-amd64.tar.gz
+fb80f35d5b150ce35505347a6cd5d900ae4aba0dff32622de08faeaab8e5265c  yunxiao-cli-0.15.7-darwin-arm64.tar.gz
+ad7dfeaa0e686f66a6bdc96f18720ef013645325fd3c1831c0816afe02493dfc  yunxiao-cli-0.15.7-linux-amd64.tar.gz
+ae7d3072597f7d0193d1d2d552b7e656be6e7922e487fca07cb545d1e2765f5b  yunxiao-cli-0.15.7-linux-arm64.tar.gz
+589964ad8387c070f611eecd2904fe9d52ff053a731670d5bc166d36f1b8c15d  yunxiao-cli-0.15.7-windows-amd64.zip
