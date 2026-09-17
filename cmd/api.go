@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -18,6 +16,8 @@ var apiCmd = &cobra.Command{
 Examples:
   yunxiao api GET /oapi/v1/platform/user
   yunxiao api POST /oapi/v1/projex/organizations/{org}/workitems:search --data '{"category":"Req"}'
+  yunxiao api POST /oapi/v1/... --data-file body.json
+  yunxiao api POST /oapi/v1/... --data @body.json
 
 Risk: write (treat unknown endpoints carefully; use --dry-run first)`,
 	Args: cobra.ExactArgs(2),
@@ -29,12 +29,11 @@ Risk: write (treat unknown endpoints carefully; use --dry-run first)`,
 			path = "/" + path
 		}
 		dataStr, _ := cmd.Flags().GetString("data")
-		var body any
-		if dataStr != "" {
-			if err := json.Unmarshal([]byte(dataStr), &body); err != nil {
-				handleErr(fmt.Errorf("--data must be JSON: %w", err))
-				return
-			}
+		dataFile, _ := cmd.Flags().GetString("data-file")
+		body, err := loadJSONBodyFromFlags(dataStr, dataFile)
+		if err != nil {
+			handleErr(err)
+			return
 		}
 		c, _, err := mustClient()
 		if err != nil {
@@ -62,5 +61,6 @@ Risk: write (treat unknown endpoints carefully; use --dry-run first)`,
 }
 
 func init() {
-	apiCmd.Flags().String("data", "", "JSON request body")
+	apiCmd.Flags().String("data", "", "JSON request body (or @file.json)")
+	apiCmd.Flags().String("data-file", "", "read JSON body from file (alternative to --data)")
 }

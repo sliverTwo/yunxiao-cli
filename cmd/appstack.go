@@ -208,19 +208,24 @@ var appstackCOCreateCmd = &cobra.Command{
 
 HTTP: POST .../apps/{app}/changeOrders
 
-Pass full body via --data JSON, e.g.:
+Pass full body via --data JSON (or --data-file / --data @file.json), e.g.:
   {"changeOrderName":"deploy-1","type":"Deploy","envs":{"prod":{"values":{}}},"orchestrationRevisionSha":"..."}`,
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		app, _ := cmd.Flags().GetString("app")
 		dataStr, _ := cmd.Flags().GetString("data")
-		if err := requireFlags("app", app, "data", dataStr); err != nil {
+		dataFile, _ := cmd.Flags().GetString("data-file")
+		if err := requireFlags("app", app); err != nil {
 			handleErr(err)
 			return
 		}
-		var body any
-		if err := json.Unmarshal([]byte(dataStr), &body); err != nil {
-			handleErr(fmt.Errorf("--data must be JSON: %w", err))
+		body, err := loadJSONBodyFromFlags(dataStr, dataFile)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		if body == nil {
+			handleErr(fmt.Errorf("missing --data or --data-file"))
 			return
 		}
 		c, _, err := mustClient()
@@ -796,6 +801,7 @@ var appstackAppsUpdateCmd = &cobra.Command{
 		desc, _ := cmd.Flags().GetString("description")
 		owner, _ := cmd.Flags().GetString("owner-id")
 		dataStr, _ := cmd.Flags().GetString("data")
+		dataFile, _ := cmd.Flags().GetString("data-file")
 		if err := requireFlags("name", name); err != nil {
 			handleErr(err)
 			return
@@ -811,10 +817,19 @@ var appstackAppsUpdateCmd = &cobra.Command{
 			return
 		}
 		body := map[string]any{}
-		if dataStr != "" {
-			if err := json.Unmarshal([]byte(dataStr), &body); err != nil {
-				handleErr(fmt.Errorf("invalid --data JSON: %w", err))
+		extra, err := loadJSONBodyFromFlags(dataStr, dataFile)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		if extra != nil {
+			m := asStringMap(extra)
+			if m == nil {
+				handleErr(fmt.Errorf("--data/--data-file must be a JSON object"))
 				return
+			}
+			for k, v := range m {
+				body[k] = v
 			}
 		}
 		if desc != "" {
@@ -824,7 +839,7 @@ var appstackAppsUpdateCmd = &cobra.Command{
 			body["ownerId"] = owner
 		}
 		if len(body) == 0 {
-			handleErr(fmt.Errorf("provide --description/--owner-id and/or --data JSON"))
+			handleErr(fmt.Errorf("provide --description/--owner-id and/or --data/--data-file JSON"))
 			return
 		}
 		handleErr(runJSONMutating(cmd.Context(), c, "appstack apps update", risk.HighRiskWrite, "PUT", path, nil, body, nil))
@@ -908,13 +923,23 @@ var appstackCRCreateCmd = &cobra.Command{
 		flagOrg(globalOrg)
 		app, _ := cmd.Flags().GetString("app")
 		dataStr, _ := cmd.Flags().GetString("data")
-		if err := requireFlags("app", app, "data", dataStr); err != nil {
+		dataFile, _ := cmd.Flags().GetString("data-file")
+		if err := requireFlags("app", app); err != nil {
 			handleErr(err)
 			return
 		}
-		var body map[string]any
-		if err := json.Unmarshal([]byte(dataStr), &body); err != nil {
-			handleErr(fmt.Errorf("invalid --data JSON: %w", err))
+		raw, err := loadJSONBodyFromFlags(dataStr, dataFile)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		if raw == nil {
+			handleErr(fmt.Errorf("missing --data or --data-file"))
+			return
+		}
+		body := asStringMap(raw)
+		if body == nil {
+			handleErr(fmt.Errorf("--data/--data-file must be a JSON object"))
 			return
 		}
 		c, _, err := mustClient()
@@ -1046,6 +1071,7 @@ var appstackGVListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		dataStr, _ := cmd.Flags().GetString("data")
+		dataFile, _ := cmd.Flags().GetString("data-file")
 		current, _ := cmd.Flags().GetInt("current")
 		pageSize, _ := cmd.Flags().GetInt("page-size")
 		search, _ := cmd.Flags().GetString("search")
@@ -1064,13 +1090,18 @@ var appstackGVListCmd = &cobra.Command{
 		if search != "" {
 			body["search"] = search
 		}
-		if dataStr != "" {
-			extra := map[string]any{}
-			if err := json.Unmarshal([]byte(dataStr), &extra); err != nil {
-				handleErr(fmt.Errorf("invalid --data JSON: %w", err))
+		extra, err := loadJSONBodyFromFlags(dataStr, dataFile)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		if extra != nil {
+			m := asStringMap(extra)
+			if m == nil {
+				handleErr(fmt.Errorf("--data/--data-file must be a JSON object"))
 				return
 			}
-			for k, v := range extra {
+			for k, v := range m {
 				body[k] = v
 			}
 		}
@@ -1122,7 +1153,8 @@ func init() {
 	appstackCOByOriginCmd.Flags().String("app", "", "optional app name filter")
 	appstackCOByOriginCmd.Flags().String("env-name", "", "optional env name filter")
 	appstackCOCreateCmd.Flags().String("app", "", "application name (required)")
-	appstackCOCreateCmd.Flags().String("data", "", "JSON change order body (required)")
+	appstackCOCreateCmd.Flags().String("data", "", "JSON change order body (required; or @file)")
+	appstackCOCreateCmd.Flags().String("data-file", "", "read JSON body from file (alternative to --data)")
 	appstackCOExecuteJobCmd.Flags().String("app", "", "application name (required)")
 	appstackCOExecuteJobCmd.Flags().String("sn", "", "change order sn (required)")
 	appstackCOExecuteJobCmd.Flags().String("job-sn", "", "job sn (required)")
@@ -1184,7 +1216,8 @@ func init() {
 	appstackAppsUpdateCmd.Flags().String("name", "", "app name (required)")
 	appstackAppsUpdateCmd.Flags().String("description", "", "description")
 	appstackAppsUpdateCmd.Flags().String("owner-id", "", "owner id")
-	appstackAppsUpdateCmd.Flags().String("data", "", "extra JSON body fields")
+	appstackAppsUpdateCmd.Flags().String("data", "", "extra JSON body fields (or @file)")
+	appstackAppsUpdateCmd.Flags().String("data-file", "", "read extra JSON from file (alternative to --data)")
 	appstackAppsSourcesCmd.Flags().String("name", "", "app name (required)")
 	appstackCRListCmd.Flags().String("app", "", "app name (required)")
 	appstackCRListCmd.Flags().String("name", "", "filter by CR name")
@@ -1192,7 +1225,8 @@ func init() {
 	appstackCRListCmd.Flags().Int("current", 1, "page")
 	appstackCRListCmd.Flags().Int("page-size", 10, "page size")
 	appstackCRCreateCmd.Flags().String("app", "", "app name (required)")
-	appstackCRCreateCmd.Flags().String("data", "", "JSON body (required)")
+	appstackCRCreateCmd.Flags().String("data", "", "JSON body (required; or @file)")
+	appstackCRCreateCmd.Flags().String("data-file", "", "read JSON body from file (alternative to --data)")
 	appstackCRCancelCmd.Flags().String("app", "", "app (required)")
 	appstackCRCancelCmd.Flags().String("sn", "", "CR sn (required)")
 	appstackCRCloseCmd.Flags().String("app", "", "app (required)")
@@ -1205,7 +1239,8 @@ func init() {
 	appstackGVListCmd.Flags().Int("current", 1, "page current (required by API)")
 	appstackGVListCmd.Flags().Int("page-size", 20, "page size (required by API)")
 	appstackGVListCmd.Flags().String("search", "", "search keyword")
-	appstackGVListCmd.Flags().String("data", "", "optional extra JSON merged into body")
+	appstackGVListCmd.Flags().String("data", "", "optional extra JSON merged into body (or @file)")
+	appstackGVListCmd.Flags().String("data-file", "", "read extra JSON from file (alternative to --data)")
 	appstackGVGetCmd.Flags().String("name", "", "var name (required)")
 	appstackAppsCmd.AddCommand(appstackAppsListCmd, appstackAppsGetCmd, appstackAppsCreateCmd, appstackAppsUpdateCmd, appstackAppsSourcesCmd)
 	appstackCRCmd.AddCommand(appstackCRListCmd, appstackCRCreateCmd, appstackCRCancelCmd, appstackCRCloseCmd, appstackCRAuditCmd, appstackCRWorkItemsCmd)

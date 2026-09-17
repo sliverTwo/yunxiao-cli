@@ -16,8 +16,8 @@ CLI binary name: **`yunxiao`**.
 npx yunxiao-cli@latest install
 # or, until published to npmjs:
 #   npm install -g ./npm
-#   npx --yes ./yunxiao-cli-0.15.3.tgz install
-yunxiao --version          # yunxiao 0.15.3
+#   npx --yes ./sanzhi-yunxiao-cli-0.15.5.tgz install
+yunxiao --version          # yunxiao 0.15.5
 ```
 
 The npm package (`npm/` in this repo) runs `postinstall` to unpack a platform archive (bundled under `releases/`, or downloaded via `YUNXIAO_CLI_DOWNLOAD_BASE`), installs companion skills, and prints auth next steps — same shape as `npx @larksuite/cli@latest install`.
@@ -26,16 +26,16 @@ The npm package (`npm/` in this repo) runs `postinstall` to unpack a platform ar
 
 ```bash
 make build                 # produces ./yunxiao (injects Version via -ldflags)
-# or (without ldflags, Version falls back to package default 0.15.3)
+# or (without ldflags, Version falls back to package default 0.15.5)
 go build -o yunxiao .
 # pin version explicitly:
-# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.15.3" -o yunxiao .
+# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.15.5" -o yunxiao .
 make install               # installs to ~/.local/bin/yunxiao
 # or
 go install github.com/yunxiao-cli/yunxiao@latest   # when published
 ```
 
-Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Version=$(VERSION)` (`VERSION` defaults to `git describe` or `0.15.3`).
+Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Version=$(VERSION)` (`VERSION` defaults to `git describe` or `0.15.5`).
 
 **Known limitation:** `go install` / a lone binary does **not** ship the repo `skills/` tree, so `yunxiao skills list|read|install` will not find skills unless you use the npm installer (which extracts `skills/`), run from a source checkout, or copy/`npx skills add` the tree. Prefer `npx yunxiao-cli@latest install` or `make build` from a checkout for skills-aware workflows.
 
@@ -121,6 +121,9 @@ Contributors and AI agents editing this repo: see **[AGENTS.md](AGENTS.md)**.
 
 ### Examples by domain
 
+Long JSON bodies: prefer `--data-file path.json` or `--data @path.json` (avoids shell quoting limits).
+
+
 ```bash
 # organization
 yunxiao organization +whoami
@@ -176,6 +179,7 @@ yunxiao testhub plan-comments list --plan-id <p> --testcase-id <t>
 yunxiao appstack change-orders job-logs --app my-app --sn <sn> --job-sn <jsn>
 yunxiao appstack orchestrations list --app my-app
 yunxiao appstack change-orders create --app my-app --data '{...}' --dry-run
+yunxiao appstack change-orders create --app my-app --data-file order.json --dry-run
 yunxiao codeup +open-mrs
 yunxiao codeup mrs create --repo <id> --source feat --target master --title "x" --dry-run
 yunxiao codeup mrs create --repo <id> --source feat --target master --title "x" --yes   # after user OK
@@ -345,6 +349,7 @@ See [AGENTS.md](AGENTS.md) for contributor / AI-agent conventions.
 
 ### Changelog
 
+- **0.15.5** — `--data-file` and `--data @file.json` for long JSON payloads (`api`, appstack, testhub, …)
 - **0.15.2** — companion skills refresh for CLI 0.15.x (`has_more` / `meta.url` / `refresh_ok`); `client.ListAll` + `--all` on `pipeline list` & `codeup mrs list`; `scripts/flow-ci.sh` (Alibaba golang mirror + `GOPROXY=goproxy.cn`)
 - **0.15.1** — B5 wave2: more cmds on `runRead`/`runJSONMutating` (workitem update/relations list; codeup writes; pipeline mutations + remaining reads; org/project/sprint/versions/packages/testhub/appstack/effort/programs reads + simple writes). Still custom: multipart attachments, cancel-reason soft-warn dry-run envelope, pipeline create/update YAML redaction preview, multi-step shortcuts (+transition/+bug*/+explore-workflow, MR create, testhub results fallback, sprint +bugs aggregate)
 - **0.15.0** — structural: B5 `runRead`/`runJSONMutating` cmd helpers (partial migration); C1 split `workitem.go`; C2 precompiled date regex; C3 `Do` returns headers (lists use `Do`+`MetaWithPagination`); C4 ldflags Version injection
@@ -387,8 +392,8 @@ MIT — see [LICENSE](LICENSE).
 npx yunxiao-cli@latest install
 # 尚未发布到 npmjs 时：
 #   npm install -g ./npm
-#   npx --yes ./yunxiao-cli-0.15.3.tgz install
-yunxiao --version          # yunxiao 0.15.3
+#   npx --yes ./sanzhi-yunxiao-cli-0.15.5.tgz install
+yunxiao --version          # yunxiao 0.15.5
 ```
 
 仓库内 `npm/` 包在 `postinstall` 时解压对应平台归档（内置 `releases/`，或通过 `YUNXIAO_CLI_DOWNLOAD_BASE` 下载），安装 companion skills，并打印认证后续步骤 — 对齐 `npx @larksuite/cli@latest install`。
@@ -398,12 +403,12 @@ yunxiao --version          # yunxiao 0.15.3
 ```bash
 make build          # 生成 ./yunxiao（-ldflags 注入 Version）
 make install        # 安装到 ~/.local/bin/yunxiao
-go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.15.3
+go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.15.5
 # 显式注入：
-# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.15.3" -o yunxiao .
+# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.15.5" -o yunxiao .
 ```
 
-需要 Go 1.24.4+。`make build` / `make ci` 通过 `-ldflags -X …version.Version=$(VERSION)` 注入版本（`VERSION` 默认 `git describe` 或 `0.15.3`）。
+需要 Go 1.24.4+。`make build` / `make ci` 通过 `-ldflags -X …version.Version=$(VERSION)` 注入版本（`VERSION` 默认 `git describe` 或 `0.15.5`）。
 
 **已知限制：** `go install` / 单独二进制**不包含**仓库 `skills/` 目录；请用 npm 安装器（会解压 `skills/`）、在源码检出目录运行，或另行复制 / `npx skills add`。需要技能时优先 `npx yunxiao-cli@latest install` 或检出目录 `make build`。
 
@@ -476,6 +481,9 @@ npx skills add https://codeup.aliyun.com/sanzhi/cli/yunxiao_cli.git -y -g
 
 ### 分域示例
 
+长 JSON 请求体请用 `--data-file path.json` 或 `--data @path.json`（避免 shell 引号长度限制）。
+
+
 ```bash
 yunxiao organization +whoami
 yunxiao project +my-open-items
@@ -546,6 +554,7 @@ Packages **上传**、Codeup **blame/cherry-pick**、MR label detach 等仍无�
 
 ### 变更摘要
 
+- **0.15.5** — 长 JSON 支持 `--data-file` / `--data @file.json`（`api`、appstack、testhub 等）
 - **0.15.2** — companion skills 对齐 CLI 0.15.x（`has_more` / `meta.url` / `refresh_ok`）；`client.ListAll` + `pipeline list --all` / `codeup mrs list --all`；`scripts/flow-ci.sh`（阿里云 golang 镜像 + `GOPROXY=goproxy.cn`）
 - **0.15.1** — B5 wave2：更多命令迁到 `runRead`/`runJSONMutating`（workitem update/relations list；codeup 写；pipeline 变更+剩余读；org/project/sprint/versions/packages/testhub/appstack/effort/programs 读与简单写）。仍自定义：multipart 附件、cancel-reason soft-warn dry-run、pipeline create/update YAML 预览脱敏、多步快捷命令
 - **0.15.0** — 结构重构：B5 `runRead`/`runJSONMutating` 命令模板（部分迁移）；C1 拆分 `workitem.go`；C2 预编译日期正则；C3 `Do` 返回 headers；C4 ldflags 注入 Version

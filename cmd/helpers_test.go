@@ -151,3 +151,75 @@ func TestReadContentOrFile(t *testing.T) {
 		t.Fatal("both")
 	}
 }
+
+func TestLoadJSONBodyFromFlags(t *testing.T) {
+	dir := t.TempDir()
+	cwd, _ := os.Getwd()
+	t.Cleanup(func() { _ = os.Chdir(cwd) })
+	if err := os.Chdir(dir); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile("body.json", []byte(`{"x":1,"y":"z"}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile("bad.json", []byte(`{not-json`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	// both empty
+	got, err := loadJSONBodyFromFlags("", "")
+	if err != nil || got != nil {
+		t.Fatalf("empty: %v %v", got, err)
+	}
+
+	// inline JSON
+	got, err = loadJSONBodyFromFlags(`{"a":true}`, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := asStringMap(got)
+	if m == nil || m["a"] != true {
+		t.Fatalf("inline: %#v", got)
+	}
+
+	// @file
+	got, err = loadJSONBodyFromFlags("@body.json", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	m = asStringMap(got)
+	if m == nil || m["x"].(float64) != 1 || m["y"] != "z" {
+		t.Fatalf("@file: %#v", got)
+	}
+
+	// --data-file
+	got, err = loadJSONBodyFromFlags("", "body.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	m = asStringMap(got)
+	if m == nil || m["y"] != "z" {
+		t.Fatalf("data-file: %#v", got)
+	}
+
+	// both set → mutual exclusion
+	if _, err := loadJSONBodyFromFlags(`{}`, "body.json"); err == nil {
+		t.Fatal("expected mutual exclusion error")
+	}
+
+	// bad JSON
+	if _, err := loadJSONBodyFromFlags(`{bad`, ""); err == nil {
+		t.Fatal("expected bad JSON error")
+	}
+	if _, err := loadJSONBodyFromFlags("", "bad.json"); err == nil {
+		t.Fatal("expected bad data-file JSON error")
+	}
+
+	// parent-path rejected (relative escape)
+	if _, err := loadJSONBodyFromFlags("", "../body.json"); err == nil {
+		t.Fatal("expected parent-path reject for data-file")
+	}
+	if _, err := loadJSONBodyFromFlags("@../body.json", ""); err == nil {
+		t.Fatal("expected parent-path reject for @file")
+	}
+}

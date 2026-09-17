@@ -177,6 +177,53 @@ func looksAbsolutePath(p string) bool {
 	return false
 }
 
+// loadJSONBodyFromFlags reads JSON from --data and/or --data-file.
+// Rules:
+// - both empty → (nil, nil)
+// - both set → error mutual exclusion
+// - dataFile set → resolveContentFilePath + os.ReadFile + json.Unmarshal
+// - data starts with "@" → treat rest as file path (same resolve rules), else Unmarshal string
+func loadJSONBodyFromFlags(data, dataFile string) (any, error) {
+	data = strings.TrimSpace(data)
+	dataFile = strings.TrimSpace(dataFile)
+	if data == "" && dataFile == "" {
+		return nil, nil
+	}
+	if data != "" && dataFile != "" {
+		return nil, fmt.Errorf("use only one of --data or --data-file")
+	}
+	var raw []byte
+	if dataFile != "" {
+		path, err := resolveContentFilePath(dataFile)
+		if err != nil {
+			return nil, err
+		}
+		b, err := os.ReadFile(path)
+		if err != nil {
+			return nil, err
+		}
+		raw = b
+	} else if strings.HasPrefix(data, "@") {
+		path, err := resolveContentFilePath(strings.TrimPrefix(data, "@"))
+		if err != nil {
+			return nil, err
+		}
+		b, err := os.ReadFile(path)
+		if err != nil {
+			return nil, err
+		}
+		raw = b
+	} else {
+		raw = []byte(data)
+	}
+	var body any
+	if err := json.Unmarshal(raw, &body); err != nil {
+		return nil, fmt.Errorf("invalid JSON: %w", err)
+	}
+	return body, nil
+}
+
+
 func apiErrorHint(ae *client.APIError) string {
 	if ae == nil {
 		return ""

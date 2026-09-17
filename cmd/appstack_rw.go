@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -179,6 +178,7 @@ var appstackRWStageExecuteCmd = &cobra.Command{
 			return
 		}
 		dataStr, _ := cmd.Flags().GetString("data")
+		dataFile, _ := cmd.Flags().GetString("data-file")
 		appReleaseSn, _ := cmd.Flags().GetString("app-release-sn")
 		c, _, err := mustClient()
 		if err != nil {
@@ -192,10 +192,19 @@ var appstackRWStageExecuteCmd = &cobra.Command{
 			return
 		}
 		body := map[string]any{}
-		if dataStr != "" {
-			if err := json.Unmarshal([]byte(dataStr), &body); err != nil {
-				handleErr(fmt.Errorf("invalid --data: %w", err))
+		extra, err := loadJSONBodyFromFlags(dataStr, dataFile)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		if extra != nil {
+			m := asStringMap(extra)
+			if m == nil {
+				handleErr(fmt.Errorf("--data/--data-file must be a JSON object"))
 				return
+			}
+			for k, v := range m {
+				body[k] = v
 			}
 		}
 		if appReleaseSn != "" {
@@ -373,13 +382,19 @@ var appstackRWStageUpdateCmd = &cobra.Command{
 			return
 		}
 		dataStr, _ := cmd.Flags().GetString("data")
-		if err := requireFlags("data", dataStr); err != nil {
+		dataFile, _ := cmd.Flags().GetString("data-file")
+		raw, err := loadJSONBodyFromFlags(dataStr, dataFile)
+		if err != nil {
 			handleErr(err)
 			return
 		}
-		var body map[string]any
-		if err := json.Unmarshal([]byte(dataStr), &body); err != nil {
-			handleErr(fmt.Errorf("invalid --data: %w", err))
+		if raw == nil {
+			handleErr(fmt.Errorf("missing --data or --data-file"))
+			return
+		}
+		body := asStringMap(raw)
+		if body == nil {
+			handleErr(fmt.Errorf("--data/--data-file must be a JSON object"))
 			return
 		}
 		c, _, err := mustClient()
@@ -433,6 +448,7 @@ var appstackRWSystemCreateCmd = &cobra.Command{
 		note, _ := cmd.Flags().GetString("note")
 		tpl, _ := cmd.Flags().GetString("template-sn")
 		dataStr, _ := cmd.Flags().GetString("data")
+		dataFile, _ := cmd.Flags().GetString("data-file")
 		if err := requireFlags("system", sys); err != nil {
 			handleErr(err)
 			return
@@ -448,9 +464,15 @@ var appstackRWSystemCreateCmd = &cobra.Command{
 			return
 		}
 		var body map[string]any
-		if dataStr != "" {
-			if err := json.Unmarshal([]byte(dataStr), &body); err != nil {
-				handleErr(fmt.Errorf("invalid --data: %w", err))
+		raw, err := loadJSONBodyFromFlags(dataStr, dataFile)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		if raw != nil {
+			body = asStringMap(raw)
+			if body == nil {
+				handleErr(fmt.Errorf("--data/--data-file must be a JSON object"))
 				return
 			}
 		} else {
@@ -488,9 +510,11 @@ func init() {
 	appstackRWStageBriefsCmd.Flags().String("workflow-sn", "", "release workflow sn (required)")
 	appstackRWStageRunsCmd.Flags().Int("page", 1, "page")
 	appstackRWStageRunsCmd.Flags().Int("per-page", 20, "per page")
-	appstackRWStageExecuteCmd.Flags().String("data", "", "execution JSON body")
+	appstackRWStageExecuteCmd.Flags().String("data", "", "execution JSON body (or @file)")
+	appstackRWStageExecuteCmd.Flags().String("data-file", "", "read JSON body from file (alternative to --data)")
 	appstackRWStageExecuteCmd.Flags().String("app-release-sn", "", "optional appReleaseSn")
-	appstackRWStageUpdateCmd.Flags().String("data", "", "stage JSON body (required)")
+	appstackRWStageUpdateCmd.Flags().String("data", "", "stage JSON body (required; or @file)")
+	appstackRWStageUpdateCmd.Flags().String("data-file", "", "read JSON body from file (alternative to --data)")
 	for _, c := range []*cobra.Command{
 		appstackRWStageCancelCmd, appstackRWStageRetryCmd, appstackRWStageSkipCmd,
 		appstackRWStagePassCmd, appstackRWStageRefuseCmd, appstackRWStagePipelineRunCmd,
@@ -509,7 +533,8 @@ func init() {
 	appstackRWSystemCreateCmd.Flags().String("name", "", "workflow name")
 	appstackRWSystemCreateCmd.Flags().String("note", "", "note")
 	appstackRWSystemCreateCmd.Flags().String("template-sn", "", "template sn")
-	appstackRWSystemCreateCmd.Flags().String("data", "", "full JSON body override")
+	appstackRWSystemCreateCmd.Flags().String("data", "", "full JSON body override (or @file)")
+	appstackRWSystemCreateCmd.Flags().String("data-file", "", "read JSON body from file (alternative to --data)")
 
 	appstackRWStageCmd.AddCommand(
 		appstackRWStageGetCmd, appstackRWStageBriefsCmd, appstackRWStageRunsCmd,

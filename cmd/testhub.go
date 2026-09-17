@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -431,6 +430,7 @@ var testhubCasesCreateCmd = &cobra.Command{
 		subject, _ := cmd.Flags().GetString("subject")
 		dirID, _ := cmd.Flags().GetString("directory-id")
 		dataStr, _ := cmd.Flags().GetString("data")
+		dataFile, _ := cmd.Flags().GetString("data-file")
 		if err := requireFlags("repo-id", repoID); err != nil {
 			handleErr(err)
 			return
@@ -446,10 +446,19 @@ var testhubCasesCreateCmd = &cobra.Command{
 			return
 		}
 		body := map[string]any{}
-		if dataStr != "" {
-			if err := json.Unmarshal([]byte(dataStr), &body); err != nil {
-				handleErr(fmt.Errorf("invalid --data: %w", err))
+		extra, err := loadJSONBodyFromFlags(dataStr, dataFile)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		if extra != nil {
+			m := asStringMap(extra)
+			if m == nil {
+				handleErr(fmt.Errorf("--data/--data-file must be a JSON object"))
 				return
+			}
+			for k, v := range m {
+				body[k] = v
 			}
 		}
 		if subject != "" {
@@ -459,7 +468,7 @@ var testhubCasesCreateCmd = &cobra.Command{
 			body["directoryId"] = dirID
 		}
 		if len(body) == 0 {
-			handleErr(fmt.Errorf("provide --subject and/or --data"))
+			handleErr(fmt.Errorf("provide --subject and/or --data/--data-file"))
 			return
 		}
 		handleErr(runJSONMutating(cmd.Context(), c, "testhub cases create", risk.Write, "POST", path, nil, body, nil))
@@ -587,7 +596,8 @@ func init() {
 	testhubCasesCreateCmd.Flags().String("repo-id", "", "test repo id (required)")
 	testhubCasesCreateCmd.Flags().String("subject", "", "title")
 	testhubCasesCreateCmd.Flags().String("directory-id", "", "directory id")
-	testhubCasesCreateCmd.Flags().String("data", "", "full JSON body")
+	testhubCasesCreateCmd.Flags().String("data", "", "full JSON body (or @file)")
+	testhubCasesCreateCmd.Flags().String("data-file", "", "read JSON body from file (alternative to --data)")
 	testhubCasesDeleteCmd.Flags().String("repo-id", "", "test repo id (required)")
 	testhubCasesDeleteCmd.Flags().String("id", "", "testcase id (required)")
 	testhubCaseCommentsListCmd.Flags().String("repo-id", "", "test repo id (required)")

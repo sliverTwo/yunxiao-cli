@@ -26,8 +26,8 @@ Until published:
 npm install -g ./npm
 # or from a packed tarball (slim — no releases/)
 npm pack
-npm install -g ./sanzhi-yunxiao-cli-0.15.4.tgz
-npx --yes ./sanzhi-yunxiao-cli-0.15.4.tgz install
+npm install -g ./sanzhi-yunxiao-cli-0.15.5.tgz
+npx --yes ./sanzhi-yunxiao-cli-0.15.5.tgz install
 ```
 
 ## Auth (after install)
