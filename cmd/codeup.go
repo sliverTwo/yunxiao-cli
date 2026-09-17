@@ -110,7 +110,7 @@ var codeupBranchesListCmd = &cobra.Command{
 var codeupMrsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List merge requests",
-	Long:  "Risk: read\nHTTP: GET .../changeRequests\n\nUse --all to follow pages via client.ListAll (cap 50).\nDefault order: newest first by update/create time. Use --sort asc for oldest first.",
+	Long:  "Risk: read\nHTTP: GET .../changeRequests\n\nUse --all to follow pages via client.ListAll (cap 50).\nDefault order: newest first by update/create time. Client-side --sort applies within the current page (or across collected pages with --all). Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		state, _ := cmd.Flags().GetString("state")
@@ -145,9 +145,13 @@ var codeupMrsListCmd = &cobra.Command{
 			}
 			q["projectIds"] = resolved
 		}
-		after := afterSortByTime(sortFlag, func(out any, meta map[string]any) (any, map[string]any) {
+		after, err := afterSortByTime(sortFlag, func(out any, meta map[string]any) (any, map[string]any) {
 			return zhiyi.AttachMergeRequestURLs(out), meta
 		})
+		if err != nil {
+			handleErr(err)
+			return
+		}
 		if allPages {
 			handleErr(runReadAll(cmd.Context(), c, "GET", path, q, perPage, map[string]any{"risk": risk.Read}, after))
 			return
@@ -632,7 +636,7 @@ var codeupFilesDeleteCmd = &cobra.Command{
 var codeupCommitsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List commits on a ref",
-	Long:  "Risk: read\nHTTP: GET .../repositories/{repo}/commits\n\nDefault order: newest first. Use --sort asc for oldest first.",
+	Long:  "Risk: read\nHTTP: GET .../repositories/{repo}/commits\n\nDefault order: newest first by commit time. Client-side --sort applies within the current page. Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		repo, _ := cmd.Flags().GetString("repo")
@@ -670,7 +674,12 @@ var codeupCommitsListCmd = &cobra.Command{
 		if pathArg != "" {
 			q["path"] = pathArg
 		}
-		handleErr(runRead(cmd.Context(), c, "GET", path, q, nil, map[string]any{"risk": risk.Read}, afterSortByTime(sortFlag, nil)))
+		after, err := afterSortByTime(sortFlag, nil)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		handleErr(runRead(cmd.Context(), c, "GET", path, q, nil, map[string]any{"risk": risk.Read}, after))
 	},
 }
 
@@ -936,7 +945,7 @@ var codeupMrsCommentsCmd = &cobra.Command{Use: "comments", Short: "MR comments"}
 var codeupMrsCommentsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List MR comments",
-	Long:  "Risk: read\nHTTP: POST .../changeRequests/{localId}/comments/list\n\nDefault order: newest first. Use --sort asc for oldest first.",
+	Long:  "Risk: read\nHTTP: POST .../changeRequests/{localId}/comments/list\n\nDefault order: newest first by create time. Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		repo, _ := cmd.Flags().GetString("repo")
@@ -979,7 +988,12 @@ var codeupMrsCommentsListCmd = &cobra.Command{
 		if filePath != "" {
 			body["filePath"] = filePath
 		}
-		handleErr(runRead(cmd.Context(), c, "POST", path, nil, body, map[string]any{"risk": risk.Read}, afterSortByTime(sortFlag, nil)))
+		after, err := afterSortByCreateTime(sortFlag, nil)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		handleErr(runRead(cmd.Context(), c, "POST", path, nil, body, map[string]any{"risk": risk.Read}, after))
 	},
 }
 

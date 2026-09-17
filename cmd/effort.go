@@ -60,7 +60,7 @@ var workitemEffortsMineCmd = &cobra.Command{
 var workitemEffortsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List effort records for a work item",
-	Long:  "Risk: read\nHTTP: GET .../workitems/{id}/effortRecords\n\nDefault order: newest first. Use --sort asc for oldest first.",
+	Long:  "Risk: read\nHTTP: GET .../workitems/{id}/effortRecords\n\nDefault order: newest first by update/create time. Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		id, _ := cmd.Flags().GetString("id")
@@ -79,7 +79,12 @@ var workitemEffortsListCmd = &cobra.Command{
 			return
 		}
 		sortFlag, _ := cmd.Flags().GetString("sort")
-		handleErr(runRead(cmd.Context(), c, "GET", path, nil, nil, map[string]any{"risk": risk.Read}, afterSortByTime(sortFlag, nil)))
+		after, err := afterSortByTime(sortFlag, nil)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		handleErr(runRead(cmd.Context(), c, "GET", path, nil, nil, map[string]any{"risk": risk.Read}, after))
 	},
 }
 
@@ -177,7 +182,7 @@ var workitemEffortsUpdateCmd = &cobra.Command{
 var workitemEstimatedListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List estimated efforts for a work item",
-	Long:  "Risk: read\nHTTP: GET .../workitems/{id}/estimatedEfforts\n\nDefault order: newest first. Use --sort asc for oldest first.",
+	Long:  "Risk: read\nHTTP: GET .../workitems/{id}/estimatedEfforts\n\nDefault order: newest first by update/create time. Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		id, _ := cmd.Flags().GetString("id")
@@ -196,7 +201,12 @@ var workitemEstimatedListCmd = &cobra.Command{
 			return
 		}
 		sortFlag, _ := cmd.Flags().GetString("sort")
-		handleErr(runRead(cmd.Context(), c, "GET", path, nil, nil, map[string]any{"risk": risk.Read}, afterSortByTime(sortFlag, nil)))
+		after, err := afterSortByTime(sortFlag, nil)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		handleErr(runRead(cmd.Context(), c, "GET", path, nil, nil, map[string]any{"risk": risk.Read}, after))
 	},
 }
 

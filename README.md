@@ -406,7 +406,7 @@ See [AGENTS.md](AGENTS.md) for contributor / AI-agent conventions.
 
 ### Changelog
 
-- **0.15.6** — default newest-first for comment/activity/history-style lists (`--sort asc|desc`); client.SortListByTime
+- **0.15.6** — default newest-first for comment/activity/history-style lists (`--sort asc|desc`; invalid values rejected); comments sort by **create** time; activity/MR/runs/efforts prefer update/modified; client-side `--sort` is **page-local** when the list is paginated (`--all` sorts across collected pages)
 - **0.15.5** — `--data-file` and `--data @file.json` for long JSON payloads (`api`, appstack, testhub, …)
 - **0.15.2** — companion skills refresh for CLI 0.15.x (`has_more` / `meta.url` / `refresh_ok`); `client.ListAll` + `--all` on `pipeline list` & `codeup mrs list`; `scripts/flow-ci.sh` (Alibaba golang mirror + `GOPROXY=goproxy.cn`)
 - **0.15.1** — B5 wave2: more cmds on `runRead`/`runJSONMutating` (workitem update/relations list; codeup writes; pipeline mutations + remaining reads; org/project/sprint/versions/packages/testhub/appstack/effort/programs reads + simple writes). Still custom: multipart attachments, cancel-reason soft-warn dry-run envelope, pipeline create/update YAML redaction preview, multi-step shortcuts (+transition/+bug*/+explore-workflow, MR create, testhub results fallback, sprint +bugs aggregate)
@@ -611,6 +611,7 @@ Packages **上传**、Codeup **blame/cherry-pick**、MR label detach 等仍无�
 
 ### 变更摘要
 
+- **0.15.6** — 评论/活动/历史类列表默认最新在前（`--sort asc|desc`，非法值报错）；评论按**创建时间**排序；活动/MR/流水线运行/工时等仍偏好更新时间；分页列表的客户端 `--sort` 仅作用于**当前页**（`--all` 时对已拉取页整体排序）
 - **0.15.5** — 长 JSON 支持 `--data-file` / `--data @file.json`（`api`、appstack、testhub 等）
 - **0.15.2** — companion skills 对齐 CLI 0.15.x（`has_more` / `meta.url` / `refresh_ok`）；`client.ListAll` + `pipeline list --all` / `codeup mrs list --all`；`scripts/flow-ci.sh`（阿里云 golang 镜像 + `GOPROXY=goproxy.cn`）
 - **0.15.1** — B5 wave2：更多命令迁到 `runRead`/`runJSONMutating`（workitem update/relations list；codeup 写；pipeline 变更+剩余读；org/project/sprint/versions/packages/testhub/appstack/effort/programs 读与简单写）。仍自定义：multipart 附件、cancel-reason soft-warn dry-run、pipeline create/update YAML 预览脱敏、多步快捷命令

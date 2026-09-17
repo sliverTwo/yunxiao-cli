@@ -135,7 +135,7 @@ var appstackRWStageBriefsCmd = &cobra.Command{
 
 var appstackRWStageRunsCmd = &cobra.Command{
 	Use: "runs", Short: "List stage execution runs",
-	Long: "Risk: read\nHTTP: GET .../releaseStages/{stage}/executions\n\nDefault order: newest first. Use --sort asc for oldest first.",
+	Long: "Risk: read\nHTTP: GET .../releaseStages/{stage}/executions\n\nDefault order: newest first by update/create time. Client-side --sort applies within the current page. Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		app, wf, stage, err := requireRWStage(cmd)
@@ -157,6 +157,11 @@ var appstackRWStageRunsCmd = &cobra.Command{
 			return
 		}
 		sortFlag, _ := cmd.Flags().GetString("sort")
+		after, err := afterSortByTime(sortFlag, nil)
+		if err != nil {
+			handleErr(err)
+			return
+		}
 		q := map[string]string{}
 		if page > 0 {
 			q["page"] = strconv.Itoa(page)
@@ -164,7 +169,7 @@ var appstackRWStageRunsCmd = &cobra.Command{
 		if perPage > 0 {
 			q["perPage"] = strconv.Itoa(perPage)
 		}
-		handleErr(runRead(cmd.Context(), c, "GET", path, q, nil, map[string]any{"risk": risk.Read}, afterSortByTime(sortFlag, nil)))
+		handleErr(runRead(cmd.Context(), c, "GET", path, q, nil, map[string]any{"risk": risk.Read}, after))
 	},
 }
 

@@ -1,6 +1,7 @@
 package client
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -38,6 +39,17 @@ func TestSortListByTimePrefersUpdatedOverCreated(t *testing.T) {
 	}
 }
 
+func TestSortListByTimePrefCreateIgnoresNewerModified(t *testing.T) {
+	in := []any{
+		map[string]any{"id": "older-edited", "gmtCreate": "2024-01-01T00:00:00Z", "gmtModified": "2025-12-01T00:00:00Z"},
+		map[string]any{"id": "newer-posted", "gmtCreate": "2025-06-01T00:00:00Z", "gmtModified": "2025-06-01T00:00:00Z"},
+	}
+	out := SortListByTimePref(in, true, PreferCreateTime).([]any)
+	if out[0].(map[string]any)["id"] != "newer-posted" {
+		t.Fatalf("prefer create: %#v", out)
+	}
+}
+
 func TestSortListByTimeWrapperComments(t *testing.T) {
 	in := map[string]any{
 		"comments": []any{
@@ -63,12 +75,26 @@ func TestSortListByTimeEpochSeconds(t *testing.T) {
 	}
 }
 
-func TestSortDescending(t *testing.T) {
-	if !SortDescending("") || !SortDescending("desc") || !SortDescending("DESC") {
-		t.Fatal("default/desc")
+func TestParseSortDescending(t *testing.T) {
+	for _, s := range []string{"", "desc", "DESC", "descending", "newest"} {
+		desc, err := ParseSortDescending(s)
+		if err != nil || !desc {
+			t.Fatalf("%q: desc=%v err=%v", s, desc, err)
+		}
 	}
-	if SortDescending("asc") || SortDescending("oldest") {
-		t.Fatal("asc")
+	for _, s := range []string{"asc", "ASC", "oldest", "oldest-first"} {
+		desc, err := ParseSortDescending(s)
+		if err != nil || desc {
+			t.Fatalf("%q: desc=%v err=%v", s, desc, err)
+		}
+	}
+	_, err := ParseSortDescending("dessc")
+	if err == nil || !strings.Contains(err.Error(), "asc or desc") {
+		t.Fatalf("want invalid error, got %v", err)
+	}
+	_, err = ParseSortDescending("newest-ish")
+	if err == nil {
+		t.Fatal("expected error for unknown sort")
 	}
 }
 

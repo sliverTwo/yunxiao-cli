@@ -87,7 +87,7 @@ var pipelineJobCmd = &cobra.Command{
 var pipelineRunListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List pipeline runs",
-	Long:  "Risk: read\nHTTP: GET .../pipelines/{id}/runs\n\nDefault order: newest first. Use --sort asc for oldest first.",
+	Long:  "Risk: read\nHTTP: GET .../pipelines/{id}/runs\n\nDefault order: newest first by update/create time. Client-side --sort applies within the current page. Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		pid, _ := cmd.Flags().GetString("pipeline-id")
@@ -113,9 +113,14 @@ var pipelineRunListCmd = &cobra.Command{
 			q["status"] = status
 		}
 		sortFlag, _ := cmd.Flags().GetString("sort")
-		handleErr(runRead(cmd.Context(), c, "GET", path, q, nil, map[string]any{"risk": risk.Read}, afterSortByTime(sortFlag, func(out any, meta map[string]any) (any, map[string]any) {
+		after, err := afterSortByTime(sortFlag, func(out any, meta map[string]any) (any, map[string]any) {
 			return zhiyi.AttachPipelineRunURLs(out, pid), meta
-		})))
+		})
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		handleErr(runRead(cmd.Context(), c, "GET", path, q, nil, map[string]any{"risk": risk.Read}, after))
 	},
 }
 

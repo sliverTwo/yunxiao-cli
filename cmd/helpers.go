@@ -475,12 +475,24 @@ func profileSpaceID() string {
 	return pf.SpaceID
 }
 
-// afterSortByTime sorts list payloads by time (default newest-first) then calls next.
-// sortFlag is the --sort value (asc|desc); empty defaults to desc.
-func afterSortByTime(sortFlag string, next func(out any, meta map[string]any) (any, map[string]any)) func(out any, meta map[string]any) (any, map[string]any) {
-	desc := client.SortDescending(sortFlag)
+// afterSortByTime sorts list payloads by update/modified time (default newest-first) then calls next.
+// sortFlag is the --sort value (asc|desc); empty defaults to desc. Invalid values return an error.
+func afterSortByTime(sortFlag string, next func(out any, meta map[string]any) (any, map[string]any)) (func(out any, meta map[string]any) (any, map[string]any), error) {
+	return afterSortByTimePref(sortFlag, client.PreferUpdateTime, next)
+}
+
+// afterSortByCreateTime is like afterSortByTime but ranks by create time first (comment lists).
+func afterSortByCreateTime(sortFlag string, next func(out any, meta map[string]any) (any, map[string]any)) (func(out any, meta map[string]any) (any, map[string]any), error) {
+	return afterSortByTimePref(sortFlag, client.PreferCreateTime, next)
+}
+
+func afterSortByTimePref(sortFlag string, pref client.TimeKeyPreference, next func(out any, meta map[string]any) (any, map[string]any)) (func(out any, meta map[string]any) (any, map[string]any), error) {
+	desc, err := client.ParseSortDescending(sortFlag)
+	if err != nil {
+		return nil, err
+	}
 	return func(out any, meta map[string]any) (any, map[string]any) {
-		out = client.SortListByTime(out, desc)
+		out = client.SortListByTimePref(out, desc, pref)
 		if meta == nil {
 			meta = map[string]any{}
 		}
@@ -493,10 +505,11 @@ func afterSortByTime(sortFlag string, next func(out any, meta map[string]any) (a
 			return next(out, meta)
 		}
 		return out, meta
-	}
+	}, nil
 }
 
 // addSortFlag registers --sort with default newest-first (desc).
+// Client-side sort applies to the current response page when the command is paginated.
 func addSortFlag(c *cobra.Command) {
-	c.Flags().String("sort", "desc", "asc|desc (default newest first by time)")
+	c.Flags().String("sort", "desc", "asc|desc (default newest first; page-local when paginated)")
 }

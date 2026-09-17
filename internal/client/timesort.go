@@ -9,12 +9,32 @@ import (
 	"time"
 )
 
-// listTimeKeys are tried in order when ranking list items for "what's recent".
-// Prefer update/modified fields over create fields when both exist.
-var listTimeKeys = []string{
+// TimeKeyPreference selects which timestamp family ranks list items.
+type TimeKeyPreference int
+
+const (
+	// PreferUpdateTime ranks by update/modified fields first, then create
+	// (activity, MR lists, pipeline runs, efforts — "what's recently touched").
+	PreferUpdateTime TimeKeyPreference = iota
+	// PreferCreateTime ranks by create fields first, then update
+	// (comment lists — "newest comment" means most recently posted).
+	PreferCreateTime
+)
+
+// listTimeKeysUpdateFirst: update/modified before create (default for activity-style lists).
+var listTimeKeysUpdateFirst = []string{
 	"updatedAt", "gmtModified", "modifiedTime", "gmtUpdate", "updateTime", "modifiedAt",
 	"updated_at", "modified_at",
 	"createdAt", "gmtCreate", "createTime", "creationDate", "created_at",
+	"committedDate", "authoredDate", "committed_date", "authored_date",
+	"gmtStart", "date", "timestamp", "time",
+}
+
+// listTimeKeysCreateFirst: create before update (comment lists).
+var listTimeKeysCreateFirst = []string{
+	"createdAt", "gmtCreate", "createTime", "creationDate", "created_at",
+	"updatedAt", "gmtModified", "modifiedTime", "gmtUpdate", "updateTime", "modifiedAt",
+	"updated_at", "modified_at",
 	"committedDate", "authoredDate", "committed_date", "authored_date",
 	"gmtStart", "date", "timestamp", "time",
 }
@@ -26,14 +46,24 @@ var listWrapperKeys = []string{
 	"executions", "logs", "result", "records", "pipelines", "members", "repositories",
 }
 
-// SortListByTime sorts list payloads newest-first (descending) or oldest-first.
+// SortListByTime sorts list payloads newest-first (descending) or oldest-first,
+// preferring update/modified timestamps when both exist.
 // Accepts a bare []any or common wrapper maps; unknown shapes are returned unchanged.
 // Items without a recognizable time field keep relative order at the "unknown" end
 // (after timed items when descending, before them when ascending).
 func SortListByTime(data any, descending bool) any {
+	return SortListByTimePref(data, descending, PreferUpdateTime)
+}
+
+// SortListByTimePref is like SortListByTime but selects create- vs update-first keys.
+func SortListByTimePref(data any, descending bool, pref TimeKeyPreference) any {
+	keys := listTimeKeysUpdateFirst
+	if pref == PreferCreateTime {
+		keys = listTimeKeysCreateFirst
+	}
 	switch v := data.(type) {
 	case []any:
-		sortSliceByTime(v, descending)
+		sortSliceByTime(v, descending, keys)
 		return v
 	case map[string]any:
 		for _, key := range listWrapperKeys {
@@ -43,10 +73,10 @@ func SortListByTime(data any, descending bool) any {
 			}
 			switch iv := inner.(type) {
 			case []any:
-				sortSliceByTime(iv, descending)
+				sortSliceByTime(iv, descending, keys)
 				return v
 			case map[string]any:
-				v[key] = SortListByTime(iv, descending)
+				v[key] = SortListByTimePref(iv, descending, pref)
 				return v
 			}
 		}
@@ -56,7 +86,7 @@ func SortListByTime(data any, descending bool) any {
 	}
 }
 
-func sortSliceByTime(items []any, descending bool) {
+func sortSliceByTime(items []any, descending bool, keys []string) {
 	if len(items) < 2 {
 		return
 	}
@@ -67,7 +97,7 @@ func sortSliceByTime(items []any, descending bool) {
 	}
 	ranks := make([]ranked, len(items))
 	for i, it := range items {
-		ms, ok := itemTimeMillis(it)
+		ms, ok := itemTimeMillis(it, keys)
 		ranks[i] = ranked{idx: i, ms: ms, ok: ok}
 	}
 	sort.SliceStable(ranks, func(i, j int) bool {
@@ -93,12 +123,12 @@ func sortSliceByTime(items []any, descending bool) {
 	copy(items, out)
 }
 
-func itemTimeMillis(item any) (int64, bool) {
+func itemTimeMillis(item any, keys []string) (int64, bool) {
 	m, ok := item.(map[string]any)
 	if !ok || m == nil {
 		return 0, false
 	}
-	for _, k := range listTimeKeys {
+	for _, k := range keys {
 		if v, exists := m[k]; exists {
 			if ms, ok := toMillis(v); ok {
 				return ms, true
@@ -180,13 +210,16 @@ func normalizeEpoch(n int64) int64 {
 	return n
 }
 
-// SortDescending reports whether a --sort flag value means newest-first.
-// Empty / unknown values default to descending.
-func SortDescending(sortFlag string) bool {
+// ParseSortDescending reports whether a --sort flag value means newest-first.
+// Empty defaults to descending. Allowed: asc|desc and documented aliases.
+// Unknown values return an error (never silently treated as desc).
+func ParseSortDescending(sortFlag string) (descending bool, err error) {
 	switch strings.ToLower(strings.TrimSpace(sortFlag)) {
+	case "", "desc", "descending", "newest", "newest-first":
+		return true, nil
 	case "asc", "ascending", "oldest", "oldest-first":
-		return false
+		return false, nil
 	default:
-		return true
+		return false, fmt.Errorf("--sort must be asc or desc (got %q)", sortFlag)
 	}
 }

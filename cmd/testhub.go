@@ -243,7 +243,7 @@ var testhubPlanCommentsCmd = &cobra.Command{Use: "plan-comments", Short: "Commen
 var testhubPlanCommentsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List comments on a plan testcase",
-	Long:  "Risk: read\nHTTP: GET .../testPlans/{plan}/testcases/{id}/comments\n\nDefault order: newest first. Use --sort asc for oldest first.",
+	Long:  "Risk: read\nHTTP: GET .../testPlans/{plan}/testcases/{id}/comments\n\nDefault order: newest first by create time. Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		planID, _ := cmd.Flags().GetString("plan-id")
@@ -263,7 +263,12 @@ var testhubPlanCommentsListCmd = &cobra.Command{
 			return
 		}
 		sortFlag, _ := cmd.Flags().GetString("sort")
-		handleErr(runRead(cmd.Context(), c, "GET", path, nil, nil, map[string]any{"risk": risk.Read}, afterSortByTime(sortFlag, nil)))
+		after, err := afterSortByCreateTime(sortFlag, nil)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		handleErr(runRead(cmd.Context(), c, "GET", path, nil, nil, map[string]any{"risk": risk.Read}, after))
 	},
 }
 
@@ -505,7 +510,7 @@ var testhubCasesDeleteCmd = &cobra.Command{
 var testhubCaseCommentsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List comments on a repo testcase",
-	Long:  "Risk: read\nHTTP: GET .../testRepos/{repo}/testcases/{id}/comments\n\nDefault order: newest first. Use --sort asc for oldest first.",
+	Long:  "Risk: read\nHTTP: GET .../testRepos/{repo}/testcases/{id}/comments\n\nDefault order: newest first by create time. Use --sort asc for oldest first.",
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		repoID, _ := cmd.Flags().GetString("repo-id")
@@ -525,7 +530,12 @@ var testhubCaseCommentsListCmd = &cobra.Command{
 			return
 		}
 		sortFlag, _ := cmd.Flags().GetString("sort")
-		handleErr(runRead(cmd.Context(), c, "GET", path, nil, nil, map[string]any{"risk": risk.Read}, afterSortByTime(sortFlag, nil)))
+		after, err := afterSortByCreateTime(sortFlag, nil)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		handleErr(runRead(cmd.Context(), c, "GET", path, nil, nil, map[string]any{"risk": risk.Read}, after))
 	},
 }
 
