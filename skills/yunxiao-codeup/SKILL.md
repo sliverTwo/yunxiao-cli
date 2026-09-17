@@ -1,0 +1,150 @@
+---
+name: yunxiao-codeup
+version: 1.1.0
+description: "云效 Codeup：列仓库/分支/MR、评论/标签、创建/合并/关闭合并请求。用户问代码库、分支、MR 时使用。创建/合并等为 high-risk-write。"
+metadata:
+  requires:
+    bins: ["yunxiao"]
+  cliHelp: "yunxiao codeup --help"
+---
+
+# codeup
+
+开始前先读 [`../yunxiao-shared/SKILL.md`](../yunxiao-shared/SKILL.md)。
+
+> List `meta` 可能含 `has_more`；`codeup mrs list --all` 可跟页（ListAll，上限 50）。
+
+## Shortcuts（优先）
+
+| Shortcut | 说明 | Risk |
+|----------|------|------|
+| `+open-mrs` | 列出 opened 合并请求 | read |
+
+```bash
+yunxiao codeup +open-mrs
+yunxiao codeup +open-mrs --repo <numericRepoId>
+```
+
+
+## MR `url`（CLI 0.15.x）
+
+`codeup mrs list` / `+open-mrs` 会为每条 MR 注入可点击 `url`（优先 API `detailUrl`，否则拼控制台链接）。`mrs get` / `create` / `+create` 写入 `meta.url`。
+
+```bash
+yunxiao codeup mrs list --state opened
+yunxiao codeup mrs list --state opened --all
+yunxiao codeup +open-mrs
+```
+
+## Typed commands
+
+```bash
+yunxiao codeup repos list --search demo
+yunxiao codeup branches list --repo <repoId>
+yunxiao codeup files tree --repo <repoId> --ref master
+yunxiao codeup files get --repo <repoId> --path README.md --ref master
+yunxiao codeup files create --repo <repoId> --path docs/a.md --branch master --message "add" --content "x" --dry-run
+yunxiao codeup files update --repo <repoId> --path docs/a.md --branch master --message "upd" --content-file ./a.md --dry-run
+yunxiao codeup commits list --repo <repoId> --ref master
+yunxiao codeup mrs list --state opened
+yunxiao schema codeup.mrs.create
+```
+
+## 创建 MR（high-risk-write）
+
+**MUST**：先 `--dry-run` → 向用户确认 → 用户同意后再加 `--yes`。
+
+```bash
+yunxiao codeup mrs create \
+  --repo <repoId> --source feature/x --target master \
+  --title "feat: x" --description "..." --dry-run
+
+# 用户明确同意后：
+yunxiao codeup mrs create \
+  --repo <repoId> --source feature/x --target master \
+  --title "feat: x" --yes
+```
+
+`--repo` 可为数字 id，或 `org/repo`（会编码）；非数字时 CLI 会尝试拉取仓库解析 `sourceProjectId`/`targetProjectId`。
+
+缺 `--yes` → exit **10** + `confirmation_required`（见 shared skill）。
+
+
+## MR 评论与标签
+
+```bash
+yunxiao codeup mrs comments list --repo <id> --local-id 1
+yunxiao codeup mrs comments create --repo <id> --local-id 1 --content "LGTM" --patchset-biz-id <biz> --dry-run
+yunxiao codeup mrs labels list --repo <id> --local-id 1
+yunxiao codeup mrs labels attach --repo <id> --local-id 1 --label-ids 1,2 --dry-run
+```
+
+`comments create` / `labels attach` 为 **write**（`--dry-run` 可预览）。`patchset-biz-id` 可从 `mrs diffs` 取得。
+
+> **Label detach**：公开 OpenAPI / MCP 仅有 Get + Attach，无 Detach/Delete labels；CLI 不封装。
+
+## 不负责
+
+工作项 → `yunxiao-project`；流水线 → `yunxiao-pipeline`。
+
+## 文件写操作
+
+`files create` / `files update` / `files delete` 为 **high-risk-write**：先 `--dry-run`，用户确认后再 `--yes`。
+
+## MR 写操作
+
+```bash
+yunxiao codeup mrs review --repo <id> --local-id 1 --opinion PASS --dry-run
+yunxiao codeup mrs merge --repo <id> --local-id 1 --merge-type no-fast-forward --dry-run
+yunxiao codeup mrs close --repo <id> --local-id 1 --dry-run
+```
+
+均为 **high-risk-write**（尤其 merge 会改写目标分支）。
+
+```bash
+yunxiao codeup mrs get --repo <id> --local-id 1
+yunxiao codeup mrs diffs --repo <id> --local-id 1
+yunxiao codeup mrs reopen --repo <id> --local-id 1 --dry-run
+yunxiao codeup compare --repo <id> --from master --to feature
+```
+
+## 分支
+
+```bash
+yunxiao codeup repos get --repo <id>
+yunxiao codeup branches get --repo <id> --branch master
+yunxiao codeup branches create --repo <id> --branch feat --ref master --dry-run
+yunxiao codeup branches delete --repo <id> --branch feat --dry-run
+```
+
+create/delete 为 **high-risk-write**。
+
+## Tags / protected branches (v0.13)
+
+```bash
+yunxiao codeup tags list --repo <id|alias>
+yunxiao codeup tags create --repo <id> --tag-name v1.0 --ref master --dry-run
+yunxiao codeup tags delete --repo <id> --tag-name v1.0 --yes
+
+yunxiao codeup protected-branches list --repo <id|alias>
+yunxiao codeup protected-branches get --repo <id> --id <ruleId>
+yunxiao codeup protected-branches create --repo <id> --branch master \
+  --allow-push-roles 40,30 --allow-merge-roles 40,30 --dry-run
+yunxiao codeup protected-branches delete --repo <id> --id <ruleId> --yes
+```
+
+`--repo` 支持 profile.repositories 别名。tags/protect create|delete 为 **high-risk-write**。
+
+## Create repository (v0.9, high-risk-write)
+
+```bash
+yunxiao codeup repos create --name my-repo --path my-repo --visibility private --dry-run
+# 用户确认后加 --yes
+```
+
+来源：`createRepositoryFunc`（query `createParentPath=true`）。
+
+## Known gaps
+
+- Blame / cherry-pick：无扎实 OpenAPI，勿臆造；需要时用 `yunxiao api`。
+- MR label detach：无 OpenAPI。

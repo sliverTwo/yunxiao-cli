@@ -1,0 +1,11 @@
+/yunxiao
+/yx
+*.exe
+*.test
+*.out
+.DS_Store
+dist/
+bin/
+.env
+*.token
+npm/releases/
