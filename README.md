@@ -164,25 +164,25 @@ Install and init yunxiao CLI with a LOCAL profile (never write tenant profiles i
 npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
 npm install -g sanzhi-yunxiao-cli@0.16.0
 npx sanzhi-yunxiao-cli@latest install
-yunxiao --version          # yunxiao 0.15.7
+yunxiao --version          # yunxiao 0.16.0
 ```
 
-The `sanzhi-yunxiao-cli` package runs `postinstall` to unpack the platform archive, install companion skills, and print auth next steps. It downloads binaries from [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases); `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli` is the default (override it when needed). You can also [download the v0.15.7 Release directly](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.0), extract it, and add the `yunxiao` binary to `PATH`.
+The `sanzhi-yunxiao-cli` package runs `postinstall` to unpack the platform archive, install companion skills, and print auth next steps. It downloads binaries from [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases); `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli` is the default (override it when needed). You can also [download the v0.16.0 Release directly](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.0), extract it, and add the `yunxiao` binary to `PATH`.
 
 **From source (secondary):**
 
 ```bash
 make build                 # produces ./yunxiao (injects Version via -ldflags)
-# or (without ldflags, Version falls back to package default 0.15.7)
+# or (without ldflags, Version falls back to package default 0.16.0)
 go build -o yunxiao .
 # pin version explicitly:
-# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.15.7" -o yunxiao .
+# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.16.0" -o yunxiao .
 make install               # installs to ~/.local/bin/yunxiao
 # or
 go install github.com/yunxiao-cli/yunxiao@latest   # when published
 ```
 
-Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Version=$(VERSION)` (`VERSION` defaults to `git describe` or `0.15.7`).
+Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Version=$(VERSION)` (`VERSION` defaults to `git describe` or `0.16.0`).
 
 **Known limitation:** `go install` / a lone binary does **not** ship the repo `skills/` tree, so `yunxiao skills list|read|install` will not find skills unless you use the npm installer (which extracts `skills/`), run from a source checkout, or copy/`npx skills add` the tree. Prefer `npx sanzhi-yunxiao-cli@latest install` or `make build` from a checkout for skills-aware workflows.
 
@@ -549,22 +549,22 @@ MIT — see [LICENSE](LICENSE).
 npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
 npm install -g sanzhi-yunxiao-cli@0.16.0
 npx sanzhi-yunxiao-cli@latest install
-yunxiao --version          # yunxiao 0.15.7
+yunxiao --version          # yunxiao 0.16.0
 ```
 
-`sanzhi-yunxiao-cli` 包会在 `postinstall` 时解压平台归档、安装 companion skills，并打印认证后续步骤。二进制来自 [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases)；默认值为 `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli`（需要时可覆盖）。也可以[直接下载 v0.15.7 Release](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.0)，解压后把 `yunxiao` 加入 `PATH`。
+`sanzhi-yunxiao-cli` 包会在 `postinstall` 时解压平台归档、安装 companion skills，并打印认证后续步骤。二进制来自 [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases)；默认值为 `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli`（需要时可覆盖）。也可以[直接下载 v0.16.0 Release](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.0)，解压后把 `yunxiao` 加入 `PATH`。
 
 **从源码安装（次要）：**
 
 ```bash
 make build          # 生成 ./yunxiao（-ldflags 注入 Version）
 make install        # 安装到 ~/.local/bin/yunxiao
-go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.15.7
+go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.16.0
 # 显式注入：
-# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.15.7" -o yunxiao .
+# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.16.0" -o yunxiao .
 ```
 
-需要 Go 1.24.4+。`make build` / `make ci` 通过 `-ldflags -X …version.Version=$(VERSION)` 注入版本（`VERSION` 默认 `git describe` 或 `0.15.7`）。
+需要 Go 1.24.4+。`make build` / `make ci` 通过 `-ldflags -X …version.Version=$(VERSION)` 注入版本（`VERSION` 默认 `git describe` 或 `0.16.0`）。
 
 **已知限制：** `go install` / 单独二进制**不包含**仓库 `skills/` 目录；请用 npm 安装器（会解压 `skills/`）、在源码检出目录运行，或另行复制 / `npx skills add`。需要技能时优先 `npx sanzhi-yunxiao-cli@latest install` 或检出目录 `make build`。
 
