@@ -12,18 +12,18 @@ CLI binary name: **`yunxiao`**.
 # 配置公司阿里云 npm 私仓（若本机还没有）
 npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
 
-npm install -g sanzhi-yunxiao-cli@0.15.6
+npm install -g sanzhi-yunxiao-cli@0.15.7
 npx sanzhi-yunxiao-cli@latest install   # 拉二进制 + 可选安装 skills
 
-yunxiao --version   # 应显示 0.15.6
+yunxiao --version   # 应显示 0.15.7
 
 # 备选：直接下 Release，解压后把 yunxiao.exe 所在目录加入 PATH
-# https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.6
+# https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.7
 ```
 
 ### 2. 认证
 
-云效建 PAT 后执行：
+打开 [个人访问令牌控制台](https://account-devops.aliyun.com/settings/personalAccessToken) 新建 PAT（名称建议 `yunxiao-cli`；勾选组织读 + 项目/代码/流水线读写，按需制品/测试/应用；令牌只显示一次），然后：
 
 ```bash
 yunxiao auth login --token "<PAT>"
@@ -44,11 +44,61 @@ yunxiao codeup repos list
 - 长 JSON 用 `--data-file ./body.json`
 - Skills 向导可多选；也可 `yunxiao skills install --skill ...`
 
+
+### 给 Agent 粘贴
+
+把下面整段发给 Agent（会装 CLI、认证、装 skills、只读列项目、让你选项目、**只在本机**写 profile，不会往仓库塞智衣/沙箱租户配置）：
+
+```text
+请帮我安装并初始化 yunxiao CLI（本地 profile，勿写入本仓库）：
+
+1) 安装（公司阿里云 npm 私仓）：
+   npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
+   npm install -g sanzhi-yunxiao-cli@0.15.7
+   npx sanzhi-yunxiao-cli@latest install
+   yunxiao --version   # 应显示 0.15.7
+   备选：GitHub Release v0.15.7
+   https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.7
+
+2) 认证：先打开控制台新建 PAT（一键），再登录（禁止把完整 PAT 打到回复/聊天里）
+   控制台（首选）：https://account-devops.aliyun.com/settings/personalAccessToken
+   帮助文档（次要）：https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+   推荐权限（控制台按「模块」勾选读/写，不是飞书 OAuth scope）：
+     - 组织/成员：读（whoami、organization）
+     - 项目管理(Projex)：读+写（工作项；只读试用可只开读）
+     - 代码管理(Codeup)：读+写（仓库/分支/文件/MR；只读试用可只开读）
+     - 流水线(Flow)：读+写（list/run；只读试用可只开读）
+     - 按需：制品 Packages、测试管理 Testhub、应用交付 AppStack
+   令牌名称建议 yunxiao-cli；设合理到期；令牌只显示一次。
+   yunxiao auth login --token "<PAT>"
+   yunxiao whoami && yunxiao doctor
+
+3) 安装 companion skills：
+   yunxiao skills install
+
+4) 只读列项目，请用户挑选一个 space_id / 项目：
+   yunxiao project list
+
+5) 仅为所选项目初始化 **本地** profile（写入 ~/.config/yunxiao/profiles/，不要写入 git 工作区）：
+   推荐交互：yunxiao +onboard
+   或非交互：yunxiao +onboard --space-id <id> --profile <name>
+   不要默认走 `profile install-example zhiyi|play`；智衣/沙箱字段留在用户本机/私有工具，不要提交到本公开仓库。
+   若仓库里已有 profiles/*.example.json，仅作示例；真实租户 profile 必须本地、勿跟踪。
+
+6) 校验：
+   export YUNXIAO_PROFILE=<name>
+   yunxiao profile show
+   yunxiao profile doctor
+   yunxiao doctor
+
+7) 风险规则：写操作先 --dry-run；高风险需用户确认后再加 --yes；长 JSON 用 --data-file。
+```
+
 ### Trial quickstart (5 minutes)
 
 ```bash
 npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-npm install -g sanzhi-yunxiao-cli@0.15.6
+npm install -g sanzhi-yunxiao-cli@0.15.7
 npx sanzhi-yunxiao-cli@latest install
 yunxiao --version
 
@@ -60,7 +110,52 @@ yunxiao pipeline list
 yunxiao codeup repos list
 ```
 
-Use the [GitHub Release binaries](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.6) as an alternative. Start writes with `--dry-run`, confirm high-risk writes before adding `--yes`, and use `--data-file ./body.json` for long JSON. The skills wizard supports multiple selections; individual skills can also be installed with `yunxiao skills install --skill ...`.
+Use the [GitHub Release binaries](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.7) as an alternative. Start writes with `--dry-run`, confirm high-risk writes before adding `--yes`, and use `--data-file ./body.json` for long JSON. The skills wizard supports multiple selections; individual skills can also be installed with `yunxiao skills install --skill ...`.
+
+
+### Paste for Agent
+
+Copy-paste for an agent (install → auth → skills → list projects read-only → user picks → **local-only** profile init; do not commit 智衣/sandbox tenant data):
+
+```text
+Install and init yunxiao CLI with a LOCAL profile (never write tenant profiles into this repo):
+
+1) Install (Aliyun npm registry):
+   npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
+   npm install -g sanzhi-yunxiao-cli@0.15.7
+   npx sanzhi-yunxiao-cli@latest install
+   yunxiao --version   # expect 0.15.7
+   Fallback: GitHub Release v0.15.7
+   https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.7
+
+2) Auth — open the PAT console first (never print/paste the raw PAT into chat):
+   Console (primary): https://account-devops.aliyun.com/settings/personalAccessToken
+   Help (secondary): https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+   Recommended module checkboxes (not OAuth scopes):
+     - Organization/members: read (whoami, organization)
+     - Projex: read+write (work items; read-only trial: read only)
+     - Codeup: read+write (repos/branches/files/MRs; trial: read only)
+     - Flow: read+write (list/run; trial: read only)
+     - As needed: Packages, Testhub, AppStack
+   Token name tip: yunxiao-cli; set a sensible expiry; shown once only.
+   yunxiao auth login --token "<PAT>"
+   yunxiao whoami && yunxiao doctor
+
+3) yunxiao skills install
+
+4) Read-only: yunxiao project list — ask the user to pick a project/space_id
+
+5) Init a LOCAL profile only (~/.config/yunxiao/profiles/), not the git tree:
+   Prefer: yunxiao +onboard
+   Or: yunxiao +onboard --space-id <id> --profile <name>
+   Do NOT default to `profile install-example zhiyi|play` for colleagues.
+   Zhiyi/sandbox specifics stay on the user's machine / private tooling.
+   Repo profiles/*.example.json (if present) are examples only; real tenant profiles must stay local/untracked.
+
+6) export YUNXIAO_PROFILE=<name> ; yunxiao profile show ; yunxiao profile doctor ; yunxiao doctor
+
+7) Risk: --dry-run before writes; high-risk needs user confirm then --yes; long JSON via --data-file.
+```
 
 ---
 
@@ -72,34 +167,37 @@ Use the [GitHub Release binaries](https://github.com/sliverTwo/yunxiao-cli/relea
 
 ```bash
 npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-npm install -g sanzhi-yunxiao-cli@0.15.6
+npm install -g sanzhi-yunxiao-cli@0.15.7
 npx sanzhi-yunxiao-cli@latest install
-yunxiao --version          # yunxiao 0.15.6
+yunxiao --version          # yunxiao 0.15.7
 ```
 
-The `sanzhi-yunxiao-cli` package runs `postinstall` to unpack the platform archive, install companion skills, and print auth next steps. It downloads binaries from [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases); `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli` is the default (override it when needed). You can also [download the v0.15.6 Release directly](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.6), extract it, and add the `yunxiao` binary to `PATH`.
+The `sanzhi-yunxiao-cli` package runs `postinstall` to unpack the platform archive, install companion skills, and print auth next steps. It downloads binaries from [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases); `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli` is the default (override it when needed). You can also [download the v0.15.7 Release directly](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.7), extract it, and add the `yunxiao` binary to `PATH`.
 
 **From source (secondary):**
 
 ```bash
 make build                 # produces ./yunxiao (injects Version via -ldflags)
-# or (without ldflags, Version falls back to package default 0.15.6)
+# or (without ldflags, Version falls back to package default 0.15.7)
 go build -o yunxiao .
 # pin version explicitly:
-# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.15.6" -o yunxiao .
+# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.15.7" -o yunxiao .
 make install               # installs to ~/.local/bin/yunxiao
 # or
 go install github.com/yunxiao-cli/yunxiao@latest   # when published
 ```
 
-Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Version=$(VERSION)` (`VERSION` defaults to `git describe` or `0.15.6`).
+Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Version=$(VERSION)` (`VERSION` defaults to `git describe` or `0.15.7`).
 
 **Known limitation:** `go install` / a lone binary does **not** ship the repo `skills/` tree, so `yunxiao skills list|read|install` will not find skills unless you use the npm installer (which extracts `skills/`), run from a source checkout, or copy/`npx skills add` the tree. Prefer `npx sanzhi-yunxiao-cli@latest install` or `make build` from a checkout for skills-aware workflows.
 
 ### Auth
 
-1. Create a Personal Access Token in Yunxiao:  
-   https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+1. Create a Personal Access Token in the Yunxiao console (primary):  
+   https://account-devops.aliyun.com/settings/personalAccessToken  
+   Help: https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+
+   Recommended module checkboxes for this CLI: Organization/members **read**; Projex/Codeup/Flow **read+write** (or read-only for trial); Packages/Testhub/AppStack as needed. Token name tip: `yunxiao-cli`.
 2. Prefer env (CI / shells):
 
 ```bash
@@ -120,6 +218,8 @@ yunxiao doctor
 ```
 
 Token precedence (highest first): `YUNXIAO_ACCESS_TOKEN` env → active profile `access_token` (`--profile` / `YUNXIAO_PROFILE`) → `~/.config/yunxiao/config.json`. Optional: put `"access_token"` in a profile JSON (mode 0600); do not commit real PATs. `yunxiao auth status` reports `token_source` as `env` | `profile` | `config` | `none` without printing the raw token.
+**Future:** Feishu-style one-click OAuth/browser login could be added later if we register a Yunxiao OAuth app (`CreateOAuthToken` is still 内测中). Today the supported path is the PAT console above — this CLI does not implement a fake OAuth page.
+
 
 ### Agent quickstart
 
@@ -314,6 +414,8 @@ yunxiao schema
 
 
 ### Profiles: play vs zhiyi (optional)
+> Note: `profiles/*.example.json` in this repo (if present) are **examples only**. Real tenant profiles (智衣/沙箱/etc.) must live under `~/.config/yunxiao/profiles/` and stay local/untracked. Prefer `yunxiao +onboard` to create a generic local profile from a chosen `space_id`.
+
 
 Tenant-specific Projex constants live in a **profile JSON**, not hardcoded CLI defaults.
 Profiles are **project-scoped** (`space_id`); discovered workitem graphs live under `workflows` keyed by **`type_id`**.
@@ -406,6 +508,7 @@ See [AGENTS.md](AGENTS.md) for contributor / AI-agent conventions.
 
 ### Changelog
 
+- **0.15.7** — `yunxiao +onboard` writes a **generic local** profile under `~/.config/yunxiao/profiles/` (TTY project pick or `--space-id`); README Agent paste prompts (ZH+EN); missing-token hints include PAT console URL + module permission checklist; real 智衣/沙箱 tenant profiles stay local/untracked (do not expand example profiles for onboard)
 - **0.15.6** — default newest-first for comment/activity/history-style lists (`--sort asc|desc`; invalid values rejected); comments sort by **create** time; activity/MR/runs/efforts prefer update/modified; client-side `--sort` is **page-local** when the list is paginated (`--all` sorts across collected pages)
 - **0.15.5** — `--data-file` and `--data @file.json` for long JSON payloads (`api`, appstack, testhub, …)
 - **0.15.2** — companion skills refresh for CLI 0.15.x (`has_more` / `meta.url` / `refresh_ok`); `client.ListAll` + `--all` on `pipeline list` & `codeup mrs list`; `scripts/flow-ci.sh` (Alibaba golang mirror + `GOPROXY=goproxy.cn`)
@@ -448,31 +551,34 @@ MIT — see [LICENSE](LICENSE).
 
 ```bash
 npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-npm install -g sanzhi-yunxiao-cli@0.15.6
+npm install -g sanzhi-yunxiao-cli@0.15.7
 npx sanzhi-yunxiao-cli@latest install
-yunxiao --version          # yunxiao 0.15.6
+yunxiao --version          # yunxiao 0.15.7
 ```
 
-`sanzhi-yunxiao-cli` 包会在 `postinstall` 时解压平台归档、安装 companion skills，并打印认证后续步骤。二进制来自 [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases)；默认值为 `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli`（需要时可覆盖）。也可以[直接下载 v0.15.6 Release](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.6)，解压后把 `yunxiao` 加入 `PATH`。
+`sanzhi-yunxiao-cli` 包会在 `postinstall` 时解压平台归档、安装 companion skills，并打印认证后续步骤。二进制来自 [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases)；默认值为 `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli`（需要时可覆盖）。也可以[直接下载 v0.15.7 Release](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.7)，解压后把 `yunxiao` 加入 `PATH`。
 
 **从源码安装（次要）：**
 
 ```bash
 make build          # 生成 ./yunxiao（-ldflags 注入 Version）
 make install        # 安装到 ~/.local/bin/yunxiao
-go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.15.6
+go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.15.7
 # 显式注入：
-# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.15.6" -o yunxiao .
+# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.15.7" -o yunxiao .
 ```
 
-需要 Go 1.24.4+。`make build` / `make ci` 通过 `-ldflags -X …version.Version=$(VERSION)` 注入版本（`VERSION` 默认 `git describe` 或 `0.15.6`）。
+需要 Go 1.24.4+。`make build` / `make ci` 通过 `-ldflags -X …version.Version=$(VERSION)` 注入版本（`VERSION` 默认 `git describe` 或 `0.15.7`）。
 
 **已知限制：** `go install` / 单独二进制**不包含**仓库 `skills/` 目录；请用 npm 安装器（会解压 `skills/`）、在源码检出目录运行，或另行复制 / `npx skills add`。需要技能时优先 `npx sanzhi-yunxiao-cli@latest install` 或检出目录 `make build`。
 
 ### 认证
 
-1. 在云效控制台创建个人访问令牌（PAT）：  
-   https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+1. 在云效控制台创建个人访问令牌（PAT，首选一键链接）：  
+   https://account-devops.aliyun.com/settings/personalAccessToken  
+   帮助文档：https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+
+   推荐勾选：组织/成员**读**；项目管理/代码管理/流水线**读+写**（只读试用可只开读）；制品/测试/应用交付按需。令牌名建议 `yunxiao-cli`。
 2. 推荐环境变量：
 
 ```bash
@@ -611,6 +717,7 @@ Packages **上传**、Codeup **blame/cherry-pick**、MR label detach 等仍无�
 
 ### 变更摘要
 
+- **0.15.7** — `yunxiao +onboard`：按所选项目/`space_id` 仅写入本机 `~/.config/yunxiao/profiles/` 的通用 profile（TTY 选择或 `--space-id`）；README「给 Agent 粘贴」；缺 token 时提示 PAT 控制台链接与模块权限清单；智衣/沙箱租户配置留在本机、勿提交本仓库（不借 onboard 扩展示例 profile）
 - **0.15.6** — 评论/活动/历史类列表默认最新在前（`--sort asc|desc`，非法值报错）；评论按**创建时间**排序；活动/MR/流水线运行/工时等仍偏好更新时间；分页列表的客户端 `--sort` 仅作用于**当前页**（`--all` 时对已拉取页整体排序）
 - **0.15.5** — 长 JSON 支持 `--data-file` / `--data @file.json`（`api`、appstack、testhub 等）
 - **0.15.2** — companion skills 对齐 CLI 0.15.x（`has_more` / `meta.url` / `refresh_ok`）；`client.ListAll` + `pipeline list --all` / `codeup mrs list --all`；`scripts/flow-ci.sh`（阿里云 golang 镜像 + `GOPROXY=goproxy.cn`）

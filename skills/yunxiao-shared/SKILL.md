@@ -1,6 +1,6 @@
 ---
 name: yunxiao-shared
-version: 1.1.0
+version: 1.1.1
 description: "Use for yunxiao CLI setup/auth: auth login/status/logout, config, doctor, whoami, JSON output contract (ok==true), list meta.has_more/total/page, meta.url, refresh_ok, --dry-run, high-risk --yes confirmation (exit 10), or handling error envelopes."
 metadata:
   requires:
@@ -33,7 +33,10 @@ yunxiao doctor
 
 可选：`YUNXIAO_ORGANIZATION_ID`、`YUNXIAO_API_BASE_URL`（默认 `https://openapi-rdc.aliyuncs.com`）、`YUNXIAO_EDITION=central|region`。也可在 profile JSON 写可选 `access_token`（优先级：env > profile > config.json）。
 
-PAT 文档：https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+PAT 控制台（首选）：https://account-devops.aliyun.com/settings/personalAccessToken
+帮助：https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+
+推荐模块权限：组织/成员读；Projex/Codeup/Flow 读+写（试用可只读）；Packages/Testhub/AppStack 按需。令牌名建议 `yunxiao-cli`。无飞书式一键 OAuth（`CreateOAuthToken` 仍内测）。
 
 **禁止**把完整 token 打到终端或回复里；只用 `token_masked` / `auth status`。
 
@@ -72,6 +75,19 @@ workitem get/create/update/transition、MR get/create、pipeline get/run 等常�
 ### `refresh_ok`（流转成功后）
 
 `+transition` / `+bug-transition` 成功信封可能含 `refresh_ok`：流转 PUT 已成功；若随后 GET 刷新失败则为 `false`，并在 **stderr** 打 warning。**不要把 `refresh_ok:false` 当成流转失败**（`ok` 仍为 `true`）。
+
+
+## 本地 Profile 初始化（+onboard）
+
+同事/Agent 首次接入优先：
+
+```bash
+yunxiao +onboard                          # TTY：列项目并编号选择
+yunxiao +onboard --space-id <id> --profile <name>   # 非交互
+yunxiao +onboard --space-id <id> --dry-run
+```
+
+写入位置：`~/.config/yunxiao/profiles/<name>.json`（仅 `name` + `space_id` 的通用模板）。**不要**把智衣/沙箱租户 profile 提交进本公开仓库；也不要把 `profile install-example zhiyi|play` 当作同事默认路径。缺 token 时提示控制台：https://account-devops.aliyun.com/settings/personalAccessToken 并打印模块权限清单
 
 ## 风险与确认
 

@@ -26,8 +26,8 @@ Until published:
 npm install -g ./npm
 # or from a packed tarball (slim — no releases/)
 npm pack
-npm install -g ./sanzhi-yunxiao-cli-0.15.6.tgz
-npx --yes ./sanzhi-yunxiao-cli-0.15.6.tgz install
+npm install -g ./sanzhi-yunxiao-cli-0.15.7.tgz
+npx --yes ./sanzhi-yunxiao-cli-0.15.7.tgz install
 ```
 
 ## Auth (after install)
@@ -37,8 +37,9 @@ yunxiao auth login --token <PAT>
 # or
 export YUNXIAO_ACCESS_TOKEN=<PAT>
 
-# optional tenant profile
-yunxiao profile install-example zhiyi
+# optional: local profile for a chosen project (never commit tenant IDs)
+# yunxiao +onboard
+# PAT docs: https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
 
 yunxiao auth status
 yunxiao doctor

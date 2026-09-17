@@ -30,7 +30,8 @@ EXAMPLES (one per command style, in order of preference):
     yunxiao api GET /oapi/v1/platform/user               # raw escape hatch — any endpoint by HTTP path
 
 Auth: YUNXIAO_ACCESS_TOKEN > profile access_token > auth login (config.json)
-Token docs: https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token`,
+PAT console: https://account-devops.aliyun.com/settings/personalAccessToken
+Help: https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token`,
 	Version:       version.Version,
 	SilenceErrors: true,
 	SilenceUsage:  true,
