@@ -39,7 +39,11 @@ Risk: write`,
 			token = strings.TrimSpace(line)
 		}
 		if token == "" {
-			handleErr(fmt.Errorf("empty token"))
+			handleErr(output.Fail(output.ErrorBody{
+				Type:    "cli",
+				Message: "empty token",
+				Hint:    "Create a Yunxiao personal access token: https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token",
+			}, 1))
 			return
 		}
 		f, _, err := config.LoadFile()
