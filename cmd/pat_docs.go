@@ -21,7 +21,8 @@ func patPermissionsGuideZH() string {
   - 流水线(Flow)：读+写（list/run；只读试用可只开读）
   - 按需：制品 Packages、测试管理 Testhub、应用交付 AppStack
 新建令牌名称建议：yunxiao-cli；设合理到期；令牌只显示一次；勿把完整 PAT 贴到聊天。
-当前支持路径：控制台 PAT（无飞书式一键 OAuth）。`
+推荐：yunxiao auth login --browser（OAuth=账号 API 全能力，平台不按模块限权）。
+CI/无浏览器：控制台 PAT 或 YUNXIAO_ACCESS_TOKEN。`
 }
 
 // patPermissionsGuideEN is a short English checklist for README / optional stderr.
@@ -33,7 +34,8 @@ func patPermissionsGuideEN() string {
   - Flow/pipelines: read+write (list/run; trial: read only)
   - As needed: Packages, Testhub, AppStack
 Token name tip: yunxiao-cli; set a sensible expiry; shown once; never paste raw PAT into chat.
-Auth today: PAT console only (no Feishu-style one-click OAuth in this CLI yet).`
+Recommended: yunxiao auth login --browser (OAuth = full account API capability).
+CI/headless: PAT console or YUNXIAO_ACCESS_TOKEN.`
 }
 
 // patPermissionsGuide defaults to ZH for CLI stderr (Asia/Shanghai users).

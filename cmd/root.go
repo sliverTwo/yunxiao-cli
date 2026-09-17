@@ -29,7 +29,9 @@ EXAMPLES (one per command style, in order of preference):
     yunxiao schema codeup.mrs.create                     # inspect a method's params before calling
     yunxiao api GET /oapi/v1/platform/user               # raw escape hatch — any endpoint by HTTP path
 
-Auth: YUNXIAO_ACCESS_TOKEN > profile access_token > auth login (config.json)
+Auth: YUNXIAO_ACCESS_TOKEN > credentials.json (last auth login) > profile > config.json
+Interactive: yunxiao auth login --browser   (OAuth = full account API capability)
+CI/PAT:      yunxiao auth login --token <PAT>
 PAT console: https://account-devops.aliyun.com/settings/personalAccessToken
 Help: https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token`,
 	Version:       version.Version,

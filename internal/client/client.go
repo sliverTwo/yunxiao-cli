@@ -54,20 +54,44 @@ type Client struct {
 	Edition   string
 	OrgID     string
 	UserAgent string
+	// AuthHeader: empty or "x-yunxiao-token" → x-yunxiao-token; "authorization-bearer" → Authorization Bearer.
+	AuthHeader string
+	// TokenKind is pat|oauth; oauth enables EnsureFresh before requests.
+	TokenKind config.TokenKind
+	// OnRefresh, when set, is called before requests if oauth token may be expired.
+	OnRefresh func(ctx context.Context, c *Client) error
 }
 
 func New(r config.Resolved) (*Client, error) {
 	if r.AccessToken == "" {
-		return nil, fmt.Errorf("missing access token: set %s, profile access_token, or run `yunxiao auth login`", config.EnvAccessToken)
+		return nil, fmt.Errorf("missing access token: set %s, run `yunxiao auth login --browser`, or `yunxiao auth login --token`", config.EnvAccessToken)
 	}
 	return &Client{
-		HTTP:      &http.Client{Timeout: 60 * time.Second},
-		BaseURL:   strings.TrimRight(r.APIBaseURL, "/"),
-		Token:     r.AccessToken,
-		Edition:   r.Edition,
-		OrgID:     r.OrganizationID,
-		UserAgent: "yunxiao-cli/" + version.Version,
+		HTTP:       &http.Client{Timeout: 60 * time.Second},
+		BaseURL:    strings.TrimRight(r.APIBaseURL, "/"),
+		Token:      r.AccessToken,
+		Edition:    r.Edition,
+		OrgID:      r.OrganizationID,
+		UserAgent:  "yunxiao-cli/" + version.Version,
+		AuthHeader: r.AuthHeader,
+		TokenKind:  r.TokenKind,
 	}, nil
+}
+
+func (c *Client) applyAuth(req *http.Request) {
+	switch c.AuthHeader {
+	case "authorization-bearer", "bearer", "Authorization", "authorization":
+		req.Header.Set("Authorization", "Bearer "+c.Token)
+	default:
+		req.Header.Set("x-yunxiao-token", c.Token)
+	}
+}
+
+func (c *Client) ensureFresh(ctx context.Context) error {
+	if c.TokenKind != config.TokenKindOAuth || c.OnRefresh == nil {
+		return nil
+	}
+	return c.OnRefresh(ctx, c)
 }
 
 func (c *Client) IsRegion() bool {
@@ -143,14 +167,24 @@ func (c *Client) Preview(method, path string, query map[string]string, body any)
 	return RequestPreview{
 		Method: method,
 		URL:    c.buildURL(path, query),
-		Headers: map[string]string{
-			"Accept":          "application/json",
-			"Content-Type":    "application/json",
-			"x-yunxiao-token": "(redacted)",
-			"User-Agent":      c.UserAgent,
-		},
+		Headers: c.previewHeaders(),
 		Body: body,
 	}
+}
+
+func (c *Client) previewHeaders() map[string]string {
+	h := map[string]string{
+		"Accept":       "application/json",
+		"Content-Type": "application/json",
+		"User-Agent":   c.UserAgent,
+	}
+	switch c.AuthHeader {
+	case "authorization-bearer", "bearer", "Authorization", "authorization":
+		h["Authorization"] = "Bearer (redacted)"
+	default:
+		h["x-yunxiao-token"] = "(redacted)"
+	}
+	return h
 }
 
 func (c *Client) buildURL(path string, query map[string]string) string {
@@ -210,6 +244,9 @@ func (c *Client) DeleteJSON(ctx context.Context, path string, body any, out any)
 // fileField is the form field name for the file (usually "file").
 // Not retried (non-idempotent).
 func (c *Client) PostMultipart(ctx context.Context, path string, query map[string]string, fileField, filename string, data []byte, fields map[string]string, out any) error {
+	if err := c.ensureFresh(ctx); err != nil {
+		return err
+	}
 	u := c.buildURL(path, query)
 	var buf bytes.Buffer
 	w := multipart.NewWriter(&buf)
@@ -235,7 +272,7 @@ func (c *Client) PostMultipart(ctx context.Context, path string, query map[strin
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", w.FormDataContentType())
 	req.Header.Set("User-Agent", c.UserAgent)
-	req.Header.Set("x-yunxiao-token", c.Token)
+	c.applyAuth(req)
 	resp, err := c.HTTP.Do(req)
 	if err != nil {
 		return fmt.Errorf("request failed: %w", err)
@@ -398,6 +435,9 @@ func (c *Client) DoRaw(ctx context.Context, method, path string, query map[strin
 	if ctx == nil {
 		ctx = context.Background()
 	}
+	if err := c.ensureFresh(ctx); err != nil {
+		return nil, 0, err
+	}
 	u := c.buildURL(path, query)
 
 	var bodyBytes []byte
@@ -434,7 +474,7 @@ func (c *Client) DoRaw(ctx context.Context, method, path string, query map[strin
 		req.Header.Set("Accept", "application/json")
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("User-Agent", c.UserAgent)
-		req.Header.Set("x-yunxiao-token", c.Token)
+		c.applyAuth(req)
 
 		resp, err := c.HTTP.Do(req)
 		if err != nil {

@@ -12,13 +12,13 @@ CLI binary name: **`yunxiao`**.
 # 配置公司阿里云 npm 私仓（若本机还没有）
 npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
 
-npm install -g sanzhi-yunxiao-cli@0.15.7
+npm install -g sanzhi-yunxiao-cli@0.16.0
 npx sanzhi-yunxiao-cli@latest install   # 拉二进制 + 可选安装 skills
 
-yunxiao --version   # 应显示 0.15.7
+yunxiao --version   # 应显示 0.16.0
 
 # 备选：直接下 Release，解压后把 yunxiao.exe 所在目录加入 PATH
-# https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.7
+# https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.0
 ```
 
 ### 2. 认证
@@ -54,24 +54,21 @@ yunxiao codeup repos list
 
 1) 安装（公司阿里云 npm 私仓）：
    npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-   npm install -g sanzhi-yunxiao-cli@0.15.7
+   npm install -g sanzhi-yunxiao-cli@0.16.0
    npx sanzhi-yunxiao-cli@latest install
-   yunxiao --version   # 应显示 0.15.7
-   备选：GitHub Release v0.15.7
-   https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.7
+   yunxiao --version   # 应显示 0.16.0
+   备选：GitHub Release v0.16.0
+   https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.0
 
-2) 认证：先打开控制台新建 PAT（一键），再登录（禁止把完整 PAT 打到回复/聊天里）
-   控制台（首选）：https://account-devops.aliyun.com/settings/personalAccessToken
-   帮助文档（次要）：https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
-   推荐权限（控制台按「模块」勾选读/写，不是飞书 OAuth scope）：
-     - 组织/成员：读（whoami、organization）
-     - 项目管理(Projex)：读+写（工作项；只读试用可只开读）
-     - 代码管理(Codeup)：读+写（仓库/分支/文件/MR；只读试用可只开读）
-     - 流水线(Flow)：读+写（list/run；只读试用可只开读）
-     - 按需：制品 Packages、测试管理 Testhub、应用交付 AppStack
-   令牌名称建议 yunxiao-cli；设合理到期；令牌只显示一次。
-   yunxiao auth login --token "<PAT>"
-   yunxiao whoami && yunxiao doctor
+2) 认证（优先浏览器 OAuth；无图形界面再用 PAT。禁止把完整 token 打到回复/聊天里）
+   推荐：yunxiao auth login --browser
+   注意：OAuth 同意 = 账号 API 全能力（平台不按模块限权，宽于细粒度 PAT）。
+   登录后探测：yunxiao auth probe-oauth
+   PAT 回落（CI/无浏览器）：
+     控制台：https://account-devops.aliyun.com/settings/personalAccessToken
+     帮助：https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+     yunxiao auth login --token "<PAT>"
+   yunxiao whoami && yunxiao doctor && yunxiao auth status
 
 3) 安装 companion skills：
    yunxiao skills install
@@ -98,11 +95,12 @@ yunxiao codeup repos list
 
 ```bash
 npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-npm install -g sanzhi-yunxiao-cli@0.15.7
+npm install -g sanzhi-yunxiao-cli@0.16.0
 npx sanzhi-yunxiao-cli@latest install
 yunxiao --version
 
-yunxiao auth login --token "<PAT>"
+yunxiao auth login --browser    # or: yunxiao auth login --token "<PAT>"
+yunxiao auth probe-oauth         # after browser login
 yunxiao whoami && yunxiao doctor
 
 yunxiao organization +whoami
@@ -110,7 +108,7 @@ yunxiao pipeline list
 yunxiao codeup repos list
 ```
 
-Use the [GitHub Release binaries](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.7) as an alternative. Start writes with `--dry-run`, confirm high-risk writes before adding `--yes`, and use `--data-file ./body.json` for long JSON. The skills wizard supports multiple selections; individual skills can also be installed with `yunxiao skills install --skill ...`.
+Use the [GitHub Release binaries](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.0) as an alternative. Start writes with `--dry-run`, confirm high-risk writes before adding `--yes`, and use `--data-file ./body.json` for long JSON. The skills wizard supports multiple selections; individual skills can also be installed with `yunxiao skills install --skill ...`.
 
 
 ### Paste for Agent
@@ -122,24 +120,21 @@ Install and init yunxiao CLI with a LOCAL profile (never write tenant profiles i
 
 1) Install (Aliyun npm registry):
    npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-   npm install -g sanzhi-yunxiao-cli@0.15.7
+   npm install -g sanzhi-yunxiao-cli@0.16.0
    npx sanzhi-yunxiao-cli@latest install
-   yunxiao --version   # expect 0.15.7
-   Fallback: GitHub Release v0.15.7
-   https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.7
+   yunxiao --version   # expect 0.16.0
+   Fallback: GitHub Release v0.16.0
+   https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.0
 
-2) Auth — open the PAT console first (never print/paste the raw PAT into chat):
-   Console (primary): https://account-devops.aliyun.com/settings/personalAccessToken
-   Help (secondary): https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
-   Recommended module checkboxes (not OAuth scopes):
-     - Organization/members: read (whoami, organization)
-     - Projex: read+write (work items; read-only trial: read only)
-     - Codeup: read+write (repos/branches/files/MRs; trial: read only)
-     - Flow: read+write (list/run; trial: read only)
-     - As needed: Packages, Testhub, AppStack
-   Token name tip: yunxiao-cli; set a sensible expiry; shown once only.
-   yunxiao auth login --token "<PAT>"
-   yunxiao whoami && yunxiao doctor
+2) Auth — prefer browser OAuth; use PAT only for CI/headless (never print/paste raw tokens into chat):
+   Recommended: yunxiao auth login --browser
+   WARNING: OAuth consent = full account API capability (no module scopes; broader than fine-grained PAT).
+   After login: yunxiao auth probe-oauth
+   PAT fallback:
+     Console: https://account-devops.aliyun.com/settings/personalAccessToken
+     Help: https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+     yunxiao auth login --token "<PAT>"
+   yunxiao whoami && yunxiao doctor && yunxiao auth status
 
 3) yunxiao skills install
 
@@ -167,12 +162,12 @@ Install and init yunxiao CLI with a LOCAL profile (never write tenant profiles i
 
 ```bash
 npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-npm install -g sanzhi-yunxiao-cli@0.15.7
+npm install -g sanzhi-yunxiao-cli@0.16.0
 npx sanzhi-yunxiao-cli@latest install
 yunxiao --version          # yunxiao 0.15.7
 ```
 
-The `sanzhi-yunxiao-cli` package runs `postinstall` to unpack the platform archive, install companion skills, and print auth next steps. It downloads binaries from [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases); `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli` is the default (override it when needed). You can also [download the v0.15.7 Release directly](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.7), extract it, and add the `yunxiao` binary to `PATH`.
+The `sanzhi-yunxiao-cli` package runs `postinstall` to unpack the platform archive, install companion skills, and print auth next steps. It downloads binaries from [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases); `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli` is the default (override it when needed). You can also [download the v0.15.7 Release directly](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.0), extract it, and add the `yunxiao` binary to `PATH`.
 
 **From source (secondary):**
 
@@ -217,8 +212,8 @@ yunxiao whoami
 yunxiao doctor
 ```
 
-Token precedence (highest first): `YUNXIAO_ACCESS_TOKEN` env → active profile `access_token` (`--profile` / `YUNXIAO_PROFILE`) → `~/.config/yunxiao/config.json`. Optional: put `"access_token"` in a profile JSON (mode 0600); do not commit real PATs. `yunxiao auth status` reports `token_source` as `env` | `profile` | `config` | `none` without printing the raw token.
-**Future:** Feishu-style one-click OAuth/browser login could be added later if we register a Yunxiao OAuth app (`CreateOAuthToken` is still 内测中). Today the supported path is the PAT console above — this CLI does not implement a fake OAuth page.
+Token precedence (highest first): `YUNXIAO_ACCESS_TOKEN` env → `~/.config/yunxiao/credentials.json` (last successful `auth login`, browser or token) → active profile `access_token` → legacy `config.json`. OAuth tokens live only in `credentials.json` (mode 0600), not in profile JSON. `yunxiao auth status` reports `token_source` / `token_kind` (`pat`|`oauth`) without printing raw tokens.
+**Browser OAuth:** `yunxiao auth login --browser` (authorization code + PKCE + DCR via `/.well-known/oauth-authorization-server`). Consent = **full account API capability** (platform has no module scopes). CI/headless: keep `--token` / env. Probe gate: `yunxiao auth probe-oauth`. Does **not** use legacy `CreateOAuthToken`.
 
 
 ### Agent quickstart
@@ -508,6 +503,7 @@ See [AGENTS.md](AGENTS.md) for contributor / AI-agent conventions.
 
 ### Changelog
 
+- **0.16.0** — Browser OAuth (`auth login --browser` / `--dry-run`), `credentials.json` (0600), `auth probe-oauth` (O1 header gate), auto refresh for `token_kind=oauth`, Agent paste prefers browser; PAT `--token` kept for CI
 - **0.15.7** — `yunxiao +onboard` writes a **generic local** profile under `~/.config/yunxiao/profiles/` (TTY project pick or `--space-id`); README Agent paste prompts (ZH+EN); missing-token hints include PAT console URL + module permission checklist; real 智衣/沙箱 tenant profiles stay local/untracked (do not expand example profiles for onboard)
 - **0.15.6** — default newest-first for comment/activity/history-style lists (`--sort asc|desc`; invalid values rejected); comments sort by **create** time; activity/MR/runs/efforts prefer update/modified; client-side `--sort` is **page-local** when the list is paginated (`--all` sorts across collected pages)
 - **0.15.5** — `--data-file` and `--data @file.json` for long JSON payloads (`api`, appstack, testhub, …)
@@ -551,12 +547,12 @@ MIT — see [LICENSE](LICENSE).
 
 ```bash
 npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-npm install -g sanzhi-yunxiao-cli@0.15.7
+npm install -g sanzhi-yunxiao-cli@0.16.0
 npx sanzhi-yunxiao-cli@latest install
 yunxiao --version          # yunxiao 0.15.7
 ```
 
-`sanzhi-yunxiao-cli` 包会在 `postinstall` 时解压平台归档、安装 companion skills，并打印认证后续步骤。二进制来自 [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases)；默认值为 `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli`（需要时可覆盖）。也可以[直接下载 v0.15.7 Release](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.7)，解压后把 `yunxiao` 加入 `PATH`。
+`sanzhi-yunxiao-cli` 包会在 `postinstall` 时解压平台归档、安装 companion skills，并打印认证后续步骤。二进制来自 [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases)；默认值为 `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli`（需要时可覆盖）。也可以[直接下载 v0.15.7 Release](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.0)，解压后把 `yunxiao` 加入 `PATH`。
 
 **从源码安装（次要）：**
 
@@ -594,7 +590,7 @@ yunxiao auth status
 yunxiao doctor
 ```
 
-令牌优先级（高→低）：`YUNXIAO_ACCESS_TOKEN` → 当前 profile 的 `access_token`（`--profile` / `YUNXIAO_PROFILE`）→ `~/.config/yunxiao/config.json`。可在 profile JSON 中加可选 `"access_token"`（建议文件权限 0600，勿提交真实 PAT）。`yunxiao auth status` 的 `token_source` 为 `env` | `profile` | `config` | `none`，不打印明文。默认 API：`https://openapi-rdc.aliyuncs.com`，请求头 `x-yunxiao-token`。
+令牌优先级（高→低）：`YUNXIAO_ACCESS_TOKEN` → `~/.config/yunxiao/credentials.json`（最近一次成功的 `auth login`，browser 或 token）→ 当前 profile 的 `access_token` → 旧版 `config.json`。OAuth 凭证只写 `credentials.json`（0600），不写 profile JSON。`yunxiao auth status` 含 `token_source` / `token_kind`（`pat`|`oauth`），不打印明文。推荐：`yunxiao auth login --browser`（授权=账号 API 全能力）；CI 仍用 `--token`/env。默认 API：`https://openapi-rdc.aliyuncs.com`；OAuth 探测通过后按记录的头发送（优先 `x-yunxiao-token`，否则 `Authorization: Bearer`）。
 
 ### Agent 快速上手
 
@@ -717,6 +713,7 @@ Packages **上传**、Codeup **blame/cherry-pick**、MR label detach 等仍无�
 
 ### 变更摘要
 
+- **0.16.0** — 浏览器 OAuth（`auth login --browser` / `--dry-run`）、`credentials.json`（0600）、`auth probe-oauth`、oauth 自动 refresh；Agent 粘贴优先 browser；CI 保留 `--token`
 - **0.15.7** — `yunxiao +onboard`：按所选项目/`space_id` 仅写入本机 `~/.config/yunxiao/profiles/` 的通用 profile（TTY 选择或 `--space-id`）；README「给 Agent 粘贴」；缺 token 时提示 PAT 控制台链接与模块权限清单；智衣/沙箱租户配置留在本机、勿提交本仓库（不借 onboard 扩展示例 profile）
 - **0.15.6** — 评论/活动/历史类列表默认最新在前（`--sort asc|desc`，非法值报错）；评论按**创建时间**排序；活动/MR/流水线运行/工时等仍偏好更新时间；分页列表的客户端 `--sort` 仅作用于**当前页**（`--all` 时对已拉取页整体排序）
 - **0.15.5** — 长 JSON 支持 `--data-file` / `--data @file.json`（`api`、appstack、testhub 等）
