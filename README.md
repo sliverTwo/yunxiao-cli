@@ -4,23 +4,80 @@ Yunxiao (阿里云云效) CLI redesigned like Feishu/Lark CLI: progressive disco
 
 CLI binary name: **`yunxiao`**.
 
+## 同事试用（5 分钟）
+
+### 1. 安装
+
+```bash
+# 配置公司阿里云 npm 私仓（若本机还没有）
+npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
+
+npm install -g sanzhi-yunxiao-cli@0.15.5
+npx sanzhi-yunxiao-cli@latest install   # 拉二进制 + 可选安装 skills
+
+yunxiao --version   # 应显示 0.15.5
+
+# 备选：直接下 Release，解压后把 yunxiao.exe 所在目录加入 PATH
+# https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.5
+```
+
+### 2. 认证
+
+云效建 PAT 后执行：
+
+```bash
+yunxiao auth login --token "<PAT>"
+yunxiao whoami && yunxiao doctor
+```
+
+### 3. 试用几条只读命令
+
+```bash
+yunxiao organization +whoami
+yunxiao pipeline list
+yunxiao codeup repos list
+```
+
+### 4. 注意
+
+- 写操作先 `--dry-run`；高风险要确认后再加 `--yes`
+- 长 JSON 用 `--data-file ./body.json`
+- Skills 向导可多选；也可 `yunxiao skills install --skill ...`
+
+### Trial quickstart (5 minutes)
+
+```bash
+npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
+npm install -g sanzhi-yunxiao-cli@0.15.5
+npx sanzhi-yunxiao-cli@latest install
+yunxiao --version
+
+yunxiao auth login --token "<PAT>"
+yunxiao whoami && yunxiao doctor
+
+yunxiao organization +whoami
+yunxiao pipeline list
+yunxiao codeup repos list
+```
+
+Use the [GitHub Release binaries](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.5) as an alternative. Start writes with `--dry-run`, confirm high-risk writes before adding `--yes`, and use `--data-file ./body.json` for long JSON. The skills wizard supports multiple selections; individual skills can also be installed with `yunxiao skills install --skill ...`.
+
 ---
 
 ## English
 
 ### Install
 
-**Recommended (Feishu-style one-click):**
+**Recommended (company registry + npm installer):**
 
 ```bash
-npx yunxiao-cli@latest install
-# or, until published to npmjs:
-#   npm install -g ./npm
-#   npx --yes ./sanzhi-yunxiao-cli-0.15.5.tgz install
+npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
+npm install -g sanzhi-yunxiao-cli@0.15.5
+npx sanzhi-yunxiao-cli@latest install
 yunxiao --version          # yunxiao 0.15.5
 ```
 
-The npm package (`npm/` in this repo) runs `postinstall` to unpack a platform archive (bundled under `releases/`, or downloaded via `YUNXIAO_CLI_DOWNLOAD_BASE`), installs companion skills, and prints auth next steps — same shape as `npx @larksuite/cli@latest install`.
+The `sanzhi-yunxiao-cli` package runs `postinstall` to unpack the platform archive, install companion skills, and print auth next steps. It downloads binaries from [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases); `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli` is the default (override it when needed). You can also [download the v0.15.5 Release directly](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.5), extract it, and add the `yunxiao` binary to `PATH`.
 
 **From source (secondary):**
 
@@ -37,7 +94,7 @@ go install github.com/yunxiao-cli/yunxiao@latest   # when published
 
 Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Version=$(VERSION)` (`VERSION` defaults to `git describe` or `0.15.5`).
 
-**Known limitation:** `go install` / a lone binary does **not** ship the repo `skills/` tree, so `yunxiao skills list|read|install` will not find skills unless you use the npm installer (which extracts `skills/`), run from a source checkout, or copy/`npx skills add` the tree. Prefer `npx yunxiao-cli@latest install` or `make build` from a checkout for skills-aware workflows.
+**Known limitation:** `go install` / a lone binary does **not** ship the repo `skills/` tree, so `yunxiao skills list|read|install` will not find skills unless you use the npm installer (which extracts `skills/`), run from a source checkout, or copy/`npx skills add` the tree. Prefer `npx sanzhi-yunxiao-cli@latest install` or `make build` from a checkout for skills-aware workflows.
 
 ### Auth
 
@@ -336,14 +393,14 @@ make ci                 # go build -ldflags … ./... && go test ./... && go vet
 ./scripts/ci.sh         # same, POSIX; use from Codeup Flow
 ```
 
-**Codeup Flow:** this repo lives on Aliyun Codeup (not GitHub). Add a Flow job whose build script is:
+**Codeup Flow (optional):** If this repo is mirrored to Aliyun Codeup, add a Flow job whose build script is:
 
 ```bash
 make ci
 # or: ./scripts/ci.sh
 ```
 
-A portable `.github/workflows/ci.yml` is included for reference only; it will not run on Codeup.
+GitHub Actions are active for the GitHub repository: `.github/workflows/ci.yml` runs CI on pushes to `main` and pull requests, while `.github/workflows/release.yml` builds platform archives and publishes a GitHub Release when a `v*` tag is pushed.
 
 See [AGENTS.md](AGENTS.md) for contributor / AI-agent conventions.
 
@@ -386,17 +443,16 @@ MIT — see [LICENSE](LICENSE).
 
 ### 安装
 
-**推荐（飞书风格一键安装）：**
+**推荐（公司阿里云 npm 私仓 + npm 安装器）：**
 
 ```bash
-npx yunxiao-cli@latest install
-# 尚未发布到 npmjs 时：
-#   npm install -g ./npm
-#   npx --yes ./sanzhi-yunxiao-cli-0.15.5.tgz install
+npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
+npm install -g sanzhi-yunxiao-cli@0.15.5
+npx sanzhi-yunxiao-cli@latest install
 yunxiao --version          # yunxiao 0.15.5
 ```
 
-仓库内 `npm/` 包在 `postinstall` 时解压对应平台归档（内置 `releases/`，或通过 `YUNXIAO_CLI_DOWNLOAD_BASE` 下载），安装 companion skills，并打印认证后续步骤 — 对齐 `npx @larksuite/cli@latest install`。
+`sanzhi-yunxiao-cli` 包会在 `postinstall` 时解压平台归档、安装 companion skills，并打印认证后续步骤。二进制来自 [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases)；默认值为 `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli`（需要时可覆盖）。也可以[直接下载 v0.15.5 Release](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.5)，解压后把 `yunxiao` 加入 `PATH`。
 
 **从源码安装（次要）：**
 
@@ -410,7 +466,7 @@ go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.15.5
 
 需要 Go 1.24.4+。`make build` / `make ci` 通过 `-ldflags -X …version.Version=$(VERSION)` 注入版本（`VERSION` 默认 `git describe` 或 `0.15.5`）。
 
-**已知限制：** `go install` / 单独二进制**不包含**仓库 `skills/` 目录；请用 npm 安装器（会解压 `skills/`）、在源码检出目录运行，或另行复制 / `npx skills add`。需要技能时优先 `npx yunxiao-cli@latest install` 或检出目录 `make build`。
+**已知限制：** `go install` / 单独二进制**不包含**仓库 `skills/` 目录；请用 npm 安装器（会解压 `skills/`）、在源码检出目录运行，或另行复制 / `npx skills add`。需要技能时优先 `npx sanzhi-yunxiao-cli@latest install` 或检出目录 `make build`。
 
 ### 认证
 
@@ -539,14 +595,14 @@ make ci                 # go build -ldflags … ./... && go test ./... && go vet
 ./scripts/ci.sh         # 同上，供 Codeup Flow 调用
 ```
 
-**云效 Flow：** 本仓库在阿里云 Codeup（非 GitHub）。在 Flow 中新增构建任务，脚本写：
+**云效 Flow（可选）：** 如果把本仓库镜像到阿里云 Codeup，可在 Flow 中新增构建任务，脚本写：
 
 ```bash
 make ci
 # 或: ./scripts/ci.sh
 ```
 
-`.github/workflows/ci.yml` 仅作可移植参考，不会在 Codeup 上执行。
+GitHub 仓库已启用真实的 GitHub Actions：`.github/workflows/ci.yml` 在推送到 `main` 或提交 Pull Request 时运行 CI；`.github/workflows/release.yml` 在推送 `v*` 标签时构建各平台归档并发布 GitHub Release。
 
 ### 已知缺口
 
