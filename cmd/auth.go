@@ -21,8 +21,9 @@ var authLoginCmd = &cobra.Command{
 	Short: "Store Yunxiao personal access token in config file",
 	Long: `Store a Yunxiao personal access token.
 
-Create a PAT in the Yunxiao console:
-  https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+Create a PAT in the Yunxiao console (one-click):
+  https://account-devops.aliyun.com/settings/personalAccessToken
+Help: https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
 
 Token precedence: YUNXIAO_ACCESS_TOKEN env > active profile access_token > config.json.
 
@@ -39,10 +40,11 @@ Risk: write`,
 			token = strings.TrimSpace(line)
 		}
 		if token == "" {
+			fmt.Fprintf(os.Stderr, "Create a Yunxiao PAT (console):\n  %s\nHelp: %s\n%s\n", yunxiaoPATConsoleURL, yunxiaoPATHelpURL, patPermissionsGuide())
 			handleErr(output.Fail(output.ErrorBody{
 				Type:    "cli",
 				Message: "empty token",
-				Hint:    "Create a Yunxiao personal access token: https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token",
+				Hint:    patHintShort(),
 			}, 1))
 			return
 		}

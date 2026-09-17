@@ -278,17 +278,20 @@ func TestErrNeedAuthIncludesPATLink(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error")
 	}
-	if !strings.Contains(stderr.String(), yunxiaoPATDocsURL) {
-		t.Fatalf("stderr missing PAT link: %s", stderr.String())
+	if !strings.Contains(stderr.String(), yunxiaoPATConsoleURL) {
+		t.Fatalf("stderr missing PAT console link: %s", stderr.String())
 	}
-	if !strings.Contains(failBuf.String(), yunxiaoPATDocsURL) {
+	if !strings.Contains(stderr.String(), "项目管理") || !strings.Contains(stderr.String(), "yunxiao-cli") {
+		t.Fatalf("stderr missing permission checklist: %s", stderr.String())
+	}
+	if !strings.Contains(failBuf.String(), yunxiaoPATConsoleURL) {
 		t.Fatalf("JSON error missing PAT link: %s", failBuf.String())
 	}
 	var env output.Envelope
 	if err := json.Unmarshal(failBuf.Bytes(), &env); err != nil {
 		t.Fatal(err)
 	}
-	if env.OK || env.Error == nil || !strings.Contains(env.Error.Hint, yunxiaoPATDocsURL) {
+	if env.OK || env.Error == nil || !strings.Contains(env.Error.Hint, yunxiaoPATConsoleURL) {
 		t.Fatalf("%+v", env)
 	}
 }

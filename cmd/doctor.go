@@ -19,7 +19,8 @@ var doctorCmd = &cobra.Command{
 		}
 		tokenCheck := map[string]any{"name": "token", "ok": r.AccessToken != "", "source": r.TokenSource}
 		if r.AccessToken == "" {
-			tokenCheck["hint"] = "Create a Yunxiao personal access token: https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token"
+			tokenCheck["hint"] = patHintShort()
+			tokenCheck["console"] = yunxiaoPATConsoleURL
 		}
 		checks := []map[string]any{
 			{"name": "config_file", "ok": true, "path": r.ConfigPath},
@@ -45,7 +46,7 @@ var doctorCmd = &cobra.Command{
 				connectivity["error"] = err.Error()
 			}
 		} else {
-			connectivity["error"] = "no token — create a PAT: https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token"
+			connectivity["error"] = "no token — " + patHintShort()
 		}
 		checks = append(checks, connectivity)
 		allOK := true

@@ -18,9 +18,6 @@ import (
 	"github.com/yunxiao-cli/yunxiao/internal/risk"
 )
 
-// Official Yunxiao PAT documentation (do not invent alternate URLs).
-const yunxiaoPATDocsURL = "https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token"
-
 // stdinIsInteractive reports whether stdin is a TTY (tests may override).
 var stdinIsInteractive = func() bool {
 	fi, err := os.Stdin.Stat()
@@ -59,7 +56,8 @@ Non-TTY: require --space-id (optional --name / --profile).
 Do NOT use this to embed 智衣/沙箱 tenant templates into a repo.
 Real tenant specifics stay on the user's machine (untracked local profiles).
 
-Create a PAT: ` + yunxiaoPATDocsURL,
+Create a PAT (console): ` + yunxiaoPATConsoleURL + `
+Help: ` + yunxiaoPATHelpURL,
 	Run: func(cmd *cobra.Command, args []string) {
 		handleErr(runOnboard(cmd))
 	},
@@ -67,11 +65,13 @@ Create a PAT: ` + yunxiaoPATDocsURL,
 
 func errNeedAuth() error {
 	msg := "not authenticated: set YUNXIAO_ACCESS_TOKEN or run: yunxiao auth login --token <PAT>"
-	fmt.Fprintf(onboardStderr, "Create / get a Yunxiao personal access token:\n  %s\n", yunxiaoPATDocsURL)
+	fmt.Fprintf(onboardStderr, "Create a Yunxiao PAT (console):\n  %s\n", yunxiaoPATConsoleURL)
+	fmt.Fprintf(onboardStderr, "Help: %s\n", yunxiaoPATHelpURL)
+	fmt.Fprintln(onboardStderr, patPermissionsGuide())
 	return output.Fail(output.ErrorBody{
 		Type:    "cli",
 		Message: msg,
-		Hint:    "Create a Yunxiao personal access token: " + yunxiaoPATDocsURL,
+		Hint:    patHintShort(),
 	}, 1)
 }
 

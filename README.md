@@ -23,7 +23,7 @@ yunxiao --version   # 应显示 0.15.7
 
 ### 2. 认证
 
-云效建 PAT 后执行：
+打开 [个人访问令牌控制台](https://account-devops.aliyun.com/settings/personalAccessToken) 新建 PAT（名称建议 `yunxiao-cli`；勾选组织读 + 项目/代码/流水线读写，按需制品/测试/应用；令牌只显示一次），然后：
 
 ```bash
 yunxiao auth login --token "<PAT>"
@@ -60,8 +60,16 @@ yunxiao codeup repos list
    备选：GitHub Release v0.15.7
    https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.7
 
-2) 认证：先让用户在文档建 PAT，再登录（禁止把完整 PAT 打到回复里）
-   PAT 文档：https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+2) 认证：先打开控制台新建 PAT（一键），再登录（禁止把完整 PAT 打到回复/聊天里）
+   控制台（首选）：https://account-devops.aliyun.com/settings/personalAccessToken
+   帮助文档（次要）：https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+   推荐权限（控制台按「模块」勾选读/写，不是飞书 OAuth scope）：
+     - 组织/成员：读（whoami、organization）
+     - 项目管理(Projex)：读+写（工作项；只读试用可只开读）
+     - 代码管理(Codeup)：读+写（仓库/分支/文件/MR；只读试用可只开读）
+     - 流水线(Flow)：读+写（list/run；只读试用可只开读）
+     - 按需：制品 Packages、测试管理 Testhub、应用交付 AppStack
+   令牌名称建议 yunxiao-cli；设合理到期；令牌只显示一次。
    yunxiao auth login --token "<PAT>"
    yunxiao whoami && yunxiao doctor
 
@@ -120,8 +128,16 @@ Install and init yunxiao CLI with a LOCAL profile (never write tenant profiles i
    Fallback: GitHub Release v0.15.7
    https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.7
 
-2) Auth — create a PAT first (never print the raw PAT):
-   https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+2) Auth — open the PAT console first (never print/paste the raw PAT into chat):
+   Console (primary): https://account-devops.aliyun.com/settings/personalAccessToken
+   Help (secondary): https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+   Recommended module checkboxes (not OAuth scopes):
+     - Organization/members: read (whoami, organization)
+     - Projex: read+write (work items; read-only trial: read only)
+     - Codeup: read+write (repos/branches/files/MRs; trial: read only)
+     - Flow: read+write (list/run; trial: read only)
+     - As needed: Packages, Testhub, AppStack
+   Token name tip: yunxiao-cli; set a sensible expiry; shown once only.
    yunxiao auth login --token "<PAT>"
    yunxiao whoami && yunxiao doctor
 
@@ -177,8 +193,11 @@ Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Versio
 
 ### Auth
 
-1. Create a Personal Access Token in Yunxiao:  
-   https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+1. Create a Personal Access Token in the Yunxiao console (primary):  
+   https://account-devops.aliyun.com/settings/personalAccessToken  
+   Help: https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+
+   Recommended module checkboxes for this CLI: Organization/members **read**; Projex/Codeup/Flow **read+write** (or read-only for trial); Packages/Testhub/AppStack as needed. Token name tip: `yunxiao-cli`.
 2. Prefer env (CI / shells):
 
 ```bash
@@ -199,6 +218,8 @@ yunxiao doctor
 ```
 
 Token precedence (highest first): `YUNXIAO_ACCESS_TOKEN` env → active profile `access_token` (`--profile` / `YUNXIAO_PROFILE`) → `~/.config/yunxiao/config.json`. Optional: put `"access_token"` in a profile JSON (mode 0600); do not commit real PATs. `yunxiao auth status` reports `token_source` as `env` | `profile` | `config` | `none` without printing the raw token.
+**Future:** Feishu-style one-click OAuth/browser login could be added later if we register a Yunxiao OAuth app (`CreateOAuthToken` is still 内测中). Today the supported path is the PAT console above — this CLI does not implement a fake OAuth page.
+
 
 ### Agent quickstart
 
@@ -487,7 +508,7 @@ See [AGENTS.md](AGENTS.md) for contributor / AI-agent conventions.
 
 ### Changelog
 
-- **0.15.7** — `yunxiao +onboard` writes a **generic local** profile under `~/.config/yunxiao/profiles/` (TTY project pick or `--space-id`); README Agent paste prompts (ZH+EN); missing-token hints include the official PAT doc URL; real 智衣/沙箱 tenant profiles stay local/untracked (do not expand example profiles for onboard)
+- **0.15.7** — `yunxiao +onboard` writes a **generic local** profile under `~/.config/yunxiao/profiles/` (TTY project pick or `--space-id`); README Agent paste prompts (ZH+EN); missing-token hints include PAT console URL + module permission checklist; real 智衣/沙箱 tenant profiles stay local/untracked (do not expand example profiles for onboard)
 - **0.15.6** — default newest-first for comment/activity/history-style lists (`--sort asc|desc`; invalid values rejected); comments sort by **create** time; activity/MR/runs/efforts prefer update/modified; client-side `--sort` is **page-local** when the list is paginated (`--all` sorts across collected pages)
 - **0.15.5** — `--data-file` and `--data @file.json` for long JSON payloads (`api`, appstack, testhub, …)
 - **0.15.2** — companion skills refresh for CLI 0.15.x (`has_more` / `meta.url` / `refresh_ok`); `client.ListAll` + `--all` on `pipeline list` & `codeup mrs list`; `scripts/flow-ci.sh` (Alibaba golang mirror + `GOPROXY=goproxy.cn`)
@@ -553,8 +574,11 @@ go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.15.7
 
 ### 认证
 
-1. 在云效控制台创建个人访问令牌（PAT）：  
-   https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+1. 在云效控制台创建个人访问令牌（PAT，首选一键链接）：  
+   https://account-devops.aliyun.com/settings/personalAccessToken  
+   帮助文档：https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+
+   推荐勾选：组织/成员**读**；项目管理/代码管理/流水线**读+写**（只读试用可只开读）；制品/测试/应用交付按需。令牌名建议 `yunxiao-cli`。
 2. 推荐环境变量：
 
 ```bash
@@ -693,7 +717,7 @@ Packages **上传**、Codeup **blame/cherry-pick**、MR label detach 等仍无�
 
 ### 变更摘要
 
-- **0.15.7** — `yunxiao +onboard`：按所选项目/`space_id` 仅写入本机 `~/.config/yunxiao/profiles/` 的通用 profile（TTY 选择或 `--space-id`）；README「给 Agent 粘贴」；缺 token 时提示官方 PAT 文档链接；智衣/沙箱租户配置留在本机、勿提交本仓库（不借 onboard 扩展示例 profile）
+- **0.15.7** — `yunxiao +onboard`：按所选项目/`space_id` 仅写入本机 `~/.config/yunxiao/profiles/` 的通用 profile（TTY 选择或 `--space-id`）；README「给 Agent 粘贴」；缺 token 时提示 PAT 控制台链接与模块权限清单；智衣/沙箱租户配置留在本机、勿提交本仓库（不借 onboard 扩展示例 profile）
 - **0.15.6** — 评论/活动/历史类列表默认最新在前（`--sort asc|desc`，非法值报错）；评论按**创建时间**排序；活动/MR/流水线运行/工时等仍偏好更新时间；分页列表的客户端 `--sort` 仅作用于**当前页**（`--all` 时对已拉取页整体排序）
 - **0.15.5** — 长 JSON 支持 `--data-file` / `--data @file.json`（`api`、appstack、testhub 等）
 - **0.15.2** — companion skills 对齐 CLI 0.15.x（`has_more` / `meta.url` / `refresh_ok`）；`client.ListAll` + `pipeline list --all` / `codeup mrs list --all`；`scripts/flow-ci.sh`（阿里云 golang 镜像 + `GOPROXY=goproxy.cn`）
