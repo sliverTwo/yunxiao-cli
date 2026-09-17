@@ -12,13 +12,13 @@ CLI binary name: **`yunxiao`**.
 # 配置公司阿里云 npm 私仓（若本机还没有）
 npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
 
-npm install -g sanzhi-yunxiao-cli@0.15.5
+npm install -g sanzhi-yunxiao-cli@0.15.6
 npx sanzhi-yunxiao-cli@latest install   # 拉二进制 + 可选安装 skills
 
-yunxiao --version   # 应显示 0.15.5
+yunxiao --version   # 应显示 0.15.6
 
 # 备选：直接下 Release，解压后把 yunxiao.exe 所在目录加入 PATH
-# https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.5
+# https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.6
 ```
 
 ### 2. 认证
@@ -48,7 +48,7 @@ yunxiao codeup repos list
 
 ```bash
 npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-npm install -g sanzhi-yunxiao-cli@0.15.5
+npm install -g sanzhi-yunxiao-cli@0.15.6
 npx sanzhi-yunxiao-cli@latest install
 yunxiao --version
 
@@ -60,7 +60,7 @@ yunxiao pipeline list
 yunxiao codeup repos list
 ```
 
-Use the [GitHub Release binaries](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.5) as an alternative. Start writes with `--dry-run`, confirm high-risk writes before adding `--yes`, and use `--data-file ./body.json` for long JSON. The skills wizard supports multiple selections; individual skills can also be installed with `yunxiao skills install --skill ...`.
+Use the [GitHub Release binaries](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.6) as an alternative. Start writes with `--dry-run`, confirm high-risk writes before adding `--yes`, and use `--data-file ./body.json` for long JSON. The skills wizard supports multiple selections; individual skills can also be installed with `yunxiao skills install --skill ...`.
 
 ---
 
@@ -72,21 +72,21 @@ Use the [GitHub Release binaries](https://github.com/sliverTwo/yunxiao-cli/relea
 
 ```bash
 npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-npm install -g sanzhi-yunxiao-cli@0.15.5
+npm install -g sanzhi-yunxiao-cli@0.15.6
 npx sanzhi-yunxiao-cli@latest install
-yunxiao --version          # yunxiao 0.15.5
+yunxiao --version          # yunxiao 0.15.6
 ```
 
-The `sanzhi-yunxiao-cli` package runs `postinstall` to unpack the platform archive, install companion skills, and print auth next steps. It downloads binaries from [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases); `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli` is the default (override it when needed). You can also [download the v0.15.5 Release directly](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.5), extract it, and add the `yunxiao` binary to `PATH`.
+The `sanzhi-yunxiao-cli` package runs `postinstall` to unpack the platform archive, install companion skills, and print auth next steps. It downloads binaries from [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases); `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli` is the default (override it when needed). You can also [download the v0.15.6 Release directly](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.6), extract it, and add the `yunxiao` binary to `PATH`.
 
 **From source (secondary):**
 
 ```bash
 make build                 # produces ./yunxiao (injects Version via -ldflags)
-# or (without ldflags, Version falls back to package default 0.15.5)
+# or (without ldflags, Version falls back to package default 0.15.6)
 go build -o yunxiao .
 # pin version explicitly:
-# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.15.5" -o yunxiao .
+# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.15.6" -o yunxiao .
 make install               # installs to ~/.local/bin/yunxiao
 # or
 go install github.com/yunxiao-cli/yunxiao@latest   # when published
@@ -448,12 +448,12 @@ MIT — see [LICENSE](LICENSE).
 
 ```bash
 npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-npm install -g sanzhi-yunxiao-cli@0.15.5
+npm install -g sanzhi-yunxiao-cli@0.15.6
 npx sanzhi-yunxiao-cli@latest install
-yunxiao --version          # yunxiao 0.15.5
+yunxiao --version          # yunxiao 0.15.6
 ```
 
-`sanzhi-yunxiao-cli` 包会在 `postinstall` 时解压平台归档、安装 companion skills，并打印认证后续步骤。二进制来自 [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases)；默认值为 `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli`（需要时可覆盖）。也可以[直接下载 v0.15.5 Release](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.5)，解压后把 `yunxiao` 加入 `PATH`。
+`sanzhi-yunxiao-cli` 包会在 `postinstall` 时解压平台归档、安装 companion skills，并打印认证后续步骤。二进制来自 [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases)；默认值为 `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli`（需要时可覆盖）。也可以[直接下载 v0.15.6 Release](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.15.6)，解压后把 `yunxiao` 加入 `PATH`。
 
 **从源码安装（次要）：**
 
@@ -462,7 +462,7 @@ make build          # 生成 ./yunxiao（-ldflags 注入 Version）
 make install        # 安装到 ~/.local/bin/yunxiao
 go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.15.6
 # 显式注入：
-# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.15.5" -o yunxiao .
+# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.15.6" -o yunxiao .
 ```
 
 需要 Go 1.24.4+。`make build` / `make ci` 通过 `-ldflags -X …version.Version=$(VERSION)` 注入版本（`VERSION` 默认 `git describe` 或 `0.15.6`）。
