@@ -56,7 +56,8 @@ Non-TTY: require --space-id (optional --name / --profile).
 Do NOT use this to embed 智衣/沙箱 tenant templates into a repo.
 Real tenant specifics stay on the user's machine (untracked local profiles).
 
-Create a PAT (console): ` + yunxiaoPATConsoleURL + `
+Auth: prefer yunxiao auth login --browser (OAuth = full account API capability).
+PAT fallback: ` + yunxiaoPATConsoleURL + `
 Help: ` + yunxiaoPATHelpURL,
 	Run: func(cmd *cobra.Command, args []string) {
 		handleErr(runOnboard(cmd))
@@ -64,14 +65,16 @@ Help: ` + yunxiaoPATHelpURL,
 }
 
 func errNeedAuth() error {
-	msg := "not authenticated: set YUNXIAO_ACCESS_TOKEN or run: yunxiao auth login --token <PAT>"
-	fmt.Fprintf(onboardStderr, "Create a Yunxiao PAT (console):\n  %s\n", yunxiaoPATConsoleURL)
+	msg := "not authenticated: run yunxiao auth login --browser (or --token <PAT> / YUNXIAO_ACCESS_TOKEN)"
+	fmt.Fprintln(onboardStderr, "Recommended: yunxiao auth login --browser")
+	fmt.Fprintln(onboardStderr, "WARNING: OAuth consent = full account API capability (no module scopes).")
+	fmt.Fprintf(onboardStderr, "PAT fallback (console):\n  %s\n", yunxiaoPATConsoleURL)
 	fmt.Fprintf(onboardStderr, "Help: %s\n", yunxiaoPATHelpURL)
 	fmt.Fprintln(onboardStderr, patPermissionsGuide())
 	return output.Fail(output.ErrorBody{
 		Type:    "cli",
 		Message: msg,
-		Hint:    patHintShort(),
+		Hint:    "yunxiao auth login --browser — or PAT: " + patHintShort(),
 	}, 1)
 }
 

@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 const (
@@ -29,8 +30,18 @@ type Resolved struct {
 	OrganizationID string
 	Edition        string
 	ConfigPath     string
-	// TokenSource is env | profile | config | none
+	// CredentialsPath is ~/.config/yunxiao/credentials.json when used.
+	CredentialsPath string
+	// TokenSource is env | credentials | profile | config | none
 	TokenSource string
+	// TokenKind is pat | oauth | "" (unknown/env)
+	TokenKind TokenKind
+	// AuthHeader is x-yunxiao-token | authorization-bearer (oauth probe result).
+	AuthHeader string
+	// RefreshToken / ExpiresAt / ClientID are set for oauth credentials.
+	RefreshToken string
+	ExpiresAt    time.Time
+	ClientID     string
 }
 
 func Dir() (string, error) {
@@ -93,9 +104,10 @@ func SaveFile(f File) (string, error) {
 // Resolve loads config and resolves settings without a profile token.
 // Token precedence for Resolve / ResolveWithProfileToken:
 //  1. YUNXIAO_ACCESS_TOKEN env (highest)
-//  2. active profile's access_token (when passed via ResolveWithProfileToken)
-//  3. ~/.config/yunxiao/config.json access_token
-//  4. none
+//  2. ~/.config/yunxiao/credentials.json active (last successful auth login)
+//  3. active profile's access_token (when passed via ResolveWithProfileToken)
+//  4. ~/.config/yunxiao/config.json access_token (legacy)
+//  5. none
 func Resolve() (Resolved, error) {
 	return ResolveWithProfileToken("")
 }
@@ -103,17 +115,22 @@ func Resolve() (Resolved, error) {
 // ResolveWithProfileToken is like Resolve but considers an optional profile PAT.
 // Pass the active profile's access_token (or empty). Does not import profile
 // (avoids config↔profile cycle). Callers load the profile and pass the token.
-// TokenSource reports env | profile | config | none.
+// TokenSource reports env | credentials | profile | config | none.
 func ResolveWithProfileToken(profileToken string) (Resolved, error) {
 	f, p, err := LoadFile()
 	if err != nil {
 		return Resolved{}, err
 	}
+	cred, credPath, err := LoadCredentials()
+	if err != nil {
+		return Resolved{}, err
+	}
 	r := Resolved{
-		ConfigPath:     p,
-		APIBaseURL:     DefaultAPIBaseURL,
-		OrganizationID: f.OrganizationID,
-		Edition:        f.Edition,
+		ConfigPath:      p,
+		CredentialsPath: credPath,
+		APIBaseURL:      DefaultAPIBaseURL,
+		OrganizationID:  f.OrganizationID,
+		Edition:         f.Edition,
 	}
 	if f.APIBaseURL != "" {
 		r.APIBaseURL = strings.TrimRight(f.APIBaseURL, "/")
@@ -130,12 +147,26 @@ func ResolveWithProfileToken(profileToken string) (Resolved, error) {
 	if t := strings.TrimSpace(os.Getenv(EnvAccessToken)); t != "" {
 		r.AccessToken = t
 		r.TokenSource = "env"
+	} else if cred.Active != nil && strings.TrimSpace(cred.Active.AccessToken) != "" {
+		a := cred.Active
+		r.AccessToken = a.AccessToken
+		r.TokenSource = "credentials"
+		r.TokenKind = a.TokenKind
+		r.AuthHeader = a.AuthHeader
+		r.RefreshToken = a.RefreshToken
+		r.ExpiresAt = a.ExpiresAt
+		r.ClientID = a.ClientID
+		if a.APIBase != "" && strings.TrimSpace(os.Getenv(EnvAPIBaseURL)) == "" && f.APIBaseURL == "" {
+			r.APIBaseURL = strings.TrimRight(a.APIBase, "/")
+		}
 	} else if t := strings.TrimSpace(profileToken); t != "" {
 		r.AccessToken = t
 		r.TokenSource = "profile"
+		r.TokenKind = TokenKindPAT
 	} else if f.AccessToken != "" {
 		r.AccessToken = f.AccessToken
 		r.TokenSource = "config"
+		r.TokenKind = TokenKindPAT
 	} else {
 		r.TokenSource = "none"
 	}

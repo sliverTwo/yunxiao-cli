@@ -1,7 +1,7 @@
 {
   "name": "sanzhi-yunxiao-cli",
-  "version": "0.15.7",
-  "description": "Yunxiao (云效) CLI — Feishu-style install (GitHub Releases)",
+  "version": "0.16.0",
+  "description": "Yunxiao (\u4e91\u6548) CLI \u2014 Feishu-style install (GitHub Releases)",
   "bin": {
     "yunxiao": "scripts/run.js"
   },
@@ -33,7 +33,7 @@
   },
   "keywords": [
     "yunxiao",
-    "云效",
+    "\u4e91\u6548",
     "cli",
     "alibaba",
     "devops"

@@ -17,10 +17,13 @@ var doctorCmd = &cobra.Command{
 			handleErr(err)
 			return
 		}
-		tokenCheck := map[string]any{"name": "token", "ok": r.AccessToken != "", "source": r.TokenSource}
+		tokenCheck := map[string]any{"name": "token", "ok": r.AccessToken != "", "source": r.TokenSource, "token_kind": string(r.TokenKind)}
 		if r.AccessToken == "" {
-			tokenCheck["hint"] = patHintShort()
+			tokenCheck["hint"] = "Prefer: yunxiao auth login --browser — or PAT: " + patHintShort()
 			tokenCheck["console"] = yunxiaoPATConsoleURL
+			tokenCheck["browser"] = "yunxiao auth login --browser"
+		} else if r.TokenKind != "" {
+			tokenCheck["auth_header"] = r.AuthHeader
 		}
 		checks := []map[string]any{
 			{"name": "config_file", "ok": true, "path": r.ConfigPath},
@@ -46,7 +49,7 @@ var doctorCmd = &cobra.Command{
 				connectivity["error"] = err.Error()
 			}
 		} else {
-			connectivity["error"] = "no token — " + patHintShort()
+			connectivity["error"] = "no token — run: yunxiao auth login --browser (or --token / YUNXIAO_ACCESS_TOKEN)"
 		}
 		checks = append(checks, connectivity)
 		allOK := true

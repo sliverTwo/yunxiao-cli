@@ -44,7 +44,7 @@ func refreshAfterTransition(ctx context.Context, c getter, path, id string) (ref
 }
 
 // resolveEffectiveConfig applies active profile org (via setenv) and resolves
-// token with precedence: YUNXIAO_ACCESS_TOKEN > profile.access_token > config.json.
+// token with precedence: YUNXIAO_ACCESS_TOKEN > credentials.json > profile > config.json.
 func resolveEffectiveConfig() (config.Resolved, *profile.Profile, error) {
 	pf, err := applyActiveProfileOrg()
 	if err != nil {
@@ -67,7 +67,13 @@ func mustClient() (*client.Client, config.Resolved, error) {
 		return nil, r, err
 	}
 	c, err := client.New(r)
-	return c, r, err
+	if err != nil {
+		return nil, r, err
+	}
+	if r.TokenKind == config.TokenKindOAuth {
+		c.OnRefresh = oauthRefreshHook
+	}
+	return c, r, nil
 }
 
 func handleErr(err error) {
