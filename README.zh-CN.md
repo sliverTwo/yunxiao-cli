@@ -149,6 +149,37 @@ go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.16.1
 
 **已知限制：** `go install` / 单独二进制**不包含**仓库 `skills/` 目录；请在源码检出目录运行（或使用会解压 `skills/` 的安装器），或另行复制 / `npx skills add`。需要技能时优先检出目录 `make build`，再执行 `yunxiao skills install`。
 
+
+## 更新
+
+版本迭代较快——请用显式检查，而不是在每条命令上后台探测（默认**不会**在每个命令里访问网络）。
+
+**二进制（GitHub Releases）— 推荐：**
+
+```bash
+yunxiao update --check     # 仅检查；若有新版本则 exit 2（适合 CI/Agent）
+yunxiao update             # TTY：确认后替换当前二进制
+yunxiao update --yes       # 非交互直接更新（脚本）
+# 别名：yunxiao self-update
+```
+
+`yunxiao update` 从 [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases) 下载对应平台归档（`yunxiao-cli-<ver>-<os>-<arch>.tar.gz|.zip`），在有 `checksums.txt` 时校验 SHA-256，并安全替换正在运行的二进制（先写到旁边再 rename；Windows 上若 `--version` 仍显示旧版本，请重启进程）。门禁：`--dry-run` / `--check` 不写入；真正替换需 TTY 确认或 `--yes`。
+
+可选 doctor 探测（仍需显式打开；不下载）：
+
+```bash
+yunxiao doctor --check-update
+# 关闭：YUNXIAO_UPDATE_CHECK=0
+```
+
+**npm 安装器（`sanzhi-yunxiao-cli`）：**
+
+```bash
+npm install -g sanzhi-yunxiao-cli@latest
+```
+
+与安装器相同的环境变量：`YUNXIAO_CLI_GITHUB_REPO`、`YUNXIAO_CLI_DOWNLOAD_BASE`。
+
 ## 认证
 
 1. 在云效控制台创建个人访问令牌（PAT，首选一键链接）：  
@@ -404,7 +435,7 @@ Packages **上传**、Codeup **blame/cherry-pick**、MR label detach 等仍无�
 
 ## 变更摘要
 
-- **Unreleased** — 周报跟进：文档说明客户端日期过滤与闭区间；原始 `api` 顶层 `createdAfter`/… 规范化进 `conditions`；`workitem search --as-items`；`doctor` 打印可执行路径与当前 profile；MCP→CLI 对照与 Windows 子进程说明；`schema` 为 `workitem.search` 增加别名
+- **Unreleased** — `yunxiao update` / `self-update`（GitHub Releases 自更新、`--check` exit 2、`--yes`/TTY 确认）；`doctor --check-update`（可选）；周报跟进：文档说明客户端日期过滤与闭区间；原始 `api` 顶层 `createdAfter`/… 规范化进 `conditions`；`workitem search --as-items`；`doctor` 打印可执行路径与当前 profile；MCP→CLI 对照与 Windows 子进程说明；`schema` 为 `workitem.search` 增加别名
 - **0.16.1** — 冒烟修复：`appstack apps list` 补齐必填 `pagination=keyset`；`workitem search` / `project +my-open-items` 回退 profile `space_id` 或给出清晰 CLI 错误；`programs search` 非高级版组织返回更友好提示
 - **0.16.0** — 浏览器 OAuth（`auth login --browser` / `--dry-run`）、`credentials.json`（0600）、`auth probe-oauth`、oauth 自动 refresh；「面向 AI Agent」优先 browser OAuth；CI 保留 `--token`
 - **0.15.7** — `yunxiao +onboard`：按所选项目/`space_id` 写入 `~/.config/yunxiao/profiles/` 的通用 profile（TTY 选择或 `--space-id`）；README「面向 AI Agent」；缺 token 时提示 PAT 控制台链接与模块权限清单

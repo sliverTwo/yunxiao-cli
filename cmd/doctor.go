@@ -9,7 +9,11 @@ import (
 	"github.com/yunxiao-cli/yunxiao/internal/client"
 	"github.com/yunxiao-cli/yunxiao/internal/output"
 	"github.com/yunxiao-cli/yunxiao/internal/profile"
+	"github.com/yunxiao-cli/yunxiao/internal/update"
+	"github.com/yunxiao-cli/yunxiao/internal/version"
 )
+
+var doctorCheckUpdate bool
 
 var doctorCmd = &cobra.Command{
 	Use:   "doctor",
@@ -18,7 +22,10 @@ var doctorCmd = &cobra.Command{
 
 Prints resolved executable path (os.Executable / argv0; Windows-friendly),
 active profile summary (name, organization_id, space_id), config/token checks,
-and a connectivity probe.`,
+and a connectivity probe.
+
+Optional: --check-update queries GitHub Releases once (no download).
+Set YUNXIAO_UPDATE_CHECK=0 to skip even when the flag is passed.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		r, pf, err := resolveEffectiveConfig()
@@ -63,6 +70,9 @@ and a connectivity probe.`,
 			connectivity["error"] = "no token — run: yunxiao auth login --browser (or --token / YUNXIAO_ACCESS_TOKEN)"
 		}
 		checks = append(checks, connectivity)
+		if doctorCheckUpdate && !update.UpdateCheckDisabled() {
+			checks = append(checks, doctorUpdateCheck(cmd))
+		}
 		allOK := true
 		for _, ch := range checks {
 			if ok, _ := ch["ok"].(bool); !ok {
@@ -119,5 +129,30 @@ func activeProfileCheck(pf *profile.Profile) map[string]any {
 	}
 	ch["organization_id"] = pf.OrganizationID
 	ch["space_id"] = pf.SpaceID
+	return ch
+}
+
+func init() {
+	doctorCmd.Flags().BoolVar(&doctorCheckUpdate, "check-update", false, "also check GitHub Releases for a newer yunxiao (network; opt-in)")
+}
+
+func doctorUpdateCheck(cmd *cobra.Command) map[string]any {
+	// Informational only: never flips doctor unhealthy (GitHub blips / offline).
+	ch := map[string]any{"name": "update", "ok": true}
+	rel, err := update.FetchLatestRelease(cmd.Context(), update.DefaultHTTPClient(), update.GithubRepo())
+	if err != nil {
+		ch["skipped"] = true
+		ch["error"] = err.Error()
+		return ch
+	}
+	latest := update.NormalizeVersion(rel.TagName)
+	current := update.NormalizeVersion(version.Version)
+	ch["current"] = current
+	ch["latest"] = latest
+	ch["update_available"] = update.NewerAvailable(current, latest)
+	ch["message"] = update.FormatPair(current, latest)
+	if update.NewerAvailable(current, latest) {
+		ch["hint"] = "run: yunxiao update --check   # or: yunxiao update --yes"
+	}
 	return ch
 }
