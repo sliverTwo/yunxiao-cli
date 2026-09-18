@@ -14,9 +14,9 @@ Paste the following into an AI agent (install → auth → skills → list proje
 Install and init yunxiao CLI with a LOCAL profile:
 
 1) Install from GitHub Releases (primary):
-   https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
+   https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.2
    Download the archive for the user's OS/arch, extract, put `yunxiao` on PATH.
-   yunxiao --version   # expect 0.16.1
+   yunxiao --version   # expect 0.16.2
 
 2) Auth — prefer browser OAuth; use PAT only for CI/headless (never print/paste raw tokens into chat):
    Recommended: yunxiao auth login --browser
@@ -45,9 +45,9 @@ Install and init yunxiao CLI with a LOCAL profile:
 
 ```bash
 # 1) Install from GitHub Releases (primary)
-#    https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
+#    https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.2
 #    Download the archive for your OS/arch, extract, put `yunxiao` on PATH.
-yunxiao --version   # expect 0.16.1
+yunxiao --version   # expect 0.16.2
 
 yunxiao auth login --browser    # or: yunxiao auth login --token "<PAT>"
 yunxiao auth probe-oauth         # after browser login
@@ -97,12 +97,12 @@ For AI agents, the CLI workflow is Agent paste followed by `yunxiao …`; the MC
 
 ## Install
 
-**Recommended — [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1):**
+**Recommended — [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.2):**
 
 Download the archive for your OS/arch, extract it, and add the `yunxiao` binary to `PATH`.
 
 ```bash
-yunxiao --version          # yunxiao 0.16.1
+yunxiao --version          # yunxiao 0.16.2
 ```
 
 This project is maintained on **GitHub only** (`sliverTwo/yunxiao-cli`).
@@ -111,16 +111,16 @@ This project is maintained on **GitHub only** (`sliverTwo/yunxiao-cli`).
 
 ```bash
 make build                 # produces ./yunxiao (injects Version via -ldflags)
-# or (without ldflags, Version falls back to package default 0.16.1)
+# or (without ldflags, Version falls back to package default 0.16.2)
 go build -o yunxiao .
 # pin version explicitly:
-# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.16.1" -o yunxiao .
+# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.16.2" -o yunxiao .
 make install               # installs to ~/.local/bin/yunxiao
 # or
 go install github.com/yunxiao-cli/yunxiao@latest   # when published
 ```
 
-Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Version=$(VERSION)` (`VERSION` defaults to `git describe` or `0.16.1`).
+Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Version=$(VERSION)` (`VERSION` defaults to `git describe` or `0.16.2`).
 
 **Known limitation:** `go install` / a lone binary does **not** ship the repo `skills/` tree, so `yunxiao skills list|read|install` will not find skills unless you run from a source checkout (or an installer that extracts `skills/`), or copy/`npx skills add` the tree. Prefer `make build` from a checkout, then `yunxiao skills install`, for skills-aware workflows.
 
@@ -471,7 +471,7 @@ See [AGENTS.md](AGENTS.md) for contributor / AI-agent conventions.
 
 ## Changelog
 
-- **Unreleased** — `yunxiao update` / `self-update` (GitHub Releases self-update, `--check` exit 2, `--yes`/TTY confirm); `doctor --check-update` (opt-in); Weekly-report follow-ups: document client-side date filtering + inclusive bounds; normalize raw `api` top-level `createdAfter`/… into `conditions`; `workitem search --as-items`; `doctor` prints executable path + active profile; MCP→CLI mapping + Windows subprocess note; `schema` aliases for `workitem.search`
+- **0.16.2** — workitem search date filters + `--all` + read-only `:search`; weekly followups (`--as-items`, doctor path, MCP mapping); `yunxiao update` / `self-update`
 - **0.16.1** — Smoke fixes: `appstack apps list` sends required `pagination=keyset`; `workitem search` / `project +my-open-items` use profile `space_id` or clear CLI error; friendlier hint when `programs search` is blocked on non-Advanced orgs
 - **0.16.0** — Browser OAuth (`auth login --browser` / `--dry-run`), `credentials.json` (0600), `auth probe-oauth` (O1 header gate), auto refresh for `token_kind=oauth`, For AI agents section prefers browser OAuth; PAT `--token` kept for CI
 - **0.15.7** — `yunxiao +onboard` writes a **generic local** profile under `~/.config/yunxiao/profiles/` (TTY project pick or `--space-id`); README For AI agents prompts (EN + zh-CN); missing-token hints include PAT console URL + module permission checklist

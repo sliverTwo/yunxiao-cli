@@ -14,9 +14,9 @@ CLI 二进制名：**`yunxiao`**。
 请帮我安装并初始化 yunxiao CLI（本地 profile）：
 
 1) 安装（主路径：GitHub Releases）：
-   https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
+   https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.2
    按用户系统下载归档、解压，把 `yunxiao` 加入 PATH。
-   yunxiao --version   # 应显示 0.16.1
+   yunxiao --version   # 应显示 0.16.2
 
 2) 认证（优先浏览器 OAuth；无图形界面再用 PAT。禁止把完整 token 打到回复/聊天里）
    推荐：yunxiao auth login --browser
@@ -53,9 +53,9 @@ CLI 二进制名：**`yunxiao`**。
 
 ```bash
 # 主路径：从 GitHub Releases 下载对应平台归档，解压后把 yunxiao 加入 PATH
-# https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
+# https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.2
 
-yunxiao --version   # 应显示 0.16.1
+yunxiao --version   # 应显示 0.16.2
 ```
 
 ### 2. 认证
@@ -125,12 +125,12 @@ yunxiao codeup repos list
 
 ## 安装
 
-**推荐 — [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1)：**
+**推荐 — [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.2)：**
 
 按系统下载归档，解压后把 `yunxiao` 加入 `PATH`。
 
 ```bash
-yunxiao --version          # yunxiao 0.16.1
+yunxiao --version          # yunxiao 0.16.2
 ```
 
 本项目**仅在 GitHub 上维护**（`sliverTwo/yunxiao-cli`）。
@@ -140,12 +140,12 @@ yunxiao --version          # yunxiao 0.16.1
 ```bash
 make build          # 生成 ./yunxiao（-ldflags 注入 Version）
 make install        # 安装到 ~/.local/bin/yunxiao
-go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.16.1
+go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.16.2
 # 显式注入：
-# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.16.1" -o yunxiao .
+# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.16.2" -o yunxiao .
 ```
 
-需要 Go 1.24.4+。`make build` / `make ci` 通过 `-ldflags -X …version.Version=$(VERSION)` 注入版本（`VERSION` 默认 `git describe` 或 `0.16.1`）。
+需要 Go 1.24.4+。`make build` / `make ci` 通过 `-ldflags -X …version.Version=$(VERSION)` 注入版本（`VERSION` 默认 `git describe` 或 `0.16.2`）。
 
 **已知限制：** `go install` / 单独二进制**不包含**仓库 `skills/` 目录；请在源码检出目录运行（或使用会解压 `skills/` 的安装器），或另行复制 / `npx skills add`。需要技能时优先检出目录 `make build`，再执行 `yunxiao skills install`。
 
@@ -435,7 +435,7 @@ Packages **上传**、Codeup **blame/cherry-pick**、MR label detach 等仍无�
 
 ## 变更摘要
 
-- **Unreleased** — `yunxiao update` / `self-update`（GitHub Releases 自更新、`--check` exit 2、`--yes`/TTY 确认）；`doctor --check-update`（可选）；周报跟进：文档说明客户端日期过滤与闭区间；原始 `api` 顶层 `createdAfter`/… 规范化进 `conditions`；`workitem search --as-items`；`doctor` 打印可执行路径与当前 profile；MCP→CLI 对照与 Windows 子进程说明；`schema` 为 `workitem.search` 增加别名
+- **0.16.2** — 工作项搜索日期过滤（`--created-after`/`--updated-before` 等）、`--all`、只读 `:search`；周报跟进（`--as-items`、doctor 可执行路径、MCP 映射）；`yunxiao update` / `self-update`
 - **0.16.1** — 冒烟修复：`appstack apps list` 补齐必填 `pagination=keyset`；`workitem search` / `project +my-open-items` 回退 profile `space_id` 或给出清晰 CLI 错误；`programs search` 非高级版组织返回更友好提示
 - **0.16.0** — 浏览器 OAuth（`auth login --browser` / `--dry-run`）、`credentials.json`（0600）、`auth probe-oauth`、oauth 自动 refresh；「面向 AI Agent」优先 browser OAuth；CI 保留 `--token`
 - **0.15.7** — `yunxiao +onboard`：按所选项目/`space_id` 写入 `~/.config/yunxiao/profiles/` 的通用 profile（TTY 选择或 `--space-id`）；README「面向 AI Agent」；缺 token 时提示 PAT 控制台链接与模块权限清单
