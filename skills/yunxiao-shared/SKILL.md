@@ -1,7 +1,7 @@
 ---
 name: yunxiao-shared
-version: 1.1.1
-description: "Use for yunxiao CLI setup/auth: auth login/status/logout, config, doctor, whoami, JSON output contract (ok==true), list meta.has_more/total/page, meta.url, refresh_ok, --dry-run, high-risk --yes confirmation (exit 10), or handling error envelopes."
+version: 1.1.2
+description: "Use for yunxiao CLI setup/auth: auth login/status/logout, config, doctor, whoami, self-update (yunxiao update), JSON output contract (ok==true), list meta.has_more/total/page, meta.url, refresh_ok, --dry-run, high-risk --yes confirmation (exit 10), or handling error envelopes."
 metadata:
   requires:
     bins: ["yunxiao"]
@@ -116,6 +116,16 @@ yunxiao +onboard --space-id <id> --dry-run
 流程：识别 exit 10 → **向用户展示 action/risk/关键参数并等待同意** → 同意后再把 `--yes` 追加到原 argv 重试。**禁止**静默加 `--yes`。
 
 `--dry-run` 只预览请求（URL/body），不触发确认门禁、不发写请求。
+
+## 自更新
+
+```bash
+yunxiao update --check          # 仅检查；有新版本则 exit 2
+yunxiao update                  # TTY：确认后替换本地二进制
+yunxiao update --yes            # 非交互直接更新（脚本/CI）
+```
+
+其他命令偶尔在 **stderr** 打印中文提示（最多每 24h 一次网络检查）：`发现新版本 yunxiao：x → y。运行：yunxiao update`。跳过：`--format json`（默认）、`update`/`self-update`/`completion`。关闭：`YUNXIAO_UPDATE_CHECK=0`。**禁止**静默加 `--yes`。
 
 ## Reference
 
