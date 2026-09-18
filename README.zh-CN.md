@@ -196,25 +196,135 @@ npx skills add https://codeup.aliyun.com/sanzhi/cli/yunxiao_cli.git -y -g
 
 
 ```bash
+# organization
 yunxiao organization +whoami
-yunxiao project +my-open-items
-yunxiao project +created-by-me
-yunxiao codeup +open-mrs
-yunxiao codeup files tree --repo <id> --ref master
-yunxiao codeup mrs create ... --dry-run    # 高风险：确认后再 --yes
-yunxiao pipeline +status --pipeline-id <id>
-yunxiao pipeline +failed --pipeline-id <id>
-yunxiao packages repos list
-yunxiao testhub plans list
-yunxiao appstack apps list
-yunxiao pipeline run trigger ... --dry-run
-yunxiao pipeline run cancel ... --dry-run
-yunxiao workitem create ... --dry-run
-yunxiao codeup mrs merge ... --dry-run
-yunxiao workitem delete ... --dry-run
-yunxiao packages artifacts delete ... --dry-run
-```
+yunxiao organization list
+yunxiao organization members search --query alice
 
+# project / work items
+yunxiao project list --name demo
+yunxiao project +my-open-items
+yunxiao project +created-by-me --status-stage 1,2
+yunxiao workitem search --assigned-to self --category Req --priority <id>
+yunxiao workitem get --id <id>
+yunxiao workitem comments list --id <id>
+yunxiao workitem comment --id <id> --content "note" --dry-run
+yunxiao workitem create --space-id <sid> --type-id <tid> --subject "title" --assigned-to self --dry-run
+yunxiao workitem update --id <id> --assigned-to self --dry-run
+yunxiao workitem +transition --id <id|serial> --to <alias|statusId> --dry-run
+
+# codeup
+yunxiao codeup repos list
+yunxiao codeup branches list --repo <repoId>
+yunxiao codeup tags list --repo <repoId>
+yunxiao codeup tags create --repo <repoId> --tag-name v1.0 --ref master --dry-run
+yunxiao codeup protected-branches list --repo <repoId>
+yunxiao codeup protected-branches create --repo <repoId> --branch master --allow-push-roles 40,30 --dry-run
+yunxiao codeup files tree --repo <repoId> --ref master
+yunxiao codeup commits list --repo <repoId> --ref master
+yunxiao codeup files create --repo <id> --path a.txt --branch master --message "add" --content "hi" --dry-run
+yunxiao codeup files delete --repo <id> --path a.txt --branch master --message "rm" --dry-run
+yunxiao codeup mrs merge --repo <id> --local-id 1 --merge-type no-fast-forward --dry-run
+yunxiao codeup mrs close --repo <id> --local-id 1 --dry-run
+yunxiao codeup mrs review --repo <id> --local-id 1 --opinion PASS --dry-run
+
+yunxiao codeup mrs get --repo <id> --local-id 1
+yunxiao codeup mrs diffs --repo <id> --local-id 1
+yunxiao codeup mrs comments list --repo <id> --local-id 1
+yunxiao codeup mrs comments create --repo <id> --local-id 1 --content "LGTM" --patchset-biz-id <biz> --dry-run
+yunxiao codeup mrs labels list --repo <id> --local-id 1
+yunxiao codeup mrs labels attach --repo <id> --local-id 1 --label-ids 1,2 --dry-run
+yunxiao codeup mrs reopen --repo <id> --local-id 1 --dry-run
+yunxiao codeup compare --repo <id> --from master --to feature
+yunxiao pipeline job retry --pipeline-id <id> --run-id <r> --job-id <j> --dry-run
+yunxiao pipeline job pass --pipeline-id <id> --run-id <r> --job-id <j> --dry-run
+yunxiao pipeline job refuse --pipeline-id <id> --run-id <r> --job-id <j> --dry-run
+yunxiao packages artifacts delete --repo-id <id> --repo-type GENERIC --id <aid> --dry-run
+yunxiao workitem types list --space-id <sid> --category Req
+yunxiao workitem create --space-id <sid> --type-id <tid> --subject "t" --assigned-to self --custom-fields '{"fid":"v"}' --dry-run
+yunxiao workitem relations list --id <id> --relation-type ASSOCIATED
+yunxiao workitem relations create --id <id> --related-id <rid> --relation-type ASSOCIATED --dry-run
+yunxiao workitem delete --id <id> --dry-run
+yunxiao testhub results update --plan-id <p> --testcase-id <t> --status PASSED --dry-run
+yunxiao testhub plan-comments list --plan-id <p> --testcase-id <t>
+yunxiao appstack change-orders job-logs --app my-app --sn <sn> --job-sn <jsn>
+yunxiao appstack orchestrations list --app my-app
+yunxiao appstack change-orders create --app my-app --data '{...}' --dry-run
+yunxiao appstack change-orders create --app my-app --data-file order.json --dry-run
+yunxiao codeup +open-mrs
+yunxiao codeup mrs create --repo <id> --source feat --target master --title "x" --dry-run
+yunxiao codeup mrs create --repo <id> --source feat --target master --title "x" --yes   # after user OK
+
+# pipeline
+yunxiao pipeline list
+yunxiao pipeline +status --pipeline-id <id>
+yunxiao pipeline run list --pipeline-id <id>
+yunxiao pipeline run latest --pipeline-id <id>
+yunxiao pipeline +failed --pipeline-id <id>
+yunxiao pipeline job log --pipeline-id <id> --run-id <rid> --job-id <jid>
+yunxiao pipeline run trigger --pipeline-id <id> --branch master --dry-run
+yunxiao pipeline run cancel --pipeline-id <id> --run-id <rid> --dry-run
+
+# packages (upload skipped — see Known gaps)
+yunxiao packages repos list
+yunxiao packages artifacts list --repo-id <id> --repo-type GENERIC
+
+# testhub / appstack
+yunxiao testhub plans list --project-id <id>
+yunxiao testhub plans progress --plan-id <id>
+yunxiao appstack apps list
+yunxiao appstack change-orders versions --app my-app
+yunxiao appstack change-orders job-logs --app my-app --sn <sn> --job-sn <jsn>
+yunxiao appstack orchestrations list --app my-app
+
+
+# v0.7
+yunxiao pipeline get --id <id>
+yunxiao pipeline create --name ci --file ./pipeline.yaml --dry-run
+yunxiao pipeline update --id <id> --name ci --file ./pipeline.yaml --dry-run
+yunxiao workitem attachments list --id <id>
+yunxiao workitem attachments create --id <id> --file ./shot.png --dry-run
+yunxiao appstack tags search --search demo
+yunxiao appstack tags create --name t --color "#4676e5" --dry-run
+yunxiao appstack tags bind --app my-app --tag-names t --dry-run
+yunxiao appstack variable-groups list --app my-app
+yunxiao appstack variable-groups revision --app my-app
+
+# v0.8
+yunxiao organization departments list
+yunxiao organization roles list
+yunxiao project get --id <id>
+yunxiao sprint list --space-id <id>
+yunxiao versions list --space-id <id>
+yunxiao workitem fields --space-id <s> --type-id <t>
+yunxiao pipeline service-connections list --type codeup
+yunxiao pipeline host-groups list
+yunxiao pipeline flow-variable-groups list
+yunxiao codeup repos get --repo <id>
+yunxiao codeup branches create --repo <id> --branch feat --ref master --dry-run
+yunxiao appstack apps create --name demo --dry-run
+yunxiao appstack change-requests list --app my-app
+yunxiao appstack global-vars list
+yunxiao testhub cases search --repo-id <id>
+yunxiao testhub directories create --repo-id <id> --name folder --dry-run
+
+# v0.9
+yunxiao appstack release-workflows list --app my-app
+yunxiao appstack release-workflows stage execute --app a --workflow-sn w --stage-sn s --dry-run
+yunxiao appstack deploy machine-log --tunnel-id 1 --machine-sn sn
+yunxiao appstack deploy add-hosts --instance n --host-sns a,b --dry-run
+yunxiao pipeline vm-deploy get --pipeline-id p --deploy-id d
+yunxiao pipeline vm-deploy stop --pipeline-id p --deploy-id d --dry-run
+yunxiao pipeline resource-members create --resource-type pipeline --resource-id id --role-name viewer --user-id u --dry-run
+yunxiao workitem efforts list --id <id>
+yunxiao workitem efforts mine --start-date 2026-01-01 --end-date 2026-01-31
+yunxiao workitem estimated-efforts create --id <id> --owner self --spent-time 4 --dry-run
+yunxiao programs search --name demo
+yunxiao codeup repos create --name my-repo --path my-repo --dry-run
+# escape hatch
+yunxiao api GET /oapi/v1/platform/user
+yunxiao schema
+```
 
 ## Profile：play vs zhiyi（可选）
 
