@@ -15,7 +15,8 @@ func init() {
 	workitemSearchCmd.Flags().Int("page", 1, "page")
 	workitemSearchCmd.Flags().Int("per-page", 20, "per page (OpenAPI max 200)")
 	workitemSearchCmd.Flags().Bool("all", false, "follow all pages (ListAll, max 50); dedupe by workitem id")
-	const dateHelp = `datetime "YYYY-MM-DD HH:MM:SS" (OpenAPI BETWEEN / dateTime; e.g. "2026-09-01 00:00:00")`
+	workitemSearchCmd.Flags().Bool("as-items", false, "wrap data as {items, pagination} (opt-in stable shape for scripts; default off)")
+	const dateHelp = `datetime "YYYY-MM-DD HH:MM:SS" (OpenAPI BETWEEN inclusive; e.g. "2026-09-01 00:00:00"; client-filter if server returns extras)`
 	workitemSearchCmd.Flags().String("created-after", "", "filter gmtCreate >= value; "+dateHelp)
 	workitemSearchCmd.Flags().String("created-before", "", "filter gmtCreate <= value; "+dateHelp)
 	workitemSearchCmd.Flags().String("updated-after", "", "filter gmtModified >= value; "+dateHelp)

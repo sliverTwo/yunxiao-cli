@@ -52,3 +52,25 @@ func TestFindAndList(t *testing.T) {
 		t.Fatal()
 	}
 }
+
+func TestFindWorkitemSearchAliases(t *testing.T) {
+	m := Find("workitem.search")
+	if m == nil || m.ID != "workitem.search" {
+		t.Fatalf("%+v", m)
+	}
+	for _, alias := range []string{"project.searchWorkitems", "search_workitems", "searchWorkitems"} {
+		a := Find(alias)
+		if a == nil || a.ID != "workitem.search" {
+			t.Fatalf("alias %s -> %+v", alias, a)
+		}
+	}
+	hasAsItems := false
+	for _, param := range m.Params {
+		if param.Name == "as-items" {
+			hasAsItems = true
+		}
+	}
+	if !hasAsItems {
+		t.Fatal("workitem.search missing as-items param")
+	}
+}

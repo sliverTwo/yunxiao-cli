@@ -104,7 +104,22 @@ yunxiao codeup repos list
 
 脚本、CI 和可复制命令使用 CLI；IDE 内聊天使用 MCP；许多团队会同时使用两者。
 
-**质量周报 / 按日期窗口出数**（日期窗口 → Req/Bug → JSON → 脚本）：优先用类型化 CLI（`workitem search` 的 `--created-after` / `--created-before`、`--updated-*`、`--finish-*`，以及 `--status` / `--status-stage`，加 `--all` 跟页）。已在 IDE Agent 里对话时再用 MCP 作回落。按 `finishTime` 写入 conditions 过滤可能可用；oapi SearchWorkitems / get 响应不含 `finishTime`（schema 列的是 `gmtCreate` / `gmtModified` / `updateStatusAt`）——CLI **不会**用 `updateStatusAt` 伪造或 enrich `finishTime`。OpenAPI `perPage` 上限 200：看 `meta.total` / `has_more` / `--all`，不要只看 `len(data)`。类型化 `workitem search` 与原始 `api POST …/workitems:search` 均为 **read**（不需要 `--yes`）。
+**质量周报 / 按日期窗口出数**（日期窗口 → Req/Bug → JSON → 脚本）：优先用类型化 CLI（`workitem search` 的 `--created-after` / `--created-before`、`--updated-*`、`--finish-*`，以及 `--status` / `--status-stage`，加 `--all` 跟页，可选 `--as-items` 让 `data` 变为 `{items, pagination}`）。已在 IDE Agent 里对话时再用 MCP 作回落。按 `finishTime` 写入 conditions 过滤可能可用；oapi SearchWorkitems / get 响应不含 `finishTime`（schema 列的是 `gmtCreate` / `gmtModified` / `updateStatusAt`）——CLI **不会**用 `updateStatusAt` 伪造或 enrich `finishTime`。OpenAPI `perPage` 上限 200：看 `meta.total` / `has_more` / `--all`，不要只看 `len(data)`。服务端日期条件仍可能返回窗口外行——脚本请按需对 `gmtCreate` / `gmtModified` / `customFieldValues` 做客户端过滤。类型化 `workitem search` 与原始 `api POST …/workitems:search` 均为 **read**（不需要 `--yes`）。原始 `api` 若在顶层传入 MCP 风格的 `createdAfter` / `updatedAfter` / `finishTimeAfter` 等，会规范化进官方 `conditions`（见 `meta.request`）。
+
+### MCP → CLI 对照（周报 / 发现）
+
+| MCP 风格意图 | CLI |
+|--------------|-----|
+| `search_workitems` + `createdAfter` / `createdBefore` | `yunxiao workitem search --created-after … --created-before …`（可加 `--all`、可选 `--as-items`） |
+| 更新 / 完成时间窗口 | `--updated-after/before`、`--finish-after/before` |
+| 工作项评论 | `yunxiao workitem comments list --id <id>` |
+| 组织 / 项目（空间）列表 | `yunxiao organization list`、`yunxiao project list` |
+| 查看 search 参数 | `yunxiao schema workitem.search` |
+| 响应中的 `finishTime` | **缺口：** 过滤可能可用；oapi search/get 响应通常不含 `finishTime` |
+
+### Windows 上的 Agent / 脚本
+
+消费 CLI JSON 时，优先用 **Node / Python 子进程**（以 Buffer/bytes 捕获 stdout 再 `JSON.parse`），避免 PowerShell `>` 重定向改写编码导致解析失败。用 `yunxiao doctor` 查看已解析的可执行文件路径与当前 profile（`organization_id`、`space_id`）。
 
 对于 AI Agent，CLI 通过 Agent 粘贴指令并执行 `yunxiao …`；MCP 通过工具调用。MCP 可以减少对命令记忆的要求，但在审计性和可复现性方面通常弱于 CLI。
 
@@ -389,6 +404,7 @@ Packages **上传**、Codeup **blame/cherry-pick**、MR label detach 等仍无�
 
 ## 变更摘要
 
+- **Unreleased** — 周报跟进：文档说明客户端日期过滤与闭区间；原始 `api` 顶层 `createdAfter`/… 规范化进 `conditions`；`workitem search --as-items`；`doctor` 打印可执行路径与当前 profile；MCP→CLI 对照与 Windows 子进程说明；`schema` 为 `workitem.search` 增加别名
 - **0.16.1** — 冒烟修复：`appstack apps list` 补齐必填 `pagination=keyset`；`workitem search` / `project +my-open-items` 回退 profile `space_id` 或给出清晰 CLI 错误；`programs search` 非高级版组织返回更友好提示
 - **0.16.0** — 浏览器 OAuth（`auth login --browser` / `--dry-run`）、`credentials.json`（0600）、`auth probe-oauth`、oauth 自动 refresh；「面向 AI Agent」优先 browser OAuth；CI 保留 `--token`
 - **0.15.7** — `yunxiao +onboard`：按所选项目/`space_id` 写入 `~/.config/yunxiao/profiles/` 的通用 profile（TTY 选择或 `--space-id`）；README「面向 AI Agent」；缺 token 时提示 PAT 控制台链接与模块权限清单

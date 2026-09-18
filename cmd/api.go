@@ -26,7 +26,13 @@ are read (no --yes). Other POST/PUT/PATCH/DELETE are high-risk-write and need --
 use --dry-run first.
 
 For :search / list-style responses, meta includes pagination from x-* headers
-(pagination_headers, has_more, total, …) when the API returns them.`,
+(pagination_headers, has_more, total, …) when the API returns them.
+
+workitems:search body: top-level MCP-like date aliases (createdAfter/Before,
+updatedAfter/Before, finishTimeAfter/Before) are normalized into official
+conditions (gmtCreate / gmtModified / finishTime). Prefer typed
+` + "`yunxiao workitem search --created-after …`" + ` when possible. meta.request
+shows the conditions actually sent.`,
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
@@ -41,6 +47,15 @@ For :search / list-style responses, meta includes pagination from x-* headers
 		if err != nil {
 			handleErr(err)
 			return
+		}
+		var normalizedAliases []string
+		if bodyMap, ok := body.(map[string]any); ok && isWorkitemSearchPath(path) {
+			normalizedAliases = peekWorkitemSearchDateAliases(bodyMap)
+			if _, err := normalizeWorkitemSearchAPIBody(bodyMap); err != nil {
+				handleErr(err)
+				return
+			}
+			body = bodyMap
 		}
 		c, _, err := mustClient()
 		if err != nil {
@@ -73,7 +88,9 @@ For :search / list-style responses, meta includes pagination from x-* headers
 		if risk.IsReadOnlyHTTP(method, path) || strings.Contains(path, ":search") {
 			meta = client.MetaWithPagination(meta, hdr)
 			if bodyMap, ok := body.(map[string]any); ok {
-				if cond, ok := bodyMap["conditions"]; ok {
+				if isWorkitemSearchPath(path) {
+					meta["request"] = workitemSearchAPIRequestMeta(bodyMap, normalizedAliases)
+				} else if cond, ok := bodyMap["conditions"]; ok {
 					meta["request"] = map[string]any{"conditions": cond, "body_keys": mapKeys(bodyMap)}
 				}
 			}
