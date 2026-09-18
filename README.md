@@ -124,6 +124,38 @@ Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Versio
 
 **Known limitation:** `go install` / a lone binary does **not** ship the repo `skills/` tree, so `yunxiao skills list|read|install` will not find skills unless you run from a source checkout (or an installer that extracts `skills/`), or copy/`npx skills add` the tree. Prefer `make build` from a checkout, then `yunxiao skills install`, for skills-aware workflows.
 
+
+## Update
+
+Releases iterate quickly — prefer an explicit update check rather than background polling (the CLI does **not** call the network on every command).
+
+**Binary (GitHub Releases) — recommended:**
+
+```bash
+yunxiao update --check     # report only; exit 2 if a newer release exists (CI/Agent-friendly)
+yunxiao update             # TTY: confirm before replacing this binary
+yunxiao update --yes       # non-interactive apply (scripts)
+# alias: yunxiao self-update
+```
+
+`yunxiao update` downloads the matching platform archive from [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases) (`yunxiao-cli-<ver>-<os>-<arch>.tar.gz|.zip`), verifies SHA-256 when `checksums.txt` is present, and replaces the running binary (write-beside then rename; on Windows you may need to restart the process if `--version` still shows the old build). Gate: `--dry-run` / `--check` never writes; applying requires TTY confirm or `--yes`.
+
+Optional doctor probe (still opt-in; no download):
+
+```bash
+yunxiao doctor --check-update
+# disable: YUNXIAO_UPDATE_CHECK=0
+```
+
+**npm installer (`sanzhi-yunxiao-cli`):**
+
+```bash
+npm install -g sanzhi-yunxiao-cli@latest
+# or re-run the postinstall fetcher after bumping the package
+```
+
+Same env overrides as the installer: `YUNXIAO_CLI_GITHUB_REPO`, `YUNXIAO_CLI_DOWNLOAD_BASE`.
+
 ## Auth
 
 1. Create a Personal Access Token in the Yunxiao console (primary):  
@@ -439,7 +471,7 @@ See [AGENTS.md](AGENTS.md) for contributor / AI-agent conventions.
 
 ## Changelog
 
-- **Unreleased** — Weekly-report follow-ups: document client-side date filtering + inclusive bounds; normalize raw `api` top-level `createdAfter`/… into `conditions`; `workitem search --as-items`; `doctor` prints executable path + active profile; MCP→CLI mapping + Windows subprocess note; `schema` aliases for `workitem.search`
+- **Unreleased** — `yunxiao update` / `self-update` (GitHub Releases self-update, `--check` exit 2, `--yes`/TTY confirm); `doctor --check-update` (opt-in); Weekly-report follow-ups: document client-side date filtering + inclusive bounds; normalize raw `api` top-level `createdAfter`/… into `conditions`; `workitem search --as-items`; `doctor` prints executable path + active profile; MCP→CLI mapping + Windows subprocess note; `schema` aliases for `workitem.search`
 - **0.16.1** — Smoke fixes: `appstack apps list` sends required `pagination=keyset`; `workitem search` / `project +my-open-items` use profile `space_id` or clear CLI error; friendlier hint when `programs search` is blocked on non-Advanced orgs
 - **0.16.0** — Browser OAuth (`auth login --browser` / `--dry-run`), `credentials.json` (0600), `auth probe-oauth` (O1 header gate), auto refresh for `token_kind=oauth`, For AI agents section prefers browser OAuth; PAT `--token` kept for CI
 - **0.15.7** — `yunxiao +onboard` writes a **generic local** profile under `~/.config/yunxiao/profiles/` (TTY project pick or `--space-id`); README For AI agents prompts (EN + zh-CN); missing-token hints include PAT console URL + module permission checklist

@@ -28,6 +28,17 @@ npm install -g ./sanzhi-yunxiao-cli-0.15.7.tgz
 npx --yes ./sanzhi-yunxiao-cli-0.15.7.tgz install
 ```
 
+## Update
+
+After install, refresh the binary with:
+
+```bash
+yunxiao update --check
+yunxiao update --yes
+```
+
+Or reinstall the npm package: `npm install -g sanzhi-yunxiao-cli@latest`.
+
 ## Auth (after install)
 
 ```bash
