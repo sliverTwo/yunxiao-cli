@@ -108,6 +108,24 @@ func TestNormalizeWorkitemSearchAPIBodyNoop(t *testing.T) {
 	}
 }
 
+func TestNormalizeWorkitemSearchAPIBodyRejectsEmptyString(t *testing.T) {
+	for _, alias := range acceptedWorkitemSearchDateAliasKeys() {
+		t.Run(alias, func(t *testing.T) {
+			body := map[string]any{alias: "   "}
+			_, err := normalizeWorkitemSearchAPIBody(body)
+			if err == nil {
+				t.Fatal("expected error")
+			}
+			if !strings.Contains(err.Error(), alias) || !strings.Contains(err.Error(), "must not be empty") {
+				t.Fatalf("err=%v", err)
+			}
+			if _, still := body[alias]; !still {
+				t.Fatalf("alias %s should remain when normalization fails", alias)
+			}
+		})
+	}
+}
+
 func TestNormalizeWorkitemSearchAPIBodyRejectsNonString(t *testing.T) {
 	body := map[string]any{"createdAfter": 123}
 	_, err := normalizeWorkitemSearchAPIBody(body)

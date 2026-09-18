@@ -38,9 +38,13 @@ func isWorkitemSearchPath(path string) bool {
 func anyToTrimmedString(v any) (string, error) {
 	switch t := v.(type) {
 	case nil:
-		return "", nil
+		return "", fmt.Errorf("date alias value must be a string (got null)")
 	case string:
-		return strings.TrimSpace(t), nil
+		s := strings.TrimSpace(t)
+		if s == "" {
+			return "", fmt.Errorf("date alias value must not be empty")
+		}
+		return s, nil
 	case json.Number:
 		return strings.TrimSpace(t.String()), nil
 	case float64:

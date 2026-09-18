@@ -6,7 +6,7 @@ import "github.com/yunxiao-cli/yunxiao/internal/client"
 //
 //	{ "items": [...], "pagination": {...} }
 //
-// for opt-in --as-items / --envelope items. Pagination is taken from meta
+// for opt-in --as-items. Pagination is taken from meta
 // (nested "pagination" when present, else top-level page/perPage/total/…).
 func wrapDataAsItems(out any, meta map[string]any) any {
 	items := client.ExtractListItems(out)
