@@ -88,6 +88,24 @@ yunxiao codeup repos list
 - 长 JSON 用 `--data-file ./body.json`
 - Skills 向导可多选；也可 `yunxiao skills install --skill ...`
 
+## CLI 与 MCP 对比
+
+| 维度 | `yunxiao-cli` | Yunxiao/Alibaba Cloud DevOps MCP |
+|------|---------------|----------------------------------|
+| 形态 | 本地命令行可执行程序 | 向 MCP 客户端提供工具的 MCP 服务器 |
+| 典型用途 | 脚本、CI、终端和可复制命令 | IDE 或聊天 Agent 中的对话式工作流 |
+| 安装 | 下载发布版二进制或从源码构建；需要时另行安装 skills | 在支持 MCP 的客户端中配置 MCP 服务器 |
+| 认证 | 使用 CLI profile、环境变量、PAT 或浏览器 OAuth | 通过 MCP 服务器和客户端的配置管理凭证与授权 |
+| 发现能力 | 通过 `--help`、`schema`、类型化命令、`+快捷命令` 和 companion skills 发现 | 由 MCP 客户端展示工具目录和输入参数 schema |
+| 输出 | stdout/stderr、结构化 JSON、退出码，以及 `--jq` 等 Shell 过滤 | 由客户端呈现结构化工具结果 |
+| 写操作安全 | 明确支持 `--dry-run`；高风险写操作在确认后才需要 `--yes` | 取决于工具和 MCP 客户端的确认控制，不提供 CLI 统一的参数门禁 |
+| 可复现性 | 命令可复制、版本化、编排进脚本并审计 | 更依赖客户端上下文和设置，审计性与可复现性通常弱于 CLI |
+| IDE 依赖 | 无 | 需要支持 MCP 的 IDE、Agent 或其他客户端 |
+
+脚本、CI 和可复制命令使用 CLI；IDE 内聊天使用 MCP；许多团队会同时使用两者。
+
+对于 AI Agent，CLI 通过 Agent 粘贴指令并执行 `yunxiao …`；MCP 通过工具调用。MCP 可以减少对命令记忆的要求，但在审计性和可复现性方面通常弱于 CLI。
+
 ## 安装
 
 **推荐 — [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1)：**

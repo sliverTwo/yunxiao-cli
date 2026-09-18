@@ -60,6 +60,24 @@ yunxiao codeup repos list
 
 Start writes with `--dry-run`, confirm high-risk writes before adding `--yes`, and use `--data-file ./body.json` for long JSON. Install companion skills with `yunxiao skills install` (wizard supports multiple selections; or `--skill ...`).
 
+## CLI vs MCP
+
+| Aspect | `yunxiao-cli` | Yunxiao/Alibaba Cloud DevOps MCP |
+|--------|---------------|----------------------------------|
+| Form factor | Local command-line executable | MCP server exposing tools to an MCP client |
+| Typical use | Scripts, CI, terminals, and copy-paste commands | Conversational workflows in an IDE or chat agent |
+| Install | Download a release binary or build from source; install skills separately when needed | Configure the MCP server in an MCP-capable client |
+| Auth | CLI profiles, environment variables, PAT, or browser OAuth | Credentials and authorization are managed through the MCP server/client setup |
+| Discovery | `--help`, `schema`, typed commands, `+shortcuts`, and companion skills | Tool catalog and input schemas surfaced by the MCP client |
+| Output | stdout/stderr, structured JSON, exit codes, and shell filters such as `--jq` | Structured tool results rendered by the client |
+| Write safety | Explicit `--dry-run`; high-risk writes require `--yes` after confirmation | Depends on the tool and MCP client confirmation controls rather than universal CLI flags |
+| Reproducibility | Commands can be copied, versioned, scripted, and audited | Calls depend more on client context and settings, so auditability and reproducibility are typically weaker |
+| IDE dependency | None | Requires an MCP-capable IDE, agent, or other client |
+
+Use the CLI for scripts, CI, and copy-paste commands; use MCP for chat in an IDE; many teams use both.
+
+For AI agents, the CLI workflow is Agent paste followed by `yunxiao …`; the MCP workflow is tool-based. MCP reduces command memorization, but it often provides weaker auditability and reproducibility than the CLI.
+
 ## Install
 
 **Recommended — [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1):**
