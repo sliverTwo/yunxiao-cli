@@ -71,11 +71,9 @@ func TestShouldHint(t *testing.T) {
 
 func TestFormatHintMessage(t *testing.T) {
 	s := FormatHintMessage("v0.16.0", "v0.16.1")
-	if !strings.Contains(s, "0.16.0 → 0.16.1") {
-		t.Fatalf("pair: %q", s)
-	}
-	if !strings.Contains(s, "yunxiao update") {
-		t.Fatalf("action: %q", s)
+	want := "发现新版本 yunxiao：0.16.0 → 0.16.1。运行：yunxiao update"
+	if s != want {
+		t.Fatalf("got %q want %q", s, want)
 	}
 }
 
@@ -126,7 +124,7 @@ func TestMaybePrintUpdateHintUsesCacheWithoutNetwork(t *testing.T) {
 	if fetches != 0 {
 		t.Fatalf("fresh cache must not fetch, got %d", fetches)
 	}
-	if !strings.Contains(buf.String(), "0.16.0 → 0.16.1") {
+	if !strings.Contains(buf.String(), "发现新版本 yunxiao：0.16.0 → 0.16.1。运行：yunxiao update") {
 		t.Fatalf("hint: %q", buf.String())
 	}
 }
@@ -152,7 +150,7 @@ func TestMaybePrintUpdateHintFetchesWhenStale(t *testing.T) {
 			return "v0.16.2", nil
 		},
 	})
-	if !strings.Contains(buf.String(), "0.16.0 → 0.16.2") {
+	if !strings.Contains(buf.String(), "发现新版本 yunxiao：0.16.0 → 0.16.2。运行：yunxiao update") {
 		t.Fatalf("hint: %q", buf.String())
 	}
 	got, err := LoadCheckCache(CheckCachePath(dir))

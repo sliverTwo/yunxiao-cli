@@ -129,6 +129,8 @@ Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Versio
 
 Releases iterate quickly — use `yunxiao update` to upgrade. The CLI may also print a short **stderr** hint when a newer GitHub Release exists (at most one network check per 24h, cached under `~/.config/yunxiao/update_check.json`). Hints are skipped for `update` / `self-update` / `completion`, when `--format json` (the default), and when disabled via env. Check failures never block or fail your command; nothing is auto-downloaded.
 
+The hint itself is printed in Chinese, for example: `发现新版本 yunxiao：0.16.2 → 0.16.3。运行：yunxiao update`.
+
 **Binary (GitHub Releases) — recommended:**
 
 ```bash

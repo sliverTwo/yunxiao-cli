@@ -154,6 +154,8 @@ go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.16.2
 
 版本迭代较快——请用 `yunxiao update` 升级。若 GitHub 上有更新的 Release，CLI 偶尔会在 **stderr** 打印一行提示（网络检查最多每 24 小时一次，缓存写在 `~/.config/yunxiao/update_check.json`）。`update` / `self-update` / `completion`、默认的 `--format json`、以及通过环境变量关闭时都会跳过提示。检查失败不会阻塞或导致命令失败；不会自动下载。
 
+提示示例（打印到 **stderr**）：`发现新版本 yunxiao：0.16.2 → 0.16.3。运行：yunxiao update`
+
 **二进制（GitHub Releases）— 推荐：**
 
 ```bash

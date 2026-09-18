@@ -104,7 +104,7 @@ func ShouldHint(current, latest string) bool {
 func FormatHintMessage(current, latest string) string {
 	cur := NormalizeVersion(current)
 	lat := NormalizeVersion(latest)
-	return fmt.Sprintf("A newer yunxiao is available (%s → %s). Run: yunxiao update", cur, lat)
+	return fmt.Sprintf("发现新版本 yunxiao：%s → %s。运行：yunxiao update", cur, lat)
 }
 
 // HintConfig drives MaybePrintUpdateHint (tests inject clock/IO/fetch).
