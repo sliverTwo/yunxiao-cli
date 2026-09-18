@@ -1,7 +1,7 @@
 ---
 name: yunxiao-codeup
-version: 1.1.0
-description: "云效 Codeup：列仓库/分支/MR、评论/标签、创建/合并/关闭合并请求。用户问代码库、分支、MR 时使用。创建/合并等为 high-risk-write。"
+version: 1.1.1
+description: "云效 Codeup：列仓库/分支/MR、评论/标签/评审人、创建/合并/关闭合并请求。用户问代码库、分支、MR 时使用。创建/合并等为 high-risk-write。"
 metadata:
   requires:
     bins: ["yunxiao"]
@@ -79,9 +79,12 @@ yunxiao codeup mrs comments list --repo <id> --local-id 1   # newest first; --so
 yunxiao codeup mrs comments create --repo <id> --local-id 1 --content "LGTM" --patchset-biz-id <biz> --dry-run
 yunxiao codeup mrs labels list --repo <id> --local-id 1
 yunxiao codeup mrs labels attach --repo <id> --local-id 1 --label-ids 1,2 --dry-run
+yunxiao codeup mrs reviewers add --repo <id> --local-id 1 --reviewer <userId1,userId2> --dry-run
 ```
 
-`comments create` / `labels attach` 为 **write**（`--dry-run` 可预览）。`patchset-biz-id` 可从 `mrs diffs` 取得。
+`comments create` / `labels attach` / `reviewers add` 为 **write**（`--dry-run` 可预览）。`patchset-biz-id` 可从 `mrs diffs` 取得。
+
+`reviewers add`：逗号分隔 userId → OpenAPI `POST …/person/REVIEWER` body `userIds`（与 create 的 `reviewerUserIds` 字段名不同；CLI `--reviewer` 语义一致）。
 
 > **Label detach**：公开 OpenAPI / MCP 仅有 Get + Attach，无 Detach/Delete labels；CLI 不封装。
 
