@@ -30,7 +30,15 @@ Status filters (official SearchWorkitems filterObject shapes):
   --status       → fieldIdentifier status, className status, CONTAINS, CSV of status ids
   --status-stage → fieldIdentifier statusStage, className statusStage, CONTAINS, CSV
 
-Datetime strings: "YYYY-MM-DD HH:MM:SS" (e.g. "2026-09-01 00:00:00").
+Datetime format: "YYYY-MM-DD HH:MM:SS" (e.g. "2026-09-01 00:00:00").
+Bounds are treated as inclusive (OpenAPI BETWEEN value[0]..toValue) unless the
+API documents otherwise. Use the same timezone convention as the Yunxiao UI /
+OpenAPI examples (typically Asia/Shanghai wall time for China tenants).
+
+Server-side date conditions may still return out-of-window rows. Scripts should
+client-filter on gmtCreate / gmtModified / customFieldValues (and finishTime when
+present) as needed. Inspect meta.request.conditions to see what was sent.
+
 Combine freely with --assigned-to, --subject, --status / --status-stage, etc.
 
 Pagination:
@@ -39,10 +47,17 @@ Pagination:
   OpenAPI perPage max is 200 — len(data)==200 is not total; use meta.total / has_more.
   --all follows pages via ListAll (cap 50 pages), dedupes by workitem id.
 
+Stable script shape (opt-in):
+  --as-items wraps data as { "items": [...], "pagination": {...} } inside the
+  usual { ok, data, meta } envelope. Default remains a raw array in data for
+  compatibility. Prefer --as-items for weekly-report scripts.
+
+Schema: yunxiao schema workitem.search
+
 Examples:
   yunxiao workitem search --category Req --created-after "2026-09-01 00:00:00" --created-before "2026-09-07 23:59:59"
   yunxiao workitem search --category Bug --status 100005,100010 --status-stage 1,2
-  yunxiao workitem search --category Req --finish-after "2026-09-01 00:00:00" --finish-before "2026-09-07 23:59:59" --all
+  yunxiao workitem search --category Req --finish-after "2026-09-01 00:00:00" --finish-before "2026-09-07 23:59:59" --all --as-items
 
 finishTime notes (CLI vs MCP):
   Filtering by finishTime via conditions may work (same BETWEEN pattern; verified live).
@@ -72,6 +87,7 @@ finishTime notes (CLI vs MCP):
 		page, _ := cmd.Flags().GetInt("page")
 		perPage, _ := cmd.Flags().GetInt("per-page")
 		allPages, _ := cmd.Flags().GetBool("all")
+		asItems, _ := cmd.Flags().GetBool("as-items")
 		createdAfter, _ := cmd.Flags().GetString("created-after")
 		createdBefore, _ := cmd.Flags().GetString("created-before")
 		updatedAfter, _ := cmd.Flags().GetString("updated-after")
@@ -130,9 +146,12 @@ finishTime notes (CLI vs MCP):
 		}
 		reqMeta := workitemSearchRequestMeta(body, conditionsStr)
 		baseMeta := map[string]any{"risk": risk.Read, "request": reqMeta}
+		if asItems {
+			baseMeta["envelope"] = "items"
+		}
 
 		if allPages {
-			handleErr(runWorkitemSearchAll(cmd.Context(), c, path, body, perPage, baseMeta))
+			handleErr(runWorkitemSearchAll(cmd.Context(), c, path, body, perPage, baseMeta, asItems))
 			return
 		}
 		handleErr(runRead(cmd.Context(), c, "POST", path, nil, body, baseMeta, func(out any, meta map[string]any) (any, map[string]any) {
@@ -144,6 +163,9 @@ finishTime notes (CLI vs MCP):
 				n = len(s)
 			}
 			client.ApplyFullPageHasMoreHeuristic(meta, n, perPage)
+			if asItems {
+				out = wrapDataAsItems(out, meta)
+			}
 			return out, meta
 		}))
 	},
@@ -213,14 +235,14 @@ func workitemSearchRequestMeta(body map[string]any, conditionsStr string) map[st
 	}
 	sort.Strings(keys)
 	req := map[string]any{
-		"body_keys":                 keys,
-		"unknown_fields_dropped":    false, // CLI sends only known SearchWorkitems body fields
-		"category":                  body["category"],
-		"spaceId":                   body["spaceId"],
-		"orderBy":                   body["orderBy"],
-		"sort":                      body["sort"],
-		"page":                      body["page"],
-		"perPage":                   body["perPage"],
+		"body_keys":              keys,
+		"unknown_fields_dropped": false, // CLI sends only known SearchWorkitems body fields
+		"category":               body["category"],
+		"spaceId":                body["spaceId"],
+		"orderBy":                body["orderBy"],
+		"sort":                   body["sort"],
+		"page":                   body["page"],
+		"perPage":                body["perPage"],
 	}
 	if conditionsStr != "" {
 		req["conditions"] = conditionsStr
@@ -228,7 +250,7 @@ func workitemSearchRequestMeta(body map[string]any, conditionsStr string) map[st
 	return req
 }
 
-func runWorkitemSearchAll(ctx context.Context, c *client.Client, path string, baseBody map[string]any, perPage int, baseMeta map[string]any) error {
+func runWorkitemSearchAll(ctx context.Context, c *client.Client, path string, baseBody map[string]any, perPage int, baseMeta map[string]any, asItems bool) error {
 	if baseMeta == nil {
 		baseMeta = map[string]any{}
 	}
@@ -266,5 +288,9 @@ func runWorkitemSearchAll(ctx context.Context, c *client.Client, path string, ba
 	}
 	meta["deduped"] = len(res.Items) != len(items)
 	meta["result_count"] = len(items)
-	return output.Success(items, meta)
+	var out any = items
+	if asItems {
+		out = wrapDataAsItems(items, meta)
+	}
+	return output.Success(out, meta)
 }

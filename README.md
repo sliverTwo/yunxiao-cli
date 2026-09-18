@@ -76,7 +76,22 @@ Start writes with `--dry-run`, confirm high-risk writes before adding `--yes`, a
 
 Use the CLI for scripts, CI, and copy-paste commands; use MCP for chat in an IDE; many teams use both.
 
-**Weekly quality / date-window reports** (date range → Req/Bug → JSON → scripts): prefer the typed CLI (`workitem search` with `--created-after` / `--created-before`, `--updated-*`, `--finish-*`, plus `--status` / `--status-stage`, and `--all` to follow pages). Use MCP chat only as a fallback when you are already in an IDE agent. Filtering by `finishTime` via conditions may work; oapi SearchWorkitems / get responses omit `finishTime` (schemas list `gmtCreate` / `gmtModified` / `updateStatusAt`) — the CLI does **not** invent or enrich `finishTime` from `updateStatusAt`. OpenAPI `perPage` max is 200: use `meta.total` / `has_more` / `--all`, not `len(data)`. Typed `workitem search` and raw `api POST …/workitems:search` are **read** (no `--yes`).
+**Weekly quality / date-window reports** (date range → Req/Bug → JSON → scripts): prefer the typed CLI (`workitem search` with `--created-after` / `--created-before`, `--updated-*`, `--finish-*`, plus `--status` / `--status-stage`, `--all` to follow pages, and opt-in `--as-items` for `{items, pagination}` in `data`). Use MCP chat only as a fallback when you are already in an IDE agent. Filtering by `finishTime` via conditions may work; oapi SearchWorkitems / get responses omit `finishTime` (schemas list `gmtCreate` / `gmtModified` / `updateStatusAt`) — the CLI does **not** invent or enrich `finishTime` from `updateStatusAt`. OpenAPI `perPage` max is 200: use `meta.total` / `has_more` / `--all`, not `len(data)`. Server-side date conditions may still return out-of-window rows — client-filter on `gmtCreate` / `gmtModified` / `customFieldValues` as needed. Typed `workitem search` and raw `api POST …/workitems:search` are **read** (no `--yes`). Raw `api` bodies that pass MCP-like `createdAfter` / `updatedAfter` / `finishTimeAfter` (etc.) at top level are normalized into official `conditions` (see `meta.request`).
+
+### MCP → CLI mapping (weekly / discovery)
+
+| MCP-style intent | CLI |
+|------------------|-----|
+| `search_workitems` + `createdAfter` / `createdBefore` | `yunxiao workitem search --created-after … --created-before …` (+ `--all`, optional `--as-items`) |
+| same for updated / finish windows | `--updated-after/before`, `--finish-after/before` |
+| work item comments | `yunxiao workitem comments list --id <id>` |
+| list orgs / projects (spaces) | `yunxiao organization list`, `yunxiao project list` |
+| inspect search params | `yunxiao schema workitem.search` |
+| `finishTime` on response | **Gap:** filter may work; oapi search/get responses usually omit `finishTime` |
+
+### Agent / scripts on Windows
+
+Prefer **Node or Python subprocess** (capture stdout as a Buffer/bytes, then `JSON.parse`) over PowerShell `>` redirects when consuming CLI JSON — redirects can alter encoding and break parsers. Use `yunxiao doctor` to print the resolved executable path and active profile (`organization_id`, `space_id`).
 
 For AI agents, the CLI workflow is Agent paste followed by `yunxiao …`; the MCP workflow is tool-based. MCP reduces command memorization, but it often provides weaker auditability and reproducibility than the CLI.
 
@@ -424,6 +439,7 @@ See [AGENTS.md](AGENTS.md) for contributor / AI-agent conventions.
 
 ## Changelog
 
+- **Unreleased** — Weekly-report follow-ups: document client-side date filtering + inclusive bounds; normalize raw `api` top-level `createdAfter`/… into `conditions`; `workitem search --as-items`; `doctor` prints executable path + active profile; MCP→CLI mapping + Windows subprocess note; `schema` aliases for `workitem.search`
 - **0.16.1** — Smoke fixes: `appstack apps list` sends required `pagination=keyset`; `workitem search` / `project +my-open-items` use profile `space_id` or clear CLI error; friendlier hint when `programs search` is blocked on non-Advanced orgs
 - **0.16.0** — Browser OAuth (`auth login --browser` / `--dry-run`), `credentials.json` (0600), `auth probe-oauth` (O1 header gate), auto refresh for `token_kind=oauth`, For AI agents section prefers browser OAuth; PAT `--token` kept for CI
 - **0.15.7** — `yunxiao +onboard` writes a **generic local** profile under `~/.config/yunxiao/profiles/` (TTY project pick or `--space-id`); README For AI agents prompts (EN + zh-CN); missing-token hints include PAT console URL + module permission checklist

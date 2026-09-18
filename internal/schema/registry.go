@@ -31,7 +31,7 @@ var Registry = []Method{
 		HTTPMethod: "POST", Path: "/oapi/v1/platform/organizations/{org}/members:search", Risk: risk.Read, Example: "yunxiao organization members search --query alice"},
 	{ID: "project.list", Domain: "project", Description: "Search / list Projex projects",
 		HTTPMethod: "POST", Path: "/oapi/v1/projex/organizations/{org}/projects:search", Risk: risk.Read, Example: "yunxiao project list --name demo"},
-	{ID: "workitem.search", Domain: "project", Description: "Search work items (date/status filters, --all pagination)",
+	{ID: "workitem.search", Domain: "project", Description: "Search work items (date/status filters, --all, opt-in --as-items; client-filter dates if needed)",
 		HTTPMethod: "POST", Path: "/oapi/v1/projex/organizations/{org}/workitems:search", Risk: risk.Read,
 		Params: []Param{
 			{Name: "category", Type: "string", Required: true, Desc: "Req|Bug|Task|…"},
@@ -41,7 +41,7 @@ var Registry = []Method{
 			{Name: "subject", Type: "string", Required: false, Desc: "subject contains"},
 			{Name: "status", Type: "string", Required: false, Desc: "status ids CSV (className status)"},
 			{Name: "status-stage", Type: "string", Required: false, Desc: "statusStage ids CSV"},
-			{Name: "created-after", Type: "string", Required: false, Desc: "gmtCreate >= YYYY-MM-DD HH:MM:SS"},
+			{Name: "created-after", Type: "string", Required: false, Desc: "gmtCreate >= YYYY-MM-DD HH:MM:SS (inclusive; server may still return out-of-window — client-filter)"},
 			{Name: "created-before", Type: "string", Required: false, Desc: "gmtCreate <="},
 			{Name: "updated-after", Type: "string", Required: false, Desc: "gmtModified >="},
 			{Name: "updated-before", Type: "string", Required: false, Desc: "gmtModified <="},
@@ -50,8 +50,9 @@ var Registry = []Method{
 			{Name: "page", Type: "int", Required: false, Desc: "page (default 1)"},
 			{Name: "per-page", Type: "int", Required: false, Desc: "per page (OpenAPI max 200)"},
 			{Name: "all", Type: "bool", Required: false, Desc: "follow pages (ListAll max 50); dedupe by id"},
+			{Name: "as-items", Type: "bool", Required: false, Desc: "opt-in wrap data as {items, pagination} for scripts"},
 		},
-		Example: `yunxiao workitem search --category Req --created-after "2026-09-01 00:00:00" --created-before "2026-09-07 23:59:59" --status-stage 1,2 --all`},
+		Example: `yunxiao workitem search --category Req --created-after "2026-09-01 00:00:00" --created-before "2026-09-07 23:59:59" --status-stage 1,2 --all --as-items`},
 	{ID: "workitem.get", Domain: "project", Description: "Get a work item by ID",
 		HTTPMethod: "GET", Path: "/oapi/v1/projex/organizations/{org}/workitems/{id}", Risk: risk.Read,
 		Params: []Param{{Name: "id", Type: "string", Required: true, Desc: "Work item ID"}}, Example: "yunxiao workitem get --id <id>"},
@@ -398,7 +399,17 @@ var Registry = []Method{
 		HTTPMethod: "ANY", Path: "<path>", Risk: risk.Write, Example: "yunxiao api GET /oapi/v1/platform/user"},
 }
 
+// schemaAliases maps common / MCP-like ids onto Registry entries.
+var schemaAliases = map[string]string{
+	"project.searchWorkitems": "workitem.search",
+	"search_workitems":        "workitem.search",
+	"searchWorkitems":         "workitem.search",
+}
+
 func Find(id string) *Method {
+	if alt, ok := schemaAliases[id]; ok {
+		id = alt
+	}
 	for i := range Registry {
 		if Registry[i].ID == id {
 			return &Registry[i]
