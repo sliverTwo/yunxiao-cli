@@ -322,6 +322,8 @@ yunxiao schema
 
 ## Profile：play vs zhiyi（可选）
 
+运行 `yunxiao +onboard` 可从所选 `space_id` 在 `~/.config/yunxiao/profiles/` 下创建通用本地 profile。
+
 租户级 Projex 常量放在 **profile JSON**，不写进 CLI 全局默认。按项目（`space_id`）隔离；`workflows` 按 **`type_id`** 存放已探索状态图。
 `workitem_defaults` 同样按 **`type_id`** 存放 OpenAPI 字段默认值与创建必填；`workitem create` / `+bug-create` 会自动填入（可用 `--no-defaults` 跳过）；`profile doctor` 会列出并校验这些字段 id。
 
