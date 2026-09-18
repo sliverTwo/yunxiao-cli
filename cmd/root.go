@@ -40,6 +40,7 @@ Help: https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		output.Format = globalFormat
 		output.JQ = globalJQ
+		maybeStartUpdateHint(cmd)
 	},
 }
 

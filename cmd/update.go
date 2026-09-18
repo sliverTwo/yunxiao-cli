@@ -32,7 +32,8 @@ SHA-256 when checksums.txt is present, and replaces this binary safely
   yunxiao update                  # TTY: confirm; non-TTY: requires --yes
   yunxiao update --yes            # apply without prompt (scripts/CI)
 
-No network on other commands by default. Optional: yunxiao doctor --check-update.
+Other commands may print a stderr update hint at most once per 24h (skipped for json format / update / completion).
+Optional: yunxiao doctor --check-update.
 Disable optional hints: YUNXIAO_UPDATE_CHECK=0.
 
 Override release source (same as npm installer):

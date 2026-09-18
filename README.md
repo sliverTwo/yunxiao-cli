@@ -127,7 +127,9 @@ Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Versio
 
 ## Update
 
-Releases iterate quickly — prefer an explicit update check rather than background polling (the CLI does **not** call the network on every command).
+Releases iterate quickly — use `yunxiao update` to upgrade. The CLI may also print a short **stderr** hint when a newer GitHub Release exists (at most one network check per 24h, cached under `~/.config/yunxiao/update_check.json`). Hints are skipped for `update` / `self-update` / `completion`, when `--format json` (the default), and when disabled via env. Check failures never block or fail your command; nothing is auto-downloaded.
+
+The hint itself is printed in Chinese, for example: `发现新版本 yunxiao：0.16.2 → 0.16.3。运行：yunxiao update`.
 
 **Binary (GitHub Releases) — recommended:**
 
@@ -144,7 +146,12 @@ Optional doctor probe (still opt-in; no download):
 
 ```bash
 yunxiao doctor --check-update
-# disable: YUNXIAO_UPDATE_CHECK=0
+```
+
+Disable opportunistic hints and doctor `--check-update`:
+
+```bash
+export YUNXIAO_UPDATE_CHECK=0   # also: false | off | no
 ```
 
 **npm installer (`sanzhi-yunxiao-cli`):**

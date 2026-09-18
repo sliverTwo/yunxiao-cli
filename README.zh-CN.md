@@ -152,7 +152,9 @@ go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.16.2
 
 ## 更新
 
-版本迭代较快——请用显式检查，而不是在每条命令上后台探测（默认**不会**在每个命令里访问网络）。
+版本迭代较快——请用 `yunxiao update` 升级。若 GitHub 上有更新的 Release，CLI 偶尔会在 **stderr** 打印一行提示（网络检查最多每 24 小时一次，缓存写在 `~/.config/yunxiao/update_check.json`）。`update` / `self-update` / `completion`、默认的 `--format json`、以及通过环境变量关闭时都会跳过提示。检查失败不会阻塞或导致命令失败；不会自动下载。
+
+提示示例（打印到 **stderr**）：`发现新版本 yunxiao：0.16.2 → 0.16.3。运行：yunxiao update`
 
 **二进制（GitHub Releases）— 推荐：**
 
@@ -169,7 +171,12 @@ yunxiao update --yes       # 非交互直接更新（脚本）
 
 ```bash
 yunxiao doctor --check-update
-# 关闭：YUNXIAO_UPDATE_CHECK=0
+```
+
+关闭机会性提示以及 doctor 的 `--check-update`：
+
+```bash
+export YUNXIAO_UPDATE_CHECK=0   # 亦可：false | off | no
 ```
 
 **npm 安装器（`sanzhi-yunxiao-cli`）：**
