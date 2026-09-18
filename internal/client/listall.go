@@ -13,6 +13,9 @@ const DefaultListAllMaxPages = 50
 // ListPageFetcher fetches one page. query already includes page/perPage.
 type ListPageFetcher func(ctx context.Context, query map[string]string) (body any, hdr http.Header, err error)
 
+// ListBodyPageFetcher fetches one page by page/perPage numbers (POST body pagination).
+type ListBodyPageFetcher func(ctx context.Context, page, perPage int) (body any, hdr http.Header, err error)
+
 // ListAllResult holds concatenated list items and final pagination meta.
 type ListAllResult struct {
 	Items     []any
@@ -41,6 +44,34 @@ func ExtractListItems(body any) []any {
 	return nil
 }
 
+// DedupItemsByID drops duplicate map items that share a non-empty "id" string.
+// Items without id are kept in order. Stable: first occurrence wins.
+func DedupItemsByID(items []any) []any {
+	if len(items) == 0 {
+		return items
+	}
+	seen := make(map[string]struct{}, len(items))
+	out := make([]any, 0, len(items))
+	for _, it := range items {
+		m, ok := it.(map[string]any)
+		if !ok {
+			out = append(out, it)
+			continue
+		}
+		id, _ := m["id"].(string)
+		if id == "" {
+			out = append(out, it)
+			continue
+		}
+		if _, dup := seen[id]; dup {
+			continue
+		}
+		seen[id] = struct{}{}
+		out = append(out, it)
+	}
+	return out
+}
+
 // ListAll loops pages using PaginationFromHeader / has_more until done or maxPages.
 // startPage defaults to 1; perPage defaults to 20; maxPages defaults to DefaultListAllMaxPages.
 // baseQuery is copied each page; page/perPage keys are overwritten.
@@ -50,6 +81,25 @@ func ExtractListItems(body any) []any {
 func ListAll(ctx context.Context, startPage, perPage, maxPages int, baseQuery map[string]string, fetch ListPageFetcher) (*ListAllResult, error) {
 	if fetch == nil {
 		return nil, fmt.Errorf("ListAll: nil fetch")
+	}
+	return ListAllPages(ctx, startPage, perPage, maxPages, func(ctx context.Context, page, pp int) (any, http.Header, error) {
+		q := map[string]string{}
+		for k, v := range baseQuery {
+			if k == "page" || k == "perPage" {
+				continue
+			}
+			q[k] = v
+		}
+		q["page"] = strconv.Itoa(page)
+		q["perPage"] = strconv.Itoa(pp)
+		return fetch(ctx, q)
+	})
+}
+
+// ListAllPages is like ListAll but takes an explicit page/perPage fetcher (POST bodies).
+func ListAllPages(ctx context.Context, startPage, perPage, maxPages int, fetch ListBodyPageFetcher) (*ListAllResult, error) {
+	if fetch == nil {
+		return nil, fmt.Errorf("ListAllPages: nil fetch")
 	}
 	if startPage <= 0 {
 		startPage = 1
@@ -66,21 +116,12 @@ func ListAll(ctx context.Context, startPage, perPage, maxPages int, baseQuery ma
 	var lastMeta map[string]any
 
 	for pages := 1; pages <= maxPages; pages++ {
-		q := map[string]string{}
-		for k, v := range baseQuery {
-			if k == "page" || k == "perPage" {
-				continue
-			}
-			q[k] = v
-		}
-		q["page"] = strconv.Itoa(page)
-		q["perPage"] = strconv.Itoa(perPage)
-
-		body, hdr, err := fetch(ctx, q)
+		body, hdr, err := fetch(ctx, page, perPage)
 		if err != nil {
 			return nil, err
 		}
-		if items := ExtractListItems(body); len(items) > 0 {
+		items := ExtractListItems(body)
+		if len(items) > 0 {
 			all = append(all, items...)
 		}
 
@@ -88,6 +129,17 @@ func ListAll(ctx context.Context, startPage, perPage, maxPages int, baseQuery ma
 		meta["list_all"] = true
 		meta["pages_fetched"] = pages
 		lastMeta = meta
+
+		// Empty page → done (API may still emit a spurious x-next-page).
+		if len(items) == 0 {
+			meta["has_more"] = false
+			return &ListAllResult{Items: all, Meta: meta, Pages: pages}, nil
+		}
+		// Collected at least x-total → done even if headers keep advertising next.
+		if total, ok := meta["total"].(int); ok && total > 0 && len(all) >= total {
+			meta["has_more"] = false
+			return &ListAllResult{Items: all, Meta: meta, Pages: pages}, nil
+		}
 
 		hasMore, hasFlag := meta["has_more"].(bool)
 		if !hasFlag {

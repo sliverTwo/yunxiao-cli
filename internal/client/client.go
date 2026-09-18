@@ -347,8 +347,9 @@ func PaginationFromHeader(h http.Header) *Pagination {
 }
 
 // MetaWithPagination merges Yunxiao list pagination headers into envelope meta.
-// Agents get top-level has_more / total / page (when present) so truncation is visible;
-// the nested "pagination" object is retained for full header detail.
+// Agents get top-level has_more / total / page / perPage / totalPages (when present)
+// so truncation is visible; the nested "pagination" object is retained for full detail.
+// Raw x-* pagination headers are copied under meta["pagination_headers"] when present.
 // Callers that need every page may use ListAll (wired behind --all on some list cmds).
 //
 // has_more is true when x-next-page > 0, OR when total/page/per_page imply more
@@ -357,6 +358,9 @@ func PaginationFromHeader(h http.Header) *Pagination {
 func MetaWithPagination(base map[string]any, h http.Header) map[string]any {
 	if base == nil {
 		base = map[string]any{}
+	}
+	if raw := RawPaginationHeaders(h); len(raw) > 0 {
+		base["pagination_headers"] = raw
 	}
 	if p := PaginationFromHeader(h); p != nil {
 		base["pagination"] = p
@@ -367,24 +371,67 @@ func MetaWithPagination(base map[string]any, h http.Header) map[string]any {
 		if p.Page > 0 {
 			base["page"] = p.Page
 		}
+		if p.PerPage > 0 {
+			base["perPage"] = p.PerPage
+		}
+		if p.TotalPages > 0 {
+			base["totalPages"] = p.TotalPages
+		}
 	}
 	return base
+}
+
+// RawPaginationHeaders copies Yunxiao x-* list pagination response headers as strings.
+func RawPaginationHeaders(h http.Header) map[string]string {
+	if h == nil {
+		return nil
+	}
+	keys := []string{"x-page", "x-per-page", "x-total", "x-total-pages", "x-next-page", "x-prev-page"}
+	out := map[string]string{}
+	for _, k := range keys {
+		if v := h.Get(k); v != "" {
+			out[k] = v
+		}
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
+}
+
+// ApplyFullPageHasMoreHeuristic sets has_more when pagination headers were absent
+// but the returned item count equals the requested perPage (likely truncated).
+// Documented for agents: prefer meta.total / --all over len(data) alone (API perPage max 200).
+func ApplyFullPageHasMoreHeuristic(meta map[string]any, itemCount, perPage int) {
+	if meta == nil || perPage <= 0 || itemCount <= 0 {
+		return
+	}
+	if _, ok := meta["has_more"]; ok {
+		return
+	}
+	if itemCount >= perPage {
+		meta["has_more"] = true
+		meta["has_more_reason"] = "body_len_equals_per_page_no_pagination_headers"
+	}
 }
 
 func inferHasMore(p *Pagination) bool {
 	if p == nil {
 		return false
 	}
-	if p.NextPage > 0 {
-		return true
+	// Prefer totals over x-next-page: Yunxiao SearchWorkitems often keeps
+	// incrementing x-next-page past the last page (and even when x-total=0).
+	if p.TotalPages > 0 && p.Page > 0 {
+		return p.Page < p.TotalPages
 	}
 	if p.Total > 0 && p.Page > 0 && p.PerPage > 0 {
 		return p.Page*p.PerPage < p.Total
 	}
-	if p.Total > 0 && p.TotalPages > 0 && p.Page > 0 {
-		return p.Page < p.TotalPages
+	if p.Total == 0 && (p.Page > 0 || p.PerPage > 0) {
+		// Explicit empty set; ignore spurious x-next-page.
+		return false
 	}
-	return false
+	return p.NextPage > 0
 }
 
 func idempotentMethod(method string) bool {

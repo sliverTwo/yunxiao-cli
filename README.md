@@ -76,7 +76,7 @@ Start writes with `--dry-run`, confirm high-risk writes before adding `--yes`, a
 
 Use the CLI for scripts, CI, and copy-paste commands; use MCP for chat in an IDE; many teams use both.
 
-**Weekly quality / date-window reports** (date range → Req/Bug → JSON → scripts): prefer the typed CLI (`workitem search` with `--created-after` / `--created-before`, `--updated-*`, `--finish-*`). Use MCP chat only as a fallback when you are already in an IDE agent. Filtering by `finishTime` via conditions may work; the official oapi SearchWorkitems / get response schemas list `gmtCreate` / `gmtModified` / `updateStatusAt` and may omit `finishTime` — the CLI does not invent `finishTime` from `updateStatusAt`. Typed `workitem search` and raw `api POST …/workitems:search` are **read** (no `--yes`).
+**Weekly quality / date-window reports** (date range → Req/Bug → JSON → scripts): prefer the typed CLI (`workitem search` with `--created-after` / `--created-before`, `--updated-*`, `--finish-*`, plus `--status` / `--status-stage`, and `--all` to follow pages). Use MCP chat only as a fallback when you are already in an IDE agent. Filtering by `finishTime` via conditions may work; oapi SearchWorkitems / get responses omit `finishTime` (schemas list `gmtCreate` / `gmtModified` / `updateStatusAt`) — the CLI does **not** invent or enrich `finishTime` from `updateStatusAt`. OpenAPI `perPage` max is 200: use `meta.total` / `has_more` / `--all`, not `len(data)`. Typed `workitem search` and raw `api POST …/workitems:search` are **read** (no `--yes`).
 
 For AI agents, the CLI workflow is Agent paste followed by `yunxiao …`; the MCP workflow is tool-based. MCP reduces command memorization, but it often provides weaker auditability and reproducibility than the CLI.
 

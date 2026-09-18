@@ -104,7 +104,7 @@ yunxiao codeup repos list
 
 脚本、CI 和可复制命令使用 CLI；IDE 内聊天使用 MCP；许多团队会同时使用两者。
 
-**质量周报 / 按日期窗口出数**（日期窗口 → Req/Bug → JSON → 脚本）：优先用类型化 CLI（`workitem search` 的 `--created-after` / `--created-before`、`--updated-*`、`--finish-*`）。已在 IDE Agent 里对话时再用 MCP 作回落。按 `finishTime` 写入 conditions 过滤可能可用；官方 oapi SearchWorkitems / get 响应 schema 列的是 `gmtCreate` / `gmtModified` / `updateStatusAt`，可能没有 `finishTime`——CLI **不会**用 `updateStatusAt` 伪造 `finishTime`。类型化 `workitem search` 与原始 `api POST …/workitems:search` 均为 **read**（不需要 `--yes`）。
+**质量周报 / 按日期窗口出数**（日期窗口 → Req/Bug → JSON → 脚本）：优先用类型化 CLI（`workitem search` 的 `--created-after` / `--created-before`、`--updated-*`、`--finish-*`，以及 `--status` / `--status-stage`，加 `--all` 跟页）。已在 IDE Agent 里对话时再用 MCP 作回落。按 `finishTime` 写入 conditions 过滤可能可用；oapi SearchWorkitems / get 响应不含 `finishTime`（schema 列的是 `gmtCreate` / `gmtModified` / `updateStatusAt`）——CLI **不会**用 `updateStatusAt` 伪造或 enrich `finishTime`。OpenAPI `perPage` 上限 200：看 `meta.total` / `has_more` / `--all`，不要只看 `len(data)`。类型化 `workitem search` 与原始 `api POST …/workitems:search` 均为 **read**（不需要 `--yes`）。
 
 对于 AI Agent，CLI 通过 Agent 粘贴指令并执行 `yunxiao …`；MCP 通过工具调用。MCP 可以减少对命令记忆的要求，但在审计性和可复现性方面通常弱于 CLI。
 

@@ -14,7 +14,8 @@ var workitemCmd = &cobra.Command{
 	Long: `Work item typed commands.
 
   yunxiao workitem search --assigned-to self --category Req
-  yunxiao workitem search --category Req --created-after "2026-09-01 00:00:00" --created-before "2026-09-07 23:59:59"
+  yunxiao workitem search --category Req --created-after "2026-09-01 00:00:00" --created-before "2026-09-07 23:59:59" --all
+  yunxiao workitem search --category Bug --status 100005 --status-stage 1,2
   yunxiao workitem get --id <id|ZYPT-xxxx>   # or positional: workitem get ZYPT-xxxx
   yunxiao workitem +transition --id <id|serial> --to <alias|statusId> --dry-run
   yunxiao workitem +bug-transition --id ZYPT-xxxx --to processing --dry-run
