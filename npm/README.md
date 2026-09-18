@@ -2,6 +2,8 @@
 
 Yunxiao (云效) CLI — Feishu-style one-click install. Native binaries are fetched from **GitHub Releases** (not bundled in the npm tarball).
 
+Full docs: [README.md](../README.md) (English) · [README.zh-CN.md](../README.zh-CN.md) (中文).
+
 ## Quick start
 
 ```bash
@@ -87,7 +89,7 @@ npm/
   scripts/install.js         # download/extract native binary + skills/
   scripts/install-wizard.js  # one-click setup + skill multi-select
   checksums.txt              # SHA-256 of release archives
-  README.md
+  README.md                  # package-local notes; see repo README.md + README.zh-CN.md
   # releases/ is gitignored — used only for local/dev offline installs
 ```
 
