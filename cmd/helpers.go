@@ -243,6 +243,9 @@ func apiErrorHint(ae *client.APIError) string {
 	if strings.Contains(combined, "未启用此字段") {
 		return "one or more fields are not enabled on this type; for +bug-create try --minimal or remove module/environment/ExpCompletionTime from profile bug_create_fields; run: yunxiao profile doctor"
 	}
+	if strings.Contains(combined, "非高级版组织，不支持此功能") {
+		return "programs (project sets) require an Advanced-edition Yunxiao organization; this org cannot use `programs search` — use `yunxiao project list` for projects instead, or upgrade the org plan"
+	}
 	if hint := zhiyi.RequiredFieldHint(combined); hint != "" {
 		return hint
 	}
@@ -480,6 +483,26 @@ func profileSpaceID() string {
 	}
 	return pf.SpaceID
 }
+
+// coalesceSpaceID returns flag space id, else profile space_id.
+// When both empty, returns a clear CLI usage error (caller must not hit the API).
+func coalesceSpaceID(flagVal, profileVal string) (string, error) {
+	flagVal = strings.TrimSpace(flagVal)
+	if flagVal != "" {
+		return flagVal, nil
+	}
+	profileVal = strings.TrimSpace(profileVal)
+	if profileVal != "" {
+		return profileVal, nil
+	}
+	return "", fmt.Errorf("missing --space-id (and active profile has no space_id); pass --space-id <projectId> or run `yunxiao +onboard` / set profile space_id")
+}
+
+// resolveSpaceIDFlag resolves --space-id with profile.space_id fallback.
+func resolveSpaceIDFlag(flagVal string) (string, error) {
+	return coalesceSpaceID(flagVal, profileSpaceID())
+}
+
 
 // afterSortByTime sorts list payloads by update/modified time (default newest-first) then calls next.
 // sortFlag is the --sort value (asc|desc); empty defaults to desc. Invalid values return an error.

@@ -83,6 +83,11 @@ Uses workitems:search with assignedTo=current user and statusStage=1,2
 		flagOrg(globalOrg)
 		category, _ := cmd.Flags().GetString("category")
 		spaceID, _ := cmd.Flags().GetString("space-id")
+		spaceID, err := resolveSpaceIDFlag(spaceID)
+		if err != nil {
+			handleErr(err)
+			return
+		}
 		statusStage, _ := cmd.Flags().GetString("status-stage")
 		page, _ := cmd.Flags().GetInt("page")
 		perPage, _ := cmd.Flags().GetInt("per-page")
@@ -131,9 +136,7 @@ Uses workitems:search with assignedTo=current user and statusStage=1,2
 			"page":       page,
 			"perPage":    perPage,
 		}
-		if spaceID != "" {
-			body["spaceId"] = spaceID
-		}
+		body["spaceId"] = spaceID
 		handleErr(runRead(cmd.Context(), c, "POST", path, nil, body, map[string]any{"risk": risk.Read, "assigned_to": uid}, nil))
 	},
 }
@@ -146,6 +149,11 @@ var projectCreatedByMeCmd = &cobra.Command{
 		flagOrg(globalOrg)
 		category, _ := cmd.Flags().GetString("category")
 		spaceID, _ := cmd.Flags().GetString("space-id")
+		spaceID, err := resolveSpaceIDFlag(spaceID)
+		if err != nil {
+			handleErr(err)
+			return
+		}
 		statusStage, _ := cmd.Flags().GetString("status-stage")
 		page, _ := cmd.Flags().GetInt("page")
 		perPage, _ := cmd.Flags().GetInt("per-page")
@@ -183,9 +191,7 @@ var projectCreatedByMeCmd = &cobra.Command{
 			"category": category, "conditions": string(cb),
 			"orderBy": "gmtCreate", "sort": "desc", "page": page, "perPage": perPage,
 		}
-		if spaceID != "" {
-			body["spaceId"] = spaceID
-		}
+		body["spaceId"] = spaceID
 		handleErr(runRead(cmd.Context(), c, "POST", path, nil, body, map[string]any{"risk": risk.Read, "creator": uid}, nil))
 	},
 }
@@ -243,12 +249,12 @@ func init() {
 	projectListCmd.Flags().Int("page", 1, "page number")
 	projectListCmd.Flags().Int("per-page", 20, "page size")
 	projectMyOpenItemsCmd.Flags().String("category", "Req", "work item category: Req|Task|Bug|Risk|…")
-	projectMyOpenItemsCmd.Flags().String("space-id", "", "optional project/space id")
+	projectMyOpenItemsCmd.Flags().String("space-id", "", "project/space id (default: profile.space_id)")
 	projectMyOpenItemsCmd.Flags().String("status-stage", "1,2", "status stage IDs (default open: 1,2)")
 	projectMyOpenItemsCmd.Flags().Int("page", 1, "page")
 	projectMyOpenItemsCmd.Flags().Int("per-page", 20, "per page")
 	projectCreatedByMeCmd.Flags().String("category", "Req", "work item category")
-	projectCreatedByMeCmd.Flags().String("space-id", "", "optional project/space id")
+	projectCreatedByMeCmd.Flags().String("space-id", "", "project/space id (default: profile.space_id)")
 	projectCreatedByMeCmd.Flags().String("status-stage", "", "optional status stage filter (e.g. 1,2)")
 	projectCreatedByMeCmd.Flags().Int("page", 1, "page")
 	projectCreatedByMeCmd.Flags().Int("per-page", 20, "per page")
