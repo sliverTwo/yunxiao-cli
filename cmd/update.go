@@ -31,7 +31,7 @@ var updateCmd = &cobra.Command{
   yunxiao update                  # TTY：确认后替换；非 TTY 需 --yes
   yunxiao update --yes            # 无提示直接更新（脚本/CI）
 
-其他命令可能每 24h 最多在 stderr 打印一次中文更新提示（json / update / completion 会跳过）。
+其他命令可能每 24h 最多检查一次网络；仅在发现新版本时才在 stderr 打印中文更新提示（json / update / completion 会跳过）。
 可选：yunxiao doctor --check-update。
 关闭机会性提示：YUNXIAO_UPDATE_CHECK=0。
 
