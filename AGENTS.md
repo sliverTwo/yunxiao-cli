@@ -225,7 +225,7 @@ make test
 - Match existing command patterns in `cmd/` (flags, `runMutating`, `handleErr`).
 - Document `Risk: read|write|high-risk-write` on mutating commands.
 - Bump `internal/version` when releasing user-visible CLI changes.
-- Update README (EN + 中文) and skills when adding domains.
+- Update README.md (English) and README.zh-CN.md (Chinese) and skills when adding domains.
 
 **Don't**
 
