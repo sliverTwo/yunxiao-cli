@@ -389,3 +389,63 @@ func TestDoReturnsHeaders(t *testing.T) {
 		t.Fatalf("meta=%v", meta)
 	}
 }
+
+func TestRawPaginationHeadersAndTopLevelPerPageTotalPages(t *testing.T) {
+	h := http.Header{}
+	h.Set("x-page", "1")
+	h.Set("x-per-page", "200")
+	h.Set("x-total", "450")
+	h.Set("x-total-pages", "3")
+	h.Set("x-next-page", "2")
+	meta := MetaWithPagination(map[string]any{"risk": "read"}, h)
+	if meta["perPage"] != 200 || meta["totalPages"] != 3 || meta["total"] != 450 {
+		t.Fatalf("top-level=%v", meta)
+	}
+	raw, ok := meta["pagination_headers"].(map[string]string)
+	if !ok || raw["x-total"] != "450" || raw["x-next-page"] != "2" {
+		t.Fatalf("pagination_headers=%v", meta["pagination_headers"])
+	}
+}
+
+func TestApplyFullPageHasMoreHeuristic(t *testing.T) {
+	meta := map[string]any{"risk": "read"}
+	ApplyFullPageHasMoreHeuristic(meta, 200, 200)
+	if meta["has_more"] != true {
+		t.Fatalf("%v", meta)
+	}
+	if meta["has_more_reason"] == nil {
+		t.Fatal("missing reason")
+	}
+	// does not override existing has_more
+	meta2 := map[string]any{"has_more": false}
+	ApplyFullPageHasMoreHeuristic(meta2, 200, 200)
+	if meta2["has_more"] != false {
+		t.Fatalf("should not override: %v", meta2)
+	}
+}
+
+func TestInferHasMoreIgnoresSpuriousNextPage(t *testing.T) {
+	// Live Yunxiao: x-total=0 still sends x-next-page=2.
+	empty := http.Header{}
+	empty.Set("x-page", "1")
+	empty.Set("x-per-page", "50")
+	empty.Set("x-total", "0")
+	empty.Set("x-total-pages", "0")
+	empty.Set("x-next-page", "2")
+	meta := MetaWithPagination(nil, empty)
+	if meta["has_more"] != false {
+		t.Fatalf("empty total should not has_more: %v", meta)
+	}
+
+	// Last page still advertises x-next-page.
+	last := http.Header{}
+	last.Set("x-page", "2")
+	last.Set("x-per-page", "50")
+	last.Set("x-total", "83")
+	last.Set("x-total-pages", "2")
+	last.Set("x-next-page", "3")
+	meta2 := MetaWithPagination(nil, last)
+	if meta2["has_more"] != false {
+		t.Fatalf("page==totalPages should not has_more: %v", meta2)
+	}
+}

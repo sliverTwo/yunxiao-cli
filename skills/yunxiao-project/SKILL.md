@@ -32,6 +32,9 @@ yunxiao project +my-open-items --category Task --space-id <projectId>
 yunxiao project list --name demo
 yunxiao workitem search --assigned-to self --category Req
 yunxiao workitem search --subject "登录" --status-stage 1,2
+# 周报日期窗口 + 跟页（meta.total / --all；oapi 响应可能无 finishTime）
+yunxiao workitem search --category Req --created-after "2026-09-01 00:00:00" --created-before "2026-09-07 23:59:59" --all
+yunxiao workitem search --category Bug --status 100005,100010 --status-stage 1,2
 yunxiao workitem get --id <workItemId>
 yunxiao workitem comments list --id <id>   # newest first; --sort asc for oldest
 yunxiao workitem search --creator self --category Task --status-stage 1,2

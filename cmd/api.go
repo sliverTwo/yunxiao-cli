@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/yunxiao-cli/yunxiao/internal/client"
 	"github.com/yunxiao-cli/yunxiao/internal/output"
 	"github.com/yunxiao-cli/yunxiao/internal/risk"
 )
@@ -19,7 +21,12 @@ Examples:
   yunxiao api POST /oapi/v1/... --data-file body.json
   yunxiao api POST /oapi/v1/... --data @body.json
 
-Risk: write (treat unknown endpoints carefully; use --dry-run first)`,
+Risk: GET/HEAD and known read POSTs (paths containing ":search", e.g. workitems:search)
+are read (no --yes). Other POST/PUT/PATCH/DELETE are high-risk-write and need --yes;
+use --dry-run first.
+
+For :search / list-style responses, meta includes pagination from x-* headers
+(pagination_headers, has_more, total, …) when the API returns them.`,
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
@@ -41,23 +48,47 @@ Risk: write (treat unknown endpoints carefully; use --dry-run first)`,
 			return
 		}
 		if globalDryRun {
-			handleErr(output.DryRunResult(string(risk.Write), c.Preview(method, path, nil, body)))
+			rl := risk.Write
+			if risk.IsReadOnlyHTTP(method, path) {
+				rl = risk.Read
+			}
+			handleErr(output.DryRunResult(string(rl), c.Preview(method, path, nil, body)))
 			return
 		}
-		// Mutating methods need --yes for high-risk gate when POST/PUT/PATCH/DELETE
-		if method != "GET" && method != "HEAD" {
+		// Mutating methods need --yes. Genuine read POSTs (e.g. workitems:search)
+		// are Risk: read and must not require confirmation.
+		if !risk.IsReadOnlyHTTP(method, path) {
 			if err := risk.CheckHighRisk("api "+method+" "+path, globalYes); err != nil {
 				handleErr(err)
 				return
 			}
 		}
 		var out any
-		if _, err := c.Do(cmd.Context(), method, path, nil, body, &out); err != nil {
+		hdr, err := c.Do(cmd.Context(), method, path, nil, body, &out)
+		if err != nil {
 			handleErr(err)
 			return
 		}
-		handleErr(output.Success(out, map[string]any{"method": method, "path": path}))
+		meta := map[string]any{"method": method, "path": path}
+		if risk.IsReadOnlyHTTP(method, path) || strings.Contains(path, ":search") {
+			meta = client.MetaWithPagination(meta, hdr)
+			if bodyMap, ok := body.(map[string]any); ok {
+				if cond, ok := bodyMap["conditions"]; ok {
+					meta["request"] = map[string]any{"conditions": cond, "body_keys": mapKeys(bodyMap)}
+				}
+			}
+		}
+		handleErr(output.Success(out, meta))
 	},
+}
+
+func mapKeys(m map[string]any) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 func init() {

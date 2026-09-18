@@ -76,6 +76,8 @@ Start writes with `--dry-run`, confirm high-risk writes before adding `--yes`, a
 
 Use the CLI for scripts, CI, and copy-paste commands; use MCP for chat in an IDE; many teams use both.
 
+**Weekly quality / date-window reports** (date range → Req/Bug → JSON → scripts): prefer the typed CLI (`workitem search` with `--created-after` / `--created-before`, `--updated-*`, `--finish-*`, plus `--status` / `--status-stage`, and `--all` to follow pages). Use MCP chat only as a fallback when you are already in an IDE agent. Filtering by `finishTime` via conditions may work; oapi SearchWorkitems / get responses omit `finishTime` (schemas list `gmtCreate` / `gmtModified` / `updateStatusAt`) — the CLI does **not** invent or enrich `finishTime` from `updateStatusAt`. OpenAPI `perPage` max is 200: use `meta.total` / `has_more` / `--all`, not `len(data)`. Typed `workitem search` and raw `api POST …/workitems:search` are **read** (no `--yes`).
+
 For AI agents, the CLI workflow is Agent paste followed by `yunxiao …`; the MCP workflow is tool-based. MCP reduces command memorization, but it often provides weaker auditability and reproducibility than the CLI.
 
 ## Install
@@ -208,6 +210,8 @@ yunxiao project list --name demo
 yunxiao project +my-open-items
 yunxiao project +created-by-me --status-stage 1,2
 yunxiao workitem search --assigned-to self --category Req --priority <id>
+yunxiao workitem search --category Req --created-after "2026-09-01 00:00:00" --created-before "2026-09-07 23:59:59"
+yunxiao workitem search --category Bug --finish-after "2026-09-01 00:00:00" --finish-before "2026-09-07 23:59:59"
 yunxiao workitem get --id <id>
 yunxiao workitem comments list --id <id>
 yunxiao workitem comment --id <id> --content "note" --dry-run
