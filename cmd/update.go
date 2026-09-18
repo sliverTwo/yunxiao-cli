@@ -130,19 +130,9 @@ func runUpdate(cmd *cobra.Command) error {
 	}
 	meta["download_url"] = usedURL
 
-	if sums, sumErr := update.FetchChecksums(cmd.Context(), client, rel); sumErr == nil {
-		if expected, ok := sums[archiveName]; ok {
-			if err := update.VerifyChecksum(archivePath, expected); err != nil {
-				return err
-			}
-			meta["checksum_ok"] = true
-		} else {
-			meta["checksum_ok"] = false
-			meta["checksum_note"] = "archive not listed in checksums.txt"
-		}
-	} else {
-		meta["checksum_ok"] = false
-		meta["checksum_note"] = "checksums.txt not available; skipped verify"
+	sums, sumErr := update.FetchChecksums(cmd.Context(), client, rel)
+	if err := verifyArchiveChecksum(archivePath, archiveName, sums, sumErr, meta); err != nil {
+		return err
 	}
 
 	extractDir := filepath.Join(tmpDir, "extract")
@@ -165,6 +155,24 @@ func runUpdate(cmd *cobra.Command) error {
 		"message": fmt.Sprintf("updated %s → %s", current, latest),
 		"path":    exe,
 	}, meta)
+}
+
+func verifyArchiveChecksum(archivePath, archiveName string, sums map[string]string, fetchErr error, meta map[string]any) error {
+	if fetchErr != nil {
+		meta["checksum_ok"] = false
+		meta["checksum_note"] = "checksums.txt not available; skipped verify"
+		return nil
+	}
+
+	expected, ok := sums[archiveName]
+	if !ok {
+		return fmt.Errorf("checksums.txt missing checksum for %q", archiveName)
+	}
+	if err := update.VerifyChecksum(archivePath, expected); err != nil {
+		return err
+	}
+	meta["checksum_ok"] = true
+	return nil
 }
 
 func confirmSelfUpdate(latest, exe string, yes bool) error {
