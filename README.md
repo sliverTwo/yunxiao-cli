@@ -6,29 +6,6 @@ Yunxiao (Alibaba Cloud DevOps) CLI redesigned like Feishu/Lark CLI: progressive 
 
 CLI binary name: **`yunxiao`**.
 
-## Quick start
-
-```bash
-# 1) Install from GitHub Releases (primary)
-#    https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
-#    Download the archive for your OS/arch, extract, put `yunxiao` on PATH.
-yunxiao --version   # expect 0.16.1
-
-# Optional later: npm package name is `sanzhi-yunxiao-cli` (binaries still come from GitHub Releases).
-# Do not configure a private Aliyun npm registry for this project.
-
-yunxiao auth login --browser    # or: yunxiao auth login --token "<PAT>"
-yunxiao auth probe-oauth         # after browser login
-yunxiao whoami && yunxiao doctor
-
-yunxiao organization +whoami
-yunxiao pipeline list
-yunxiao codeup repos list
-```
-
-Start writes with `--dry-run`, confirm high-risk writes before adding `--yes`, and use `--data-file ./body.json` for long JSON. Install companion skills with `yunxiao skills install` (wizard supports multiple selections; or `--skill ...`).
-
-
 ## For AI agents
 
 Paste the following into an AI agent (install → auth → skills → list projects read-only → user picks a project → **local-only** profile init; do not commit Zhiyi/sandbox tenant data):
@@ -40,8 +17,6 @@ Install and init yunxiao CLI with a LOCAL profile (never write tenant profiles i
    https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
    Download the archive for the user's OS/arch, extract, put `yunxiao` on PATH.
    yunxiao --version   # expect 0.16.1
-   Optional: npm package name is `sanzhi-yunxiao-cli` (may be published elsewhere later);
-   do not configure a private Aliyun npm registry for this project.
 
 2) Auth — prefer browser OAuth; use PAT only for CI/headless (never print/paste raw tokens into chat):
    Recommended: yunxiao auth login --browser
@@ -61,13 +36,32 @@ Install and init yunxiao CLI with a LOCAL profile (never write tenant profiles i
    Prefer: yunxiao +onboard
    Or: yunxiao +onboard --space-id <id> --profile <name>
    Do NOT default to `profile install-example zhiyi|play`.
-   Zhiyi/sandbox specifics stay on the user's machine / private tooling.
+   Zhiyi/sandbox specifics stay on the user's machine / user-managed tooling.
    Repo profiles/*.example.json (if present) are examples only; real tenant profiles must stay local/untracked.
 
 6) export YUNXIAO_PROFILE=<name> ; yunxiao profile show ; yunxiao profile doctor ; yunxiao doctor
 
 7) Risk: --dry-run before writes; high-risk needs user confirm then --yes; long JSON via --data-file.
 ```
+
+## Quick start
+
+```bash
+# 1) Install from GitHub Releases (primary)
+#    https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
+#    Download the archive for your OS/arch, extract, put `yunxiao` on PATH.
+yunxiao --version   # expect 0.16.1
+
+yunxiao auth login --browser    # or: yunxiao auth login --token "<PAT>"
+yunxiao auth probe-oauth         # after browser login
+yunxiao whoami && yunxiao doctor
+
+yunxiao organization +whoami
+yunxiao pipeline list
+yunxiao codeup repos list
+```
+
+Start writes with `--dry-run`, confirm high-risk writes before adding `--yes`, and use `--data-file ./body.json` for long JSON. Install companion skills with `yunxiao skills install` (wizard supports multiple selections; or `--skill ...`).
 
 ## Install
 
@@ -80,8 +74,6 @@ yunxiao --version          # yunxiao 0.16.1
 ```
 
 This project is maintained on **GitHub only** (`sliverTwo/yunxiao-cli`).
-
-**Optional — npm package name `sanzhi-yunxiao-cli`:** if the package is available on a public registry later, `npm install -g sanzhi-yunxiao-cli@0.16.1` then `npx sanzhi-yunxiao-cli@latest install` still pulls binaries from [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases) (`YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli` by default). Do **not** document or require a private Aliyun npm registry URL for installs.
 
 **From source (secondary):**
 
