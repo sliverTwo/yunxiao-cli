@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/yunxiao-cli/yunxiao/internal/risk"
@@ -92,5 +93,27 @@ func TestFindUpdate(t *testing.T) {
 	}
 	if !hasCheck {
 		t.Fatal("update missing check param")
+	}
+}
+
+func TestMrsCreateReviewerParam(t *testing.T) {
+	m := Find("codeup.mrs.create")
+	if m == nil {
+		t.Fatal("missing codeup.mrs.create")
+	}
+	hasReviewer := false
+	for _, param := range m.Params {
+		if param.Name == "reviewer" {
+			hasReviewer = true
+			if param.Required {
+				t.Fatal("reviewer should be optional")
+			}
+		}
+	}
+	if !hasReviewer {
+		t.Fatal("codeup.mrs.create missing reviewer param")
+	}
+	if m.Example == "" || !strings.Contains(m.Example, "--reviewer") {
+		t.Fatalf("example should mention --reviewer: %q", m.Example)
 	}
 }

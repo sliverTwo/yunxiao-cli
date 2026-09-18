@@ -25,7 +25,8 @@ Zhiyi-oriented wrapper around Codeup changeRequests. Does not replace typed
   yunxiao codeup mrs +create --repo <repo-id> --source feat/x --title "fix" --yes
 
 --repo accepts numeric id or profile.repositories alias. Profile optional when --repo is numeric.
---target defaults to master. --wip prefixes "WIP: " when target is master.`,
+--target defaults to master. --wip prefixes "WIP: " when target is master.
+--reviewer is comma-separated userIds (OpenAPI reviewerUserIds), same as typed mrs create.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 
@@ -94,7 +95,7 @@ Zhiyi-oriented wrapper around Codeup changeRequests. Does not replace typed
 			"targetProjectId": repositoryID,
 			"createFrom":      "WEB",
 			"description":     desc,
-			"reviewerIds":     reviewerIDs,
+			"reviewerUserIds": reviewerIDs,
 			"workItemIds":     workItemIDs,
 		}
 
@@ -127,7 +128,7 @@ func init() {
 	codeupMrsPlusCreateCmd.Flags().String("title", "", "MR title (required)")
 	codeupMrsPlusCreateCmd.Flags().String("description", "", "MR description")
 	codeupMrsPlusCreateCmd.Flags().String("work-item", "", "ZYPT serial or internal id (resolved to workItemIds)")
-	codeupMrsPlusCreateCmd.Flags().String("reviewer", "", "optional reviewer userId(s), comma-separated")
+	codeupMrsPlusCreateCmd.Flags().String("reviewer", "", "optional reviewer userId(s), comma-separated (OpenAPI reviewerUserIds; same as mrs create)")
 	codeupMrsPlusCreateCmd.Flags().Bool("wip", false, "prefix WIP: when target is master")
 	codeupMrsCmd.AddCommand(codeupMrsPlusCreateCmd)
 }
