@@ -133,7 +133,7 @@ func activeProfileCheck(pf *profile.Profile) map[string]any {
 }
 
 func init() {
-	doctorCmd.Flags().BoolVar(&doctorCheckUpdate, "check-update", false, "also check GitHub Releases for a newer yunxiao (network; opt-in)")
+	doctorCmd.Flags().BoolVar(&doctorCheckUpdate, "check-update", false, "同时查询 GitHub Releases 是否有新版本（网络；需显式开启）")
 }
 
 func doctorUpdateCheck(cmd *cobra.Command) map[string]any {

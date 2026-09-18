@@ -74,3 +74,23 @@ func TestFindWorkitemSearchAliases(t *testing.T) {
 		t.Fatal("workitem.search missing as-items param")
 	}
 }
+
+func TestFindUpdate(t *testing.T) {
+	m := Find("update")
+	if m == nil || m.ID != "update" || m.Risk != risk.Write || m.Domain != "cli" {
+		t.Fatalf("%+v", m)
+	}
+	a := Find("self-update")
+	if a == nil || a.ID != "update" {
+		t.Fatalf("self-update alias -> %+v", a)
+	}
+	hasCheck := false
+	for _, param := range m.Params {
+		if param.Name == "check" {
+			hasCheck = true
+		}
+	}
+	if !hasCheck {
+		t.Fatal("update missing check param")
+	}
+}

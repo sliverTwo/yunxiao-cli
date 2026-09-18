@@ -19,35 +19,34 @@ var updateCheckOnly bool
 var updateCmd = &cobra.Command{
 	Use:     "update",
 	Aliases: []string{"self-update"},
-	Short:   "Update the yunxiao binary from GitHub Releases",
-	Long: `Risk: write (replaces the local yunxiao executable)
+	Short:   "从 GitHub Releases 自更新 yunxiao 二进制",
+	Long: `Risk: write（替换本地 yunxiao 可执行文件）
 
-Compares the running version to the latest GitHub Release, downloads the
-matching platform archive (windows/linux/darwin × amd64/arm64), verifies
-SHA-256 when checksums.txt is present, and replaces this binary safely
-(write beside → rename; Windows-friendly).
+对比当前版本与 GitHub Releases 最新版，下载匹配平台归档
+（windows/linux/darwin × amd64/arm64），有 checksums.txt 时校验 SHA-256，
+并安全替换本二进制（先写旁边再 rename；Windows 友好）。
 
-  yunxiao update --check          # report only; exit 2 if update available
-  yunxiao update --dry-run        # same as --check
-  yunxiao update                  # TTY: confirm; non-TTY: requires --yes
-  yunxiao update --yes            # apply without prompt (scripts/CI)
+  yunxiao update --check          # 仅检查；有新版本则 exit 2
+  yunxiao update --dry-run        # 同 --check
+  yunxiao update                  # TTY：确认后替换；非 TTY 需 --yes
+  yunxiao update --yes            # 无提示直接更新（脚本/CI）
 
-Other commands may print a stderr update hint at most once per 24h (skipped for json format / update / completion).
-Optional: yunxiao doctor --check-update.
-Disable optional hints: YUNXIAO_UPDATE_CHECK=0.
+其他命令可能每 24h 最多在 stderr 打印一次中文更新提示（json / update / completion 会跳过）。
+可选：yunxiao doctor --check-update。
+关闭机会性提示：YUNXIAO_UPDATE_CHECK=0。
 
-Override release source (same as npm installer):
+覆盖发布源（与 npm 安装器相同）：
   YUNXIAO_CLI_GITHUB_REPO=owner/repo
   YUNXIAO_CLI_DOWNLOAD_BASE=https://example.com/path
 
-npm installs can also refresh via: npm install -g sanzhi-yunxiao-cli@latest`,
+npm 安装亦可：npm install -g sanzhi-yunxiao-cli@latest`,
 	Run: func(cmd *cobra.Command, args []string) {
 		handleErr(runUpdate(cmd))
 	},
 }
 
 func init() {
-	updateCmd.Flags().BoolVar(&updateCheckOnly, "check", false, "only check for a newer release (no download); exit 2 if available")
+	updateCmd.Flags().BoolVar(&updateCheckOnly, "check", false, "仅检查是否有新版本（不下载）；有则 exit 2")
 	rootCmd.AddCommand(updateCmd)
 }
 

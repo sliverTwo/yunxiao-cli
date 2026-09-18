@@ -395,6 +395,13 @@ var Registry = []Method{
 	{ID: "codeup.protected_branches.delete", Domain: "codeup", Description: "Delete protected branch rule",
 		HTTPMethod: "DELETE", Path: ".../protectedBranches/{id}", Risk: risk.HighRiskWrite,
 		Example: "yunxiao codeup protected-branches delete --repo <id> --id 1 --dry-run"},
+	{ID: "update", Domain: "cli", Description: "Self-update yunxiao binary from GitHub Releases (alias: self-update)",
+		HTTPMethod: "N/A", Path: "local binary replace", Risk: risk.Write,
+		Params: []Param{
+			{Name: "check", Type: "bool", Required: false, Desc: "report only; exit 2 if update available (no download)"},
+			{Name: "yes", Type: "bool", Required: false, Desc: "apply without prompt (scripts/CI; never silent)"},
+		},
+		Example: "yunxiao update --check"},
 	{ID: "api.raw", Domain: "api", Description: "Raw HTTP escape hatch",
 		HTTPMethod: "ANY", Path: "<path>", Risk: risk.Write, Example: "yunxiao api GET /oapi/v1/platform/user"},
 }
@@ -404,6 +411,7 @@ var schemaAliases = map[string]string{
 	"project.searchWorkitems": "workitem.search",
 	"search_workitems":        "workitem.search",
 	"searchWorkitems":         "workitem.search",
+	"self-update":             "update",
 }
 
 func Find(id string) *Method {
