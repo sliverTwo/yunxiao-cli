@@ -6,6 +6,49 @@
 
 CLI 二进制名：**`yunxiao`**。
 
+## 面向 AI Agent
+
+将以下内容粘贴给 AI Agent（安装 → 认证 → 安装 skills → 只读列项目 → 由用户选择项目 → **仅本机**初始化 profile；勿将智衣/沙箱租户配置提交到仓库）：
+
+```text
+请帮我安装并初始化 yunxiao CLI（本地 profile，勿写入本仓库）：
+
+1) 安装（主路径：GitHub Releases）：
+   https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
+   按用户系统下载归档、解压，把 `yunxiao` 加入 PATH。
+   yunxiao --version   # 应显示 0.16.1
+
+2) 认证（优先浏览器 OAuth；无图形界面再用 PAT。禁止把完整 token 打到回复/聊天里）
+   推荐：yunxiao auth login --browser
+   注意：OAuth 同意 = 账号 API 全能力（平台不按模块限权，宽于细粒度 PAT）。
+   登录后探测：yunxiao auth probe-oauth
+   PAT 回落（CI/无浏览器）：
+     控制台：https://account-devops.aliyun.com/settings/personalAccessToken
+     帮助：https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
+     yunxiao auth login --token "<PAT>"
+   yunxiao whoami && yunxiao doctor && yunxiao auth status
+
+3) 安装 companion skills：
+   yunxiao skills install
+
+4) 只读列项目，请用户挑选一个 space_id / 项目：
+   yunxiao project list
+
+5) 仅为所选项目初始化 **本地** profile（写入 ~/.config/yunxiao/profiles/，不要写入 git 工作区）：
+   推荐交互：yunxiao +onboard
+   或非交互：yunxiao +onboard --space-id <id> --profile <name>
+   不要默认走 `profile install-example zhiyi|play`；智衣/沙箱字段留在用户本机/用户管理的工具，不要提交到本公开仓库。
+   若仓库里已有 profiles/*.example.json，仅作示例；真实租户 profile 必须本地、勿跟踪。
+
+6) 校验：
+   export YUNXIAO_PROFILE=<name>
+   yunxiao profile show
+   yunxiao profile doctor
+   yunxiao doctor
+
+7) 风险规则：写操作先 --dry-run；高风险需用户确认后再加 --yes；长 JSON 用 --data-file。
+```
+
 ## 快速开始
 
 ### 1. 安装
@@ -15,9 +58,6 @@ CLI 二进制名：**`yunxiao`**。
 # https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
 
 yunxiao --version   # 应显示 0.16.1
-
-# 可选：npm 包名是 sanzhi-yunxiao-cli（日后若在公共源发布；二进制仍来自 GitHub Releases）
-# 本项目不要再配置公司阿里云 npm 私仓
 ```
 
 ### 2. 认证
@@ -50,51 +90,6 @@ yunxiao codeup repos list
 - 长 JSON 用 `--data-file ./body.json`
 - Skills 向导可多选；也可 `yunxiao skills install --skill ...`
 
-
-## 面向 AI Agent
-
-将以下内容粘贴给 AI Agent（安装 → 认证 → 安装 skills → 只读列项目 → 由用户选择项目 → **仅本机**初始化 profile；勿将智衣/沙箱租户配置提交到仓库）：
-
-```text
-请帮我安装并初始化 yunxiao CLI（本地 profile，勿写入本仓库）：
-
-1) 安装（主路径：GitHub Releases）：
-   https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
-   按用户系统下载归档、解压，把 `yunxiao` 加入 PATH。
-   yunxiao --version   # 应显示 0.16.1
-   可选：npm 包名 `sanzhi-yunxiao-cli`（日后或在别处发布）；不要为本项目配置公司阿里云 npm 私仓。
-
-2) 认证（优先浏览器 OAuth；无图形界面再用 PAT。禁止把完整 token 打到回复/聊天里）
-   推荐：yunxiao auth login --browser
-   注意：OAuth 同意 = 账号 API 全能力（平台不按模块限权，宽于细粒度 PAT）。
-   登录后探测：yunxiao auth probe-oauth
-   PAT 回落（CI/无浏览器）：
-     控制台：https://account-devops.aliyun.com/settings/personalAccessToken
-     帮助：https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
-     yunxiao auth login --token "<PAT>"
-   yunxiao whoami && yunxiao doctor && yunxiao auth status
-
-3) 安装 companion skills：
-   yunxiao skills install
-
-4) 只读列项目，请用户挑选一个 space_id / 项目：
-   yunxiao project list
-
-5) 仅为所选项目初始化 **本地** profile（写入 ~/.config/yunxiao/profiles/，不要写入 git 工作区）：
-   推荐交互：yunxiao +onboard
-   或非交互：yunxiao +onboard --space-id <id> --profile <name>
-   不要默认走 `profile install-example zhiyi|play`；智衣/沙箱字段留在用户本机/私有工具，不要提交到本公开仓库。
-   若仓库里已有 profiles/*.example.json，仅作示例；真实租户 profile 必须本地、勿跟踪。
-
-6) 校验：
-   export YUNXIAO_PROFILE=<name>
-   yunxiao profile show
-   yunxiao profile doctor
-   yunxiao doctor
-
-7) 风险规则：写操作先 --dry-run；高风险需用户确认后再加 --yes；长 JSON 用 --data-file。
-```
-
 ## 安装
 
 **推荐 — [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1)：**
@@ -106,8 +101,6 @@ yunxiao --version          # yunxiao 0.16.1
 ```
 
 本项目**仅在 GitHub 上维护**（`sliverTwo/yunxiao-cli`）。
-
-**可选 — npm 包名 `sanzhi-yunxiao-cli`：** 若日后在公共源可用，`npm install -g sanzhi-yunxiao-cli@0.16.1` 再执行 `npx sanzhi-yunxiao-cli@latest install` 时，二进制仍来自 [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases)（默认 `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli`）。**不要**再为本项目文档化或依赖公司阿里云 npm 私仓 URL。
 
 **从源码安装（次要）：**
 
