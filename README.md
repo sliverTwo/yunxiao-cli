@@ -8,10 +8,10 @@ CLI binary name: **`yunxiao`**.
 
 ## For AI agents
 
-Paste the following into an AI agent (install → auth → skills → list projects read-only → user picks a project → **local-only** profile init; do not commit Zhiyi/sandbox tenant data):
+Paste the following into an AI agent (install → auth → skills → list projects read-only → user picks a project → **local-only** profile init):
 
 ```text
-Install and init yunxiao CLI with a LOCAL profile (never write tenant profiles into this repo):
+Install and init yunxiao CLI with a LOCAL profile:
 
 1) Install from GitHub Releases (primary):
    https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
@@ -32,12 +32,9 @@ Install and init yunxiao CLI with a LOCAL profile (never write tenant profiles i
 
 4) Read-only: yunxiao project list — ask the user to pick a project/space_id
 
-5) Init a LOCAL profile only (~/.config/yunxiao/profiles/), not the git tree:
+5) Init a LOCAL profile under ~/.config/yunxiao/profiles/:
    Prefer: yunxiao +onboard
    Or: yunxiao +onboard --space-id <id> --profile <name>
-   Do NOT default to `profile install-example zhiyi|play`.
-   Zhiyi/sandbox specifics stay on the user's machine / user-managed tooling.
-   Repo profiles/*.example.json (if present) are examples only; real tenant profiles must stay local/untracked.
 
 6) export YUNXIAO_PROFILE=<name> ; yunxiao profile show ; yunxiao profile doctor ; yunxiao doctor
 
@@ -315,7 +312,7 @@ yunxiao schema
 
 
 ## Profiles: play vs zhiyi (optional)
-> Note: `profiles/*.example.json` in this repo (if present) are **examples only**. Real tenant profiles (Zhiyi/sandbox/etc.) must live under `~/.config/yunxiao/profiles/` and stay local/untracked. Prefer `yunxiao +onboard` to create a generic local profile from a chosen `space_id`.
+`yunxiao +onboard` creates a generic local profile from a chosen `space_id` under `~/.config/yunxiao/profiles/`.
 
 
 Tenant-specific Projex constants live in a **profile JSON**, not hardcoded CLI defaults.
@@ -407,7 +404,7 @@ See [AGENTS.md](AGENTS.md) for contributor / AI-agent conventions.
 
 - **0.16.1** — Smoke fixes: `appstack apps list` sends required `pagination=keyset`; `workitem search` / `project +my-open-items` use profile `space_id` or clear CLI error; friendlier hint when `programs search` is blocked on non-Advanced orgs
 - **0.16.0** — Browser OAuth (`auth login --browser` / `--dry-run`), `credentials.json` (0600), `auth probe-oauth` (O1 header gate), auto refresh for `token_kind=oauth`, For AI agents section prefers browser OAuth; PAT `--token` kept for CI
-- **0.15.7** — `yunxiao +onboard` writes a **generic local** profile under `~/.config/yunxiao/profiles/` (TTY project pick or `--space-id`); README For AI agents prompts (EN + zh-CN); missing-token hints include PAT console URL + module permission checklist; real Zhiyi/sandbox tenant profiles stay local/untracked (do not expand example profiles for onboard)
+- **0.15.7** — `yunxiao +onboard` writes a **generic local** profile under `~/.config/yunxiao/profiles/` (TTY project pick or `--space-id`); README For AI agents prompts (EN + zh-CN); missing-token hints include PAT console URL + module permission checklist
 - **0.15.6** — default newest-first for comment/activity/history-style lists (`--sort asc|desc`; invalid values rejected); comments sort by **create** time; activity/MR/runs/efforts prefer update/modified; client-side `--sort` is **page-local** when the list is paginated (`--all` sorts across collected pages)
 - **0.15.5** — `--data-file` and `--data @file.json` for long JSON payloads (`api`, appstack, testhub, …)
 - **0.15.2** — companion skills refresh for CLI 0.15.x (`has_more` / `meta.url` / `refresh_ok`); `client.ListAll` + `--all` on `pipeline list` & `codeup mrs list`; `scripts/flow-ci.sh` (Alibaba golang mirror + `GOPROXY=goproxy.cn`)

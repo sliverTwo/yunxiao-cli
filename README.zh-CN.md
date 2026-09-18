@@ -8,10 +8,10 @@ CLI 二进制名：**`yunxiao`**。
 
 ## 面向 AI Agent
 
-将以下内容粘贴给 AI Agent（安装 → 认证 → 安装 skills → 只读列项目 → 由用户选择项目 → **仅本机**初始化 profile；勿将智衣/沙箱租户配置提交到仓库）：
+将以下内容粘贴给 AI Agent（安装 → 认证 → 安装 skills → 只读列项目 → 由用户选择项目 → **仅本机**初始化 profile）：
 
 ```text
-请帮我安装并初始化 yunxiao CLI（本地 profile，勿写入本仓库）：
+请帮我安装并初始化 yunxiao CLI（本地 profile）：
 
 1) 安装（主路径：GitHub Releases）：
    https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
@@ -34,11 +34,9 @@ CLI 二进制名：**`yunxiao`**。
 4) 只读列项目，请用户挑选一个 space_id / 项目：
    yunxiao project list
 
-5) 仅为所选项目初始化 **本地** profile（写入 ~/.config/yunxiao/profiles/，不要写入 git 工作区）：
+5) 仅为所选项目初始化 **本地** profile（写入 ~/.config/yunxiao/profiles/）：
    推荐交互：yunxiao +onboard
    或非交互：yunxiao +onboard --space-id <id> --profile <name>
-   不要默认走 `profile install-example zhiyi|play`；智衣/沙箱字段留在用户本机/用户管理的工具，不要提交到本公开仓库。
-   若仓库里已有 profiles/*.example.json，仅作示例；真实租户 profile 必须本地、勿跟踪。
 
 6) 校验：
    export YUNXIAO_PROFILE=<name>
@@ -369,7 +367,7 @@ Packages **上传**、Codeup **blame/cherry-pick**、MR label detach 等仍无�
 
 - **0.16.1** — 冒烟修复：`appstack apps list` 补齐必填 `pagination=keyset`；`workitem search` / `project +my-open-items` 回退 profile `space_id` 或给出清晰 CLI 错误；`programs search` 非高级版组织返回更友好提示
 - **0.16.0** — 浏览器 OAuth（`auth login --browser` / `--dry-run`）、`credentials.json`（0600）、`auth probe-oauth`、oauth 自动 refresh；「面向 AI Agent」优先 browser OAuth；CI 保留 `--token`
-- **0.15.7** — `yunxiao +onboard`：按所选项目/`space_id` 仅写入本机 `~/.config/yunxiao/profiles/` 的通用 profile（TTY 选择或 `--space-id`）；README「面向 AI Agent」；缺 token 时提示 PAT 控制台链接与模块权限清单；智衣/沙箱租户配置留在本机、勿提交本仓库（不借 onboard 扩展示例 profile）
+- **0.15.7** — `yunxiao +onboard`：按所选项目/`space_id` 写入 `~/.config/yunxiao/profiles/` 的通用 profile（TTY 选择或 `--space-id`）；README「面向 AI Agent」；缺 token 时提示 PAT 控制台链接与模块权限清单
 - **0.15.6** — 评论/活动/历史类列表默认最新在前（`--sort asc|desc`，非法值报错）；评论按**创建时间**排序；活动/MR/流水线运行/工时等仍偏好更新时间；分页列表的客户端 `--sort` 仅作用于**当前页**（`--all` 时对已拉取页整体排序）
 - **0.15.5** — 长 JSON 支持 `--data-file` / `--data @file.json`（`api`、appstack、testhub 等）
 - **0.15.2** — companion skills 对齐 CLI 0.15.x（`has_more` / `meta.url` / `refresh_ok`）；`client.ListAll` + `pipeline list --all` / `codeup mrs list --all`；`scripts/flow-ci.sh`（阿里云 golang 镜像 + `GOPROXY=goproxy.cn`）
