@@ -16,13 +16,9 @@ yunxiao --version
 # interactive skill picker (TTY) or install all (non-TTY)
 ```
 
-### Aliyun npm registry (optional)
+### From this checkout (before/without a public npm publish)
 
-```bash
-npm install -g sanzhi-yunxiao-cli --registry=https://registry.npmmirror.com
-```
-
-Until published:
+Primary end-user install path is **[GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases)** (see repo README). Package name is `sanzhi-yunxiao-cli` only — do not document a private company npm registry URL.
 
 ```bash
 npm install -g ./npm

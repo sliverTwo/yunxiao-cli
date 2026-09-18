@@ -162,8 +162,8 @@ Alternatives:
 # From a local checkout path
 npx skills add /path/to/yunxiao-cli -y -g
 
-# After Codeup push (URL MUST end in .git; needs Codeup git credentials)
-npx skills add https://codeup.aliyun.com/sanzhi/cli/yunxiao_cli.git -y -g
+# From GitHub (URL MUST end in .git)
+npx skills add https://github.com/sliverTwo/yunxiao-cli.git -y -g
 ```
 
 Then **restart / reload** the AI tool so it picks up skills.
