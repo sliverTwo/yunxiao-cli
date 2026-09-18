@@ -6,7 +6,7 @@ Yunxiao (Alibaba Cloud DevOps) CLI redesigned like Feishu/Lark CLI: progressive 
 
 CLI binary name: **`yunxiao`**.
 
-## Trial quickstart (5 minutes)
+## Quick start
 
 ```bash
 # 1) Install from GitHub Releases (primary)
@@ -29,9 +29,9 @@ yunxiao codeup repos list
 Start writes with `--dry-run`, confirm high-risk writes before adding `--yes`, and use `--data-file ./body.json` for long JSON. Install companion skills with `yunxiao skills install` (wizard supports multiple selections; or `--skill ...`).
 
 
-## Paste for Agent
+## For AI agents
 
-Copy-paste for an agent (install → auth → skills → list projects read-only → user picks → **local-only** profile init; do not commit Zhiyi/sandbox tenant data):
+Paste the following into an AI agent (install → auth → skills → list projects read-only → user picks a project → **local-only** profile init; do not commit Zhiyi/sandbox tenant data):
 
 ```text
 Install and init yunxiao CLI with a LOCAL profile (never write tenant profiles into this repo):
@@ -60,7 +60,7 @@ Install and init yunxiao CLI with a LOCAL profile (never write tenant profiles i
 5) Init a LOCAL profile only (~/.config/yunxiao/profiles/), not the git tree:
    Prefer: yunxiao +onboard
    Or: yunxiao +onboard --space-id <id> --profile <name>
-   Do NOT default to `profile install-example zhiyi|play` for colleagues.
+   Do NOT default to `profile install-example zhiyi|play`.
    Zhiyi/sandbox specifics stay on the user's machine / private tooling.
    Repo profiles/*.example.json (if present) are examples only; real tenant profiles must stay local/untracked.
 
@@ -106,7 +106,7 @@ Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Versio
    https://account-devops.aliyun.com/settings/personalAccessToken  
    Help: https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
 
-   Recommended module checkboxes for this CLI: Organization/members **read**; Projex/Codeup/Flow **read+write** (or read-only for trial); Packages/Testhub/AppStack as needed. Token name tip: `yunxiao-cli`.
+   Recommended module checkboxes for this CLI: Organization/members **read**; Projex/Codeup/Flow **read+write** (or read-only if preferred); Packages/Testhub/AppStack as needed. Token name tip: `yunxiao-cli`.
 2. Prefer env (CI / shells):
 
 ```bash
@@ -414,8 +414,8 @@ See [AGENTS.md](AGENTS.md) for contributor / AI-agent conventions.
 ## Changelog
 
 - **0.16.1** — Smoke fixes: `appstack apps list` sends required `pagination=keyset`; `workitem search` / `project +my-open-items` use profile `space_id` or clear CLI error; friendlier hint when `programs search` is blocked on non-Advanced orgs
-- **0.16.0** — Browser OAuth (`auth login --browser` / `--dry-run`), `credentials.json` (0600), `auth probe-oauth` (O1 header gate), auto refresh for `token_kind=oauth`, Agent paste prefers browser; PAT `--token` kept for CI
-- **0.15.7** — `yunxiao +onboard` writes a **generic local** profile under `~/.config/yunxiao/profiles/` (TTY project pick or `--space-id`); README Agent paste prompts (EN + zh-CN); missing-token hints include PAT console URL + module permission checklist; real Zhiyi/sandbox tenant profiles stay local/untracked (do not expand example profiles for onboard)
+- **0.16.0** — Browser OAuth (`auth login --browser` / `--dry-run`), `credentials.json` (0600), `auth probe-oauth` (O1 header gate), auto refresh for `token_kind=oauth`, For AI agents section prefers browser OAuth; PAT `--token` kept for CI
+- **0.15.7** — `yunxiao +onboard` writes a **generic local** profile under `~/.config/yunxiao/profiles/` (TTY project pick or `--space-id`); README For AI agents prompts (EN + zh-CN); missing-token hints include PAT console URL + module permission checklist; real Zhiyi/sandbox tenant profiles stay local/untracked (do not expand example profiles for onboard)
 - **0.15.6** — default newest-first for comment/activity/history-style lists (`--sort asc|desc`; invalid values rejected); comments sort by **create** time; activity/MR/runs/efforts prefer update/modified; client-side `--sort` is **page-local** when the list is paginated (`--all` sorts across collected pages)
 - **0.15.5** — `--data-file` and `--data @file.json` for long JSON payloads (`api`, appstack, testhub, …)
 - **0.15.2** — companion skills refresh for CLI 0.15.x (`has_more` / `meta.url` / `refresh_ok`); `client.ListAll` + `--all` on `pipeline list` & `codeup mrs list`; `scripts/flow-ci.sh` (Alibaba golang mirror + `GOPROXY=goproxy.cn`)

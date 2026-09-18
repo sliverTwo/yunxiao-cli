@@ -6,7 +6,7 @@
 
 CLI 二进制名：**`yunxiao`**。
 
-## 同事试用（5 分钟）
+## 快速开始
 
 ### 1. 安装
 
@@ -22,14 +22,21 @@ yunxiao --version   # 应显示 0.16.1
 
 ### 2. 认证
 
-打开 [个人访问令牌控制台](https://account-devops.aliyun.com/settings/personalAccessToken) 新建 PAT（名称建议 `yunxiao-cli`；勾选组织读 + 项目/代码/流水线读写，按需制品/测试/应用；令牌只显示一次），然后：
+优先使用浏览器 OAuth；仅在 CI/无图形界面时使用 PAT（不要把完整 token 打到回复/聊天里）：
 
 ```bash
-yunxiao auth login --token "<PAT>"
+yunxiao auth login --browser
+yunxiao auth probe-oauth
 yunxiao whoami && yunxiao doctor
 ```
 
-### 3. 试用几条只读命令
+PAT 回落：打开 [个人访问令牌控制台](https://account-devops.aliyun.com/settings/personalAccessToken) 新建 PAT（名称建议 `yunxiao-cli`；勾选组织读 + 项目/代码/流水线读写，按需制品/测试/应用；令牌只显示一次），然后：
+
+```bash
+yunxiao auth login --token "<PAT>"
+```
+
+### 3. 常用只读命令
 
 ```bash
 yunxiao organization +whoami
@@ -37,16 +44,16 @@ yunxiao pipeline list
 yunxiao codeup repos list
 ```
 
-### 4. 注意
+### 4. 使用提示
 
 - 写操作先 `--dry-run`；高风险要确认后再加 `--yes`
 - 长 JSON 用 `--data-file ./body.json`
 - Skills 向导可多选；也可 `yunxiao skills install --skill ...`
 
 
-### 给 Agent 粘贴
+## 面向 AI Agent
 
-把下面整段发给 Agent（会装 CLI、认证、装 skills、只读列项目、让你选项目、**只在本机**写 profile，不会往仓库塞智衣/沙箱租户配置）：
+将以下内容粘贴给 AI Agent（安装 → 认证 → 安装 skills → 只读列项目 → 由用户选择项目 → **仅本机**初始化 profile；勿将智衣/沙箱租户配置提交到仓库）：
 
 ```text
 请帮我安装并初始化 yunxiao CLI（本地 profile，勿写入本仓库）：
@@ -122,7 +129,7 @@ go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.16.1
    https://account-devops.aliyun.com/settings/personalAccessToken  
    帮助文档：https://help.aliyun.com/zh/yunxiao/user-guide/personal-access-token
 
-   推荐勾选：组织/成员**读**；项目管理/代码管理/流水线**读+写**（只读试用可只开读）；制品/测试/应用交付按需。令牌名建议 `yunxiao-cli`。
+   推荐勾选：组织/成员**读**；项目管理/代码管理/流水线**读+写**（只读场景可只开读）；制品/测试/应用交付按需。令牌名建议 `yunxiao-cli`。
 2. 推荐环境变量：
 
 ```bash
@@ -368,8 +375,8 @@ Packages **上传**、Codeup **blame/cherry-pick**、MR label detach 等仍无�
 ## 变更摘要
 
 - **0.16.1** — 冒烟修复：`appstack apps list` 补齐必填 `pagination=keyset`；`workitem search` / `project +my-open-items` 回退 profile `space_id` 或给出清晰 CLI 错误；`programs search` 非高级版组织返回更友好提示
-- **0.16.0** — 浏览器 OAuth（`auth login --browser` / `--dry-run`）、`credentials.json`（0600）、`auth probe-oauth`、oauth 自动 refresh；Agent 粘贴优先 browser；CI 保留 `--token`
-- **0.15.7** — `yunxiao +onboard`：按所选项目/`space_id` 仅写入本机 `~/.config/yunxiao/profiles/` 的通用 profile（TTY 选择或 `--space-id`）；README「给 Agent 粘贴」；缺 token 时提示 PAT 控制台链接与模块权限清单；智衣/沙箱租户配置留在本机、勿提交本仓库（不借 onboard 扩展示例 profile）
+- **0.16.0** — 浏览器 OAuth（`auth login --browser` / `--dry-run`）、`credentials.json`（0600）、`auth probe-oauth`、oauth 自动 refresh；「面向 AI Agent」优先 browser OAuth；CI 保留 `--token`
+- **0.15.7** — `yunxiao +onboard`：按所选项目/`space_id` 仅写入本机 `~/.config/yunxiao/profiles/` 的通用 profile（TTY 选择或 `--space-id`）；README「面向 AI Agent」；缺 token 时提示 PAT 控制台链接与模块权限清单；智衣/沙箱租户配置留在本机、勿提交本仓库（不借 onboard 扩展示例 profile）
 - **0.15.6** — 评论/活动/历史类列表默认最新在前（`--sort asc|desc`，非法值报错）；评论按**创建时间**排序；活动/MR/流水线运行/工时等仍偏好更新时间；分页列表的客户端 `--sort` 仅作用于**当前页**（`--all` 时对已拉取页整体排序）
 - **0.15.5** — 长 JSON 支持 `--data-file` / `--data @file.json`（`api`、appstack、testhub 等）
 - **0.15.2** — companion skills 对齐 CLI 0.15.x（`has_more` / `meta.url` / `refresh_ok`）；`client.ListAll` + `pipeline list --all` / `codeup mrs list --all`；`scripts/flow-ci.sh`（阿里云 golang 镜像 + `GOPROXY=goproxy.cn`）
