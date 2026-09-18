@@ -51,22 +51,7 @@ var appstackAppsListCmd = &cobra.Command{
 			handleErr(err)
 			return
 		}
-		q := map[string]string{}
-		if perPage > 0 {
-			q["perPage"] = strconv.Itoa(perPage)
-		}
-		if nextToken != "" {
-			q["nextToken"] = nextToken
-		}
-		if orderBy != "" {
-			q["orderBy"] = orderBy
-		}
-		if sort != "" {
-			q["sort"] = sort
-		}
-		if tags != "" {
-			q["tags"] = tags
-		}
+		q := appstackAppsListQuery(perPage, nextToken, orderBy, sort, tags)
 		handleErr(runRead(cmd.Context(), c, "GET", path, q, nil, map[string]any{"risk": risk.Read}, nil))
 	},
 }
@@ -1134,10 +1119,34 @@ var appstackGVGetCmd = &cobra.Command{
 	},
 }
 
+
+// appstackAppsListQuery builds query for GET .../apps:search.
+// Yunxiao requires pagination=keyset (keyset pagination); orderBy defaults to id.
+func appstackAppsListQuery(perPage int, nextToken, orderBy, sort, tags string) map[string]string {
+	q := map[string]string{"pagination": "keyset"}
+	if perPage > 0 {
+		q["perPage"] = strconv.Itoa(perPage)
+	}
+	if nextToken != "" {
+		q["nextToken"] = nextToken
+	}
+	if orderBy == "" {
+		orderBy = "id"
+	}
+	q["orderBy"] = orderBy
+	if sort != "" {
+		q["sort"] = sort
+	}
+	if tags != "" {
+		q["tags"] = tags
+	}
+	return q
+}
+
 func init() {
 	appstackAppsListCmd.Flags().Int("per-page", 20, "page size")
 	appstackAppsListCmd.Flags().String("next-token", "", "pagination token")
-	appstackAppsListCmd.Flags().String("order-by", "", "orderBy")
+	appstackAppsListCmd.Flags().String("order-by", "id", "orderBy (API required; default id)")
 	appstackAppsListCmd.Flags().String("sort", "", "asc|desc")
 	appstackAppsListCmd.Flags().String("tags", "", "comma-separated tags")
 	appstackAppsGetCmd.Flags().String("name", "", "application name (required)")

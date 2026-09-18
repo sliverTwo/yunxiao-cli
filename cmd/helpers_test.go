@@ -87,6 +87,10 @@ func TestAPIErrorHint(t *testing.T) {
 	if !strings.Contains(h3, "--cancel-reason") {
 		t.Fatalf("hint3=%q", h3)
 	}
+	h4 := apiErrorHint(&client.APIError{Status: 403, Body: `{"errorMessage":"非高级版组织，不支持此功能"}`})
+	if !strings.Contains(h4, "Advanced-edition") || !strings.Contains(h4, "project list") {
+		t.Fatalf("programs hint=%q", h4)
+	}
 }
 
 func TestRunMutatingHighRiskGate(t *testing.T) {
@@ -223,3 +227,19 @@ func TestLoadJSONBodyFromFlags(t *testing.T) {
 		t.Fatal("expected parent-path reject for @file")
 	}
 }
+
+func TestCoalesceSpaceID(t *testing.T) {
+	got, err := coalesceSpaceID("flag-1", "profile-1")
+	if err != nil || got != "flag-1" {
+		t.Fatalf("flag wins: %q %v", got, err)
+	}
+	got, err = coalesceSpaceID("  ", "profile-1")
+	if err != nil || got != "profile-1" {
+		t.Fatalf("profile fallback: %q %v", got, err)
+	}
+	_, err = coalesceSpaceID("", "")
+	if err == nil || !strings.Contains(err.Error(), "--space-id") || !strings.Contains(err.Error(), "+onboard") {
+		t.Fatalf("want usage error, got %v", err)
+	}
+}
+

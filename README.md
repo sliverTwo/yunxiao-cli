@@ -12,13 +12,13 @@ CLI binary name: **`yunxiao`**.
 # 配置公司阿里云 npm 私仓（若本机还没有）
 npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
 
-npm install -g sanzhi-yunxiao-cli@0.16.0
+npm install -g sanzhi-yunxiao-cli@0.16.1
 npx sanzhi-yunxiao-cli@latest install   # 拉二进制 + 可选安装 skills
 
-yunxiao --version   # 应显示 0.16.0
+yunxiao --version   # 应显示 0.16.1
 
 # 备选：直接下 Release，解压后把 yunxiao.exe 所在目录加入 PATH
-# https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.0
+# https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
 ```
 
 ### 2. 认证
@@ -54,11 +54,11 @@ yunxiao codeup repos list
 
 1) 安装（公司阿里云 npm 私仓）：
    npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-   npm install -g sanzhi-yunxiao-cli@0.16.0
+   npm install -g sanzhi-yunxiao-cli@0.16.1
    npx sanzhi-yunxiao-cli@latest install
-   yunxiao --version   # 应显示 0.16.0
-   备选：GitHub Release v0.16.0
-   https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.0
+   yunxiao --version   # 应显示 0.16.1
+   备选：GitHub Release v0.16.1
+   https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
 
 2) 认证（优先浏览器 OAuth；无图形界面再用 PAT。禁止把完整 token 打到回复/聊天里）
    推荐：yunxiao auth login --browser
@@ -95,7 +95,7 @@ yunxiao codeup repos list
 
 ```bash
 npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-npm install -g sanzhi-yunxiao-cli@0.16.0
+npm install -g sanzhi-yunxiao-cli@0.16.1
 npx sanzhi-yunxiao-cli@latest install
 yunxiao --version
 
@@ -108,7 +108,7 @@ yunxiao pipeline list
 yunxiao codeup repos list
 ```
 
-Use the [GitHub Release binaries](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.0) as an alternative. Start writes with `--dry-run`, confirm high-risk writes before adding `--yes`, and use `--data-file ./body.json` for long JSON. The skills wizard supports multiple selections; individual skills can also be installed with `yunxiao skills install --skill ...`.
+Use the [GitHub Release binaries](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1) as an alternative. Start writes with `--dry-run`, confirm high-risk writes before adding `--yes`, and use `--data-file ./body.json` for long JSON. The skills wizard supports multiple selections; individual skills can also be installed with `yunxiao skills install --skill ...`.
 
 
 ### Paste for Agent
@@ -120,11 +120,11 @@ Install and init yunxiao CLI with a LOCAL profile (never write tenant profiles i
 
 1) Install (Aliyun npm registry):
    npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-   npm install -g sanzhi-yunxiao-cli@0.16.0
+   npm install -g sanzhi-yunxiao-cli@0.16.1
    npx sanzhi-yunxiao-cli@latest install
-   yunxiao --version   # expect 0.16.0
-   Fallback: GitHub Release v0.16.0
-   https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.0
+   yunxiao --version   # expect 0.16.1
+   Fallback: GitHub Release v0.16.1
+   https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
 
 2) Auth — prefer browser OAuth; use PAT only for CI/headless (never print/paste raw tokens into chat):
    Recommended: yunxiao auth login --browser
@@ -162,27 +162,27 @@ Install and init yunxiao CLI with a LOCAL profile (never write tenant profiles i
 
 ```bash
 npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-npm install -g sanzhi-yunxiao-cli@0.16.0
+npm install -g sanzhi-yunxiao-cli@0.16.1
 npx sanzhi-yunxiao-cli@latest install
-yunxiao --version          # yunxiao 0.16.0
+yunxiao --version          # yunxiao 0.16.1
 ```
 
-The `sanzhi-yunxiao-cli` package runs `postinstall` to unpack the platform archive, install companion skills, and print auth next steps. It downloads binaries from [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases); `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli` is the default (override it when needed). You can also [download the v0.16.0 Release directly](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.0), extract it, and add the `yunxiao` binary to `PATH`.
+The `sanzhi-yunxiao-cli` package runs `postinstall` to unpack the platform archive, install companion skills, and print auth next steps. It downloads binaries from [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases); `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli` is the default (override it when needed). You can also [download the v0.16.1 Release directly](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1), extract it, and add the `yunxiao` binary to `PATH`.
 
 **From source (secondary):**
 
 ```bash
 make build                 # produces ./yunxiao (injects Version via -ldflags)
-# or (without ldflags, Version falls back to package default 0.16.0)
+# or (without ldflags, Version falls back to package default 0.16.1)
 go build -o yunxiao .
 # pin version explicitly:
-# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.16.0" -o yunxiao .
+# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.16.1" -o yunxiao .
 make install               # installs to ~/.local/bin/yunxiao
 # or
 go install github.com/yunxiao-cli/yunxiao@latest   # when published
 ```
 
-Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Version=$(VERSION)` (`VERSION` defaults to `git describe` or `0.16.0`).
+Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Version=$(VERSION)` (`VERSION` defaults to `git describe` or `0.16.1`).
 
 **Known limitation:** `go install` / a lone binary does **not** ship the repo `skills/` tree, so `yunxiao skills list|read|install` will not find skills unless you use the npm installer (which extracts `skills/`), run from a source checkout, or copy/`npx skills add` the tree. Prefer `npx sanzhi-yunxiao-cli@latest install` or `make build` from a checkout for skills-aware workflows.
 
@@ -503,6 +503,7 @@ See [AGENTS.md](AGENTS.md) for contributor / AI-agent conventions.
 
 ### Changelog
 
+- **0.16.1** — Smoke fixes: `appstack apps list` sends required `pagination=keyset`; `workitem search` / `project +my-open-items` use profile `space_id` or clear CLI error; friendlier hint when `programs search` is blocked on non-Advanced orgs
 - **0.16.0** — Browser OAuth (`auth login --browser` / `--dry-run`), `credentials.json` (0600), `auth probe-oauth` (O1 header gate), auto refresh for `token_kind=oauth`, Agent paste prefers browser; PAT `--token` kept for CI
 - **0.15.7** — `yunxiao +onboard` writes a **generic local** profile under `~/.config/yunxiao/profiles/` (TTY project pick or `--space-id`); README Agent paste prompts (ZH+EN); missing-token hints include PAT console URL + module permission checklist; real 智衣/沙箱 tenant profiles stay local/untracked (do not expand example profiles for onboard)
 - **0.15.6** — default newest-first for comment/activity/history-style lists (`--sort asc|desc`; invalid values rejected); comments sort by **create** time; activity/MR/runs/efforts prefer update/modified; client-side `--sort` is **page-local** when the list is paginated (`--all` sorts across collected pages)
@@ -547,24 +548,24 @@ MIT — see [LICENSE](LICENSE).
 
 ```bash
 npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-npm install -g sanzhi-yunxiao-cli@0.16.0
+npm install -g sanzhi-yunxiao-cli@0.16.1
 npx sanzhi-yunxiao-cli@latest install
-yunxiao --version          # yunxiao 0.16.0
+yunxiao --version          # yunxiao 0.16.1
 ```
 
-`sanzhi-yunxiao-cli` 包会在 `postinstall` 时解压平台归档、安装 companion skills，并打印认证后续步骤。二进制来自 [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases)；默认值为 `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli`（需要时可覆盖）。也可以[直接下载 v0.16.0 Release](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.0)，解压后把 `yunxiao` 加入 `PATH`。
+`sanzhi-yunxiao-cli` 包会在 `postinstall` 时解压平台归档、安装 companion skills，并打印认证后续步骤。二进制来自 [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases)；默认值为 `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli`（需要时可覆盖）。也可以[直接下载 v0.16.1 Release](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1)，解压后把 `yunxiao` 加入 `PATH`。
 
 **从源码安装（次要）：**
 
 ```bash
 make build          # 生成 ./yunxiao（-ldflags 注入 Version）
 make install        # 安装到 ~/.local/bin/yunxiao
-go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.16.0
+go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.16.1
 # 显式注入：
-# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.16.0" -o yunxiao .
+# go build -ldflags "-X github.com/yunxiao-cli/yunxiao/internal/version.Version=0.16.1" -o yunxiao .
 ```
 
-需要 Go 1.24.4+。`make build` / `make ci` 通过 `-ldflags -X …version.Version=$(VERSION)` 注入版本（`VERSION` 默认 `git describe` 或 `0.16.0`）。
+需要 Go 1.24.4+。`make build` / `make ci` 通过 `-ldflags -X …version.Version=$(VERSION)` 注入版本（`VERSION` 默认 `git describe` 或 `0.16.1`）。
 
 **已知限制：** `go install` / 单独二进制**不包含**仓库 `skills/` 目录；请用 npm 安装器（会解压 `skills/`）、在源码检出目录运行，或另行复制 / `npx skills add`。需要技能时优先 `npx sanzhi-yunxiao-cli@latest install` 或检出目录 `make build`。
 
@@ -713,6 +714,7 @@ Packages **上传**、Codeup **blame/cherry-pick**、MR label detach 等仍无�
 
 ### 变更摘要
 
+- **0.16.1** — 冒烟修复：`appstack apps list` 补齐必填 `pagination=keyset`；`workitem search` / `project +my-open-items` 回退 profile `space_id` 或给出清晰 CLI 错误；`programs search` 非高级版组织返回更友好提示
 - **0.16.0** — 浏览器 OAuth（`auth login --browser` / `--dry-run`）、`credentials.json`（0600）、`auth probe-oauth`、oauth 自动 refresh；Agent 粘贴优先 browser；CI 保留 `--token`
 - **0.15.7** — `yunxiao +onboard`：按所选项目/`space_id` 仅写入本机 `~/.config/yunxiao/profiles/` 的通用 profile（TTY 选择或 `--space-id`）；README「给 Agent 粘贴」；缺 token 时提示 PAT 控制台链接与模块权限清单；智衣/沙箱租户配置留在本机、勿提交本仓库（不借 onboard 扩展示例 profile）
 - **0.15.6** — 评论/活动/历史类列表默认最新在前（`--sort asc|desc`，非法值报错）；评论按**创建时间**排序；活动/MR/流水线运行/工时等仍偏好更新时间；分页列表的客户端 `--sort` 仅作用于**当前页**（`--all` 时对已拉取页整体排序）

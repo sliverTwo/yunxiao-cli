@@ -2,7 +2,7 @@ package cmd
 
 func init() {
 	workitemSearchCmd.Flags().String("category", "Req", "category")
-	workitemSearchCmd.Flags().String("space-id", "", "project/space id")
+	workitemSearchCmd.Flags().String("space-id", "", "project/space id (default: profile.space_id; required)")
 	workitemSearchCmd.Flags().String("assigned-to", "", "assignee user id or 'self'")
 	workitemSearchCmd.Flags().String("creator", "", "creator user id or 'self'")
 	workitemSearchCmd.Flags().String("subject", "", "subject contains")

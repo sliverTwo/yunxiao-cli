@@ -15,6 +15,11 @@ var workitemSearchCmd = &cobra.Command{
 		flagOrg(globalOrg)
 		category, _ := cmd.Flags().GetString("category")
 		spaceID, _ := cmd.Flags().GetString("space-id")
+		spaceID, err := resolveSpaceIDFlag(spaceID)
+		if err != nil {
+			handleErr(err)
+			return
+		}
 		assignedTo, _ := cmd.Flags().GetString("assigned-to")
 		creator, _ := cmd.Flags().GetString("creator")
 		subject, _ := cmd.Flags().GetString("subject")
@@ -79,9 +84,7 @@ var workitemSearchCmd = &cobra.Command{
 			"page":     page,
 			"perPage":  perPage,
 		}
-		if spaceID != "" {
-			body["spaceId"] = spaceID
-		}
+		body["spaceId"] = spaceID
 		if len(filters) > 0 {
 			conds := map[string]any{"conditionGroups": []any{filters}}
 			cb, _ := json.Marshal(conds)
