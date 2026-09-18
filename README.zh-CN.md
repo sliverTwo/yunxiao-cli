@@ -104,6 +104,8 @@ yunxiao codeup repos list
 
 脚本、CI 和可复制命令使用 CLI；IDE 内聊天使用 MCP；许多团队会同时使用两者。
 
+**质量周报 / 按日期窗口出数**（日期窗口 → Req/Bug → JSON → 脚本）：优先用类型化 CLI（`workitem search` 的 `--created-after` / `--created-before`、`--updated-*`、`--finish-*`）。已在 IDE Agent 里对话时再用 MCP 作回落。按 `finishTime` 写入 conditions 过滤可能可用；官方 oapi SearchWorkitems / get 响应 schema 列的是 `gmtCreate` / `gmtModified` / `updateStatusAt`，可能没有 `finishTime`——CLI **不会**用 `updateStatusAt` 伪造 `finishTime`。类型化 `workitem search` 与原始 `api POST …/workitems:search` 均为 **read**（不需要 `--yes`）。
+
 对于 AI Agent，CLI 通过 Agent 粘贴指令并执行 `yunxiao …`；MCP 通过工具调用。MCP 可以减少对命令记忆的要求，但在审计性和可复现性方面通常弱于 CLI。
 
 ## 安装
@@ -218,6 +220,8 @@ yunxiao project list --name demo
 yunxiao project +my-open-items
 yunxiao project +created-by-me --status-stage 1,2
 yunxiao workitem search --assigned-to self --category Req --priority <id>
+yunxiao workitem search --category Req --created-after "2026-09-01 00:00:00" --created-before "2026-09-07 23:59:59"
+yunxiao workitem search --category Bug --finish-after "2026-09-01 00:00:00" --finish-before "2026-09-07 23:59:59"
 yunxiao workitem get --id <id>
 yunxiao workitem comments list --id <id>
 yunxiao workitem comment --id <id> --content "note" --dry-run

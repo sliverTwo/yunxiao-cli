@@ -19,7 +19,9 @@ Examples:
   yunxiao api POST /oapi/v1/... --data-file body.json
   yunxiao api POST /oapi/v1/... --data @body.json
 
-Risk: write (treat unknown endpoints carefully; use --dry-run first)`,
+Risk: GET/HEAD and known read POSTs (paths containing ":search", e.g. workitems:search)
+are read (no --yes). Other POST/PUT/PATCH/DELETE are high-risk-write and need --yes;
+use --dry-run first.`,
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
@@ -41,11 +43,16 @@ Risk: write (treat unknown endpoints carefully; use --dry-run first)`,
 			return
 		}
 		if globalDryRun {
-			handleErr(output.DryRunResult(string(risk.Write), c.Preview(method, path, nil, body)))
+			rl := risk.Write
+			if risk.IsReadOnlyHTTP(method, path) {
+				rl = risk.Read
+			}
+			handleErr(output.DryRunResult(string(rl), c.Preview(method, path, nil, body)))
 			return
 		}
-		// Mutating methods need --yes for high-risk gate when POST/PUT/PATCH/DELETE
-		if method != "GET" && method != "HEAD" {
+		// Mutating methods need --yes. Genuine read POSTs (e.g. workitems:search)
+		// are Risk: read and must not require confirmation.
+		if !risk.IsReadOnlyHTTP(method, path) {
 			if err := risk.CheckHighRisk("api "+method+" "+path, globalYes); err != nil {
 				handleErr(err)
 				return

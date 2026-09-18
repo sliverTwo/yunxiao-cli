@@ -13,6 +13,13 @@ func init() {
 	workitemSearchCmd.Flags().String("sort", "desc", "asc|desc")
 	workitemSearchCmd.Flags().Int("page", 1, "page")
 	workitemSearchCmd.Flags().Int("per-page", 20, "per page")
+	const dateHelp = `datetime "YYYY-MM-DD HH:MM:SS" (OpenAPI BETWEEN / dateTime; e.g. "2026-09-01 00:00:00")`
+	workitemSearchCmd.Flags().String("created-after", "", "filter gmtCreate >= value; "+dateHelp)
+	workitemSearchCmd.Flags().String("created-before", "", "filter gmtCreate <= value; "+dateHelp)
+	workitemSearchCmd.Flags().String("updated-after", "", "filter gmtModified >= value; "+dateHelp)
+	workitemSearchCmd.Flags().String("updated-before", "", "filter gmtModified <= value; "+dateHelp)
+	workitemSearchCmd.Flags().String("finish-after", "", "filter finishTime >= value; "+dateHelp)
+	workitemSearchCmd.Flags().String("finish-before", "", "filter finishTime <= value; "+dateHelp)
 	workitemGetCmd.Flags().String("id", "", "work item id or serial (or positional arg)")
 	workitemCommentsListCmd.Flags().String("id", "", "work item id (required)")
 	workitemCommentsListCmd.Flags().Int("page", 1, "page")
