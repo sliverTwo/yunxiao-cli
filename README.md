@@ -9,10 +9,13 @@ CLI binary name: **`yunxiao`**.
 ## Trial quickstart (5 minutes)
 
 ```bash
-npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-npm install -g sanzhi-yunxiao-cli@0.16.1
-npx sanzhi-yunxiao-cli@latest install
-yunxiao --version
+# 1) Install from GitHub Releases (primary)
+#    https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
+#    Download the archive for your OS/arch, extract, put `yunxiao` on PATH.
+yunxiao --version   # expect 0.16.1
+
+# Optional later: npm package name is `sanzhi-yunxiao-cli` (binaries still come from GitHub Releases).
+# Do not configure a private Aliyun npm registry for this project.
 
 yunxiao auth login --browser    # or: yunxiao auth login --token "<PAT>"
 yunxiao auth probe-oauth         # after browser login
@@ -23,7 +26,7 @@ yunxiao pipeline list
 yunxiao codeup repos list
 ```
 
-Use the [GitHub Release binaries](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1) as an alternative. Start writes with `--dry-run`, confirm high-risk writes before adding `--yes`, and use `--data-file ./body.json` for long JSON. The skills wizard supports multiple selections; individual skills can also be installed with `yunxiao skills install --skill ...`.
+Start writes with `--dry-run`, confirm high-risk writes before adding `--yes`, and use `--data-file ./body.json` for long JSON. Install companion skills with `yunxiao skills install` (wizard supports multiple selections; or `--skill ...`).
 
 
 ## Paste for Agent
@@ -33,13 +36,12 @@ Copy-paste for an agent (install → auth → skills → list projects read-only
 ```text
 Install and init yunxiao CLI with a LOCAL profile (never write tenant profiles into this repo):
 
-1) Install (Aliyun npm registry):
-   npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-   npm install -g sanzhi-yunxiao-cli@0.16.1
-   npx sanzhi-yunxiao-cli@latest install
-   yunxiao --version   # expect 0.16.1
-   Fallback: GitHub Release v0.16.1
+1) Install from GitHub Releases (primary):
    https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
+   Download the archive for the user's OS/arch, extract, put `yunxiao` on PATH.
+   yunxiao --version   # expect 0.16.1
+   Optional: npm package name is `sanzhi-yunxiao-cli` (may be published elsewhere later);
+   do not configure a private Aliyun npm registry for this project.
 
 2) Auth — prefer browser OAuth; use PAT only for CI/headless (never print/paste raw tokens into chat):
    Recommended: yunxiao auth login --browser
@@ -69,16 +71,17 @@ Install and init yunxiao CLI with a LOCAL profile (never write tenant profiles i
 
 ## Install
 
-**Recommended (company registry + npm installer):**
+**Recommended — [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1):**
+
+Download the archive for your OS/arch, extract it, and add the `yunxiao` binary to `PATH`.
 
 ```bash
-npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-npm install -g sanzhi-yunxiao-cli@0.16.1
-npx sanzhi-yunxiao-cli@latest install
 yunxiao --version          # yunxiao 0.16.1
 ```
 
-The `sanzhi-yunxiao-cli` package runs `postinstall` to unpack the platform archive, install companion skills, and print auth next steps. It downloads binaries from [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases); `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli` is the default (override it when needed). You can also [download the v0.16.1 Release directly](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1), extract it, and add the `yunxiao` binary to `PATH`.
+This project is maintained on **GitHub only** (`sliverTwo/yunxiao-cli`).
+
+**Optional — npm package name `sanzhi-yunxiao-cli`:** if the package is available on a public registry later, `npm install -g sanzhi-yunxiao-cli@0.16.1` then `npx sanzhi-yunxiao-cli@latest install` still pulls binaries from [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases) (`YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli` by default). Do **not** document or require a private Aliyun npm registry URL for installs.
 
 **From source (secondary):**
 
@@ -95,7 +98,7 @@ go install github.com/yunxiao-cli/yunxiao@latest   # when published
 
 Requires Go 1.24.4+. `make build` / `make ci` set `-ldflags -X …version.Version=$(VERSION)` (`VERSION` defaults to `git describe` or `0.16.1`).
 
-**Known limitation:** `go install` / a lone binary does **not** ship the repo `skills/` tree, so `yunxiao skills list|read|install` will not find skills unless you use the npm installer (which extracts `skills/`), run from a source checkout, or copy/`npx skills add` the tree. Prefer `npx sanzhi-yunxiao-cli@latest install` or `make build` from a checkout for skills-aware workflows.
+**Known limitation:** `go install` / a lone binary does **not** ship the repo `skills/` tree, so `yunxiao skills list|read|install` will not find skills unless you run from a source checkout (or an installer that extracts `skills/`), or copy/`npx skills add` the tree. Prefer `make build` from a checkout, then `yunxiao skills install`, for skills-aware workflows.
 
 ## Auth
 
@@ -166,8 +169,8 @@ yunxiao skills install --symlink --force
 # 2) Via skills CLI from a local checkout
 npx skills add /path/to/yunxiao-cli -y -g
 
-# 3) After Codeup push (URL must end in .git; needs Codeup git credentials)
-npx skills add https://codeup.aliyun.com/sanzhi/cli/yunxiao_cli.git -y -g
+# 3) From GitHub (URL must end in .git)
+npx skills add https://github.com/sliverTwo/yunxiao-cli.git -y -g
 ```
 
 Then restart / reload your AI tool so skills are picked up.
@@ -398,17 +401,13 @@ v0.9 landed deferred clears: AppStack release-workflows + deploy host mutations,
 ```bash
 make test && make build
 make ci                 # go build -ldflags … ./... && go test ./... && go vet ./...
-./scripts/ci.sh         # same, POSIX; use from Codeup Flow
+./scripts/ci.sh         # same checks, POSIX (local / any CI runner)
 ```
 
-**Codeup Flow (optional):** If this repo is mirrored to Aliyun Codeup, add a Flow job whose build script is:
+CI/CD is **GitHub Actions only** (this repo is maintained on GitHub, not mirrored to Codeup Flow):
 
-```bash
-make ci
-# or: ./scripts/ci.sh
-```
-
-GitHub Actions are active for the GitHub repository: `.github/workflows/ci.yml` runs CI on pushes to `main` and pull requests, while `.github/workflows/release.yml` builds platform archives and publishes a GitHub Release when a `v*` tag is pushed.
+- `.github/workflows/ci.yml` — CI on pushes to `main` and pull requests
+- `.github/workflows/release.yml` — build platform archives and publish a GitHub Release when a `v*` tag is pushed
 
 See [AGENTS.md](AGENTS.md) for contributor / AI-agent conventions.
 

@@ -11,16 +11,13 @@ CLI 二进制名：**`yunxiao`**。
 ### 1. 安装
 
 ```bash
-# 配置公司阿里云 npm 私仓（若本机还没有）
-npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-
-npm install -g sanzhi-yunxiao-cli@0.16.1
-npx sanzhi-yunxiao-cli@latest install   # 拉二进制 + 可选安装 skills
+# 主路径：从 GitHub Releases 下载对应平台归档，解压后把 yunxiao 加入 PATH
+# https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
 
 yunxiao --version   # 应显示 0.16.1
 
-# 备选：直接下 Release，解压后把 yunxiao.exe 所在目录加入 PATH
-# https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
+# 可选：npm 包名是 sanzhi-yunxiao-cli（日后若在公共源发布；二进制仍来自 GitHub Releases）
+# 本项目不要再配置公司阿里云 npm 私仓
 ```
 
 ### 2. 认证
@@ -54,13 +51,11 @@ yunxiao codeup repos list
 ```text
 请帮我安装并初始化 yunxiao CLI（本地 profile，勿写入本仓库）：
 
-1) 安装（公司阿里云 npm 私仓）：
-   npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-   npm install -g sanzhi-yunxiao-cli@0.16.1
-   npx sanzhi-yunxiao-cli@latest install
-   yunxiao --version   # 应显示 0.16.1
-   备选：GitHub Release v0.16.1
+1) 安装（主路径：GitHub Releases）：
    https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1
+   按用户系统下载归档、解压，把 `yunxiao` 加入 PATH。
+   yunxiao --version   # 应显示 0.16.1
+   可选：npm 包名 `sanzhi-yunxiao-cli`（日后或在别处发布）；不要为本项目配置公司阿里云 npm 私仓。
 
 2) 认证（优先浏览器 OAuth；无图形界面再用 PAT。禁止把完整 token 打到回复/聊天里）
    推荐：yunxiao auth login --browser
@@ -95,16 +90,17 @@ yunxiao codeup repos list
 
 ## 安装
 
-**推荐（公司阿里云 npm 私仓 + npm 安装器）：**
+**推荐 — [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1)：**
+
+按系统下载归档，解压后把 `yunxiao` 加入 `PATH`。
 
 ```bash
-npm config set registry https://packages.aliyun.com/67762490f72b227b2bf8327b/npm/npm-registry/
-npm install -g sanzhi-yunxiao-cli@0.16.1
-npx sanzhi-yunxiao-cli@latest install
 yunxiao --version          # yunxiao 0.16.1
 ```
 
-`sanzhi-yunxiao-cli` 包会在 `postinstall` 时解压平台归档、安装 companion skills，并打印认证后续步骤。二进制来自 [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases)；默认值为 `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli`（需要时可覆盖）。也可以[直接下载 v0.16.1 Release](https://github.com/sliverTwo/yunxiao-cli/releases/tag/v0.16.1)，解压后把 `yunxiao` 加入 `PATH`。
+本项目**仅在 GitHub 上维护**（`sliverTwo/yunxiao-cli`）。
+
+**可选 — npm 包名 `sanzhi-yunxiao-cli`：** 若日后在公共源可用，`npm install -g sanzhi-yunxiao-cli@0.16.1` 再执行 `npx sanzhi-yunxiao-cli@latest install` 时，二进制仍来自 [GitHub Releases](https://github.com/sliverTwo/yunxiao-cli/releases)（默认 `YUNXIAO_CLI_GITHUB_REPO=sliverTwo/yunxiao-cli`）。**不要**再为本项目文档化或依赖公司阿里云 npm 私仓 URL。
 
 **从源码安装（次要）：**
 
@@ -118,7 +114,7 @@ go build -o yunxiao .   # 无 ldflags 时回退包内默认 0.16.1
 
 需要 Go 1.24.4+。`make build` / `make ci` 通过 `-ldflags -X …version.Version=$(VERSION)` 注入版本（`VERSION` 默认 `git describe` 或 `0.16.1`）。
 
-**已知限制：** `go install` / 单独二进制**不包含**仓库 `skills/` 目录；请用 npm 安装器（会解压 `skills/`）、在源码检出目录运行，或另行复制 / `npx skills add`。需要技能时优先 `npx sanzhi-yunxiao-cli@latest install` 或检出目录 `make build`。
+**已知限制：** `go install` / 单独二进制**不包含**仓库 `skills/` 目录；请在源码检出目录运行（或使用会解压 `skills/` 的安装器），或另行复制 / `npx skills add`。需要技能时优先检出目录 `make build`，再执行 `yunxiao skills install`。
 
 ## 认证
 
@@ -182,8 +178,8 @@ yunxiao skills install --symlink --force
 # 2) 从本地仓库路径
 npx skills add /path/to/yunxiao-cli -y -g
 
-# 3) Codeup 推送后（URL 必须以 .git 结尾；需 Codeup git 凭证）
-npx skills add https://codeup.aliyun.com/sanzhi/cli/yunxiao_cli.git -y -g
+# 3) 从 GitHub（URL 必须以 .git 结尾）
+npx skills add https://github.com/sliverTwo/yunxiao-cli.git -y -g
 ```
 
 安装后请重启 / 重载 AI 工具。查看：`yunxiao skills list|path|read <name>`。
@@ -357,17 +353,13 @@ yunxiao workitem relations create --id <id> --related-id <rid> --relation-type A
 ```bash
 make test && make build
 make ci                 # go build -ldflags … ./... && go test ./... && go vet ./...
-./scripts/ci.sh         # 同上，供 Codeup Flow 调用
+./scripts/ci.sh         # 同上的 POSIX 本地 / 通用 CI 脚本
 ```
 
-**云效 Flow（可选）：** 如果把本仓库镜像到阿里云 Codeup，可在 Flow 中新增构建任务，脚本写：
+CI/CD **仅使用 GitHub Actions**（本仓库在 GitHub 维护，不再镜像到 Codeup Flow）：
 
-```bash
-make ci
-# 或: ./scripts/ci.sh
-```
-
-GitHub 仓库已启用真实的 GitHub Actions：`.github/workflows/ci.yml` 在推送到 `main` 或提交 Pull Request 时运行 CI；`.github/workflows/release.yml` 在推送 `v*` 标签时构建各平台归档并发布 GitHub Release。
+- `.github/workflows/ci.yml` — 推送到 `main` 或 Pull Request 时跑 CI
+- `.github/workflows/release.yml` — 推送 `v*` 标签时构建各平台归档并发布 GitHub Release
 
 ## 已知缺口
 
