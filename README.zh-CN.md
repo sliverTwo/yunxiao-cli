@@ -22,11 +22,18 @@ yunxiao --version   # 应显示 0.16.1
 
 ### 2. 认证
 
-打开 [个人访问令牌控制台](https://account-devops.aliyun.com/settings/personalAccessToken) 新建 PAT（名称建议 `yunxiao-cli`；勾选组织读 + 项目/代码/流水线读写，按需制品/测试/应用；令牌只显示一次），然后：
+优先使用浏览器 OAuth；仅在 CI/无图形界面时使用 PAT（不要把完整 token 打到回复/聊天里）：
+
+```bash
+yunxiao auth login --browser
+yunxiao auth probe-oauth
+yunxiao whoami && yunxiao doctor
+```
+
+PAT 回落：打开 [个人访问令牌控制台](https://account-devops.aliyun.com/settings/personalAccessToken) 新建 PAT（名称建议 `yunxiao-cli`；勾选组织读 + 项目/代码/流水线读写，按需制品/测试/应用；令牌只显示一次），然后：
 
 ```bash
 yunxiao auth login --token "<PAT>"
-yunxiao whoami && yunxiao doctor
 ```
 
 ### 3. 常用只读命令
