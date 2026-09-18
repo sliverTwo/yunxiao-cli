@@ -27,7 +27,7 @@ func TestFindAndList(t *testing.T) {
 	if Find("codeup.tags.list") == nil || Find("codeup.protected_branches.list") == nil {
 		t.Fatal("codeup tags/protect reads")
 	}
-	for _, id := range []string{"codeup.mrs.comments.create", "codeup.mrs.labels.attach", "testhub.results.update", "workitem.relations.create", "workitem.relations.delete"} {
+	for _, id := range []string{"codeup.mrs.comments.create", "codeup.mrs.labels.attach", "codeup.mrs.reviewers.add", "testhub.results.update", "workitem.relations.create", "workitem.relations.delete"} {
 		mm := Find(id)
 		if mm == nil || mm.Risk != risk.Write {
 			t.Fatalf("%s %+v", id, mm)
@@ -115,5 +115,33 @@ func TestMrsCreateReviewerParam(t *testing.T) {
 	}
 	if m.Example == "" || !strings.Contains(m.Example, "--reviewer") {
 		t.Fatalf("example should mention --reviewer: %q", m.Example)
+	}
+}
+
+func TestMrsReviewersAddSchema(t *testing.T) {
+	m := Find("codeup.mrs.reviewers.add")
+	if m == nil {
+		t.Fatal("missing codeup.mrs.reviewers.add")
+	}
+	if m.Risk != risk.Write {
+		t.Fatalf("risk=%v", m.Risk)
+	}
+	if m.HTTPMethod != "POST" || !strings.Contains(m.Path, "/person/REVIEWER") {
+		t.Fatalf("method/path=%s %s", m.HTTPMethod, m.Path)
+	}
+	hasReviewer := false
+	for _, param := range m.Params {
+		if param.Name == "reviewer" {
+			hasReviewer = true
+			if !param.Required {
+				t.Fatal("reviewer should be required")
+			}
+		}
+	}
+	if !hasReviewer {
+		t.Fatal("codeup.mrs.reviewers.add missing reviewer param")
+	}
+	if m.Example == "" || !strings.Contains(m.Example, "reviewers add") {
+		t.Fatalf("example: %q", m.Example)
 	}
 }

@@ -27,7 +27,7 @@ Typed:
   yunxiao codeup protected-branches list|get|create|delete --repo <id|alias>
   yunxiao codeup files tree|get|create|update|delete --repo <id|alias>
   yunxiao codeup commits list --repo <id|alias> --ref <branch>
-  yunxiao codeup mrs list|get|diffs|comments|labels|create|merge|close|review|reopen
+  yunxiao codeup mrs list|get|diffs|comments|labels|reviewers|create|merge|close|review|reopen
   yunxiao codeup compare --repo <id|alias> --from <ref> --to <ref>
 
 --repo accepts numeric id, profile.repositories alias, or org/repo path.
@@ -1140,6 +1140,55 @@ var codeupMrsLabelsAttachCmd = &cobra.Command{
 	},
 }
 
+var codeupMrsReviewersCmd = &cobra.Command{Use: "reviewers", Short: "MR reviewers (add via person/REVIEWER)"}
+
+var codeupMrsReviewersAddCmd = &cobra.Command{
+	Use:   "add",
+	Short: "Add/update reviewers on an existing MR (write)",
+	Long: `Risk: write
+HTTP: POST .../changeRequests/{localId}/person/REVIEWER
+Body: {"userIds":[...]}
+
+OpenAPI UpdateChangeRequestRelatedPerson with type=REVIEWER.
+--reviewer accepts comma-separated userIds (same CSV as mrs create; body field is userIds, not reviewerUserIds).
+
+Example:
+  yunxiao codeup mrs reviewers add --repo <id> --local-id 1 --reviewer <userId1,userId2> --dry-run`,
+	Run: func(cmd *cobra.Command, args []string) {
+		flagOrg(globalOrg)
+		repo, _ := cmd.Flags().GetString("repo")
+		localID, _ := cmd.Flags().GetString("local-id")
+		reviewer, _ := cmd.Flags().GetString("reviewer")
+		if err := requireFlags("repo", repo, "local-id", localID, "reviewer", reviewer); err != nil {
+			handleErr(err)
+			return
+		}
+		ids := zhiyi.SplitUserIDs(reviewer)
+		if len(ids) == 0 {
+			handleErr(fmt.Errorf("--reviewer requires at least one userId"))
+			return
+		}
+		repositoryID, err := resolveCodeupRepo(repo)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		c, _, err := mustClient()
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		repoID := client.EncodeRepoID(repositoryID)
+		path, err := c.CodeupPath(cmd.Context(), "/repositories/"+repoID+"/changeRequests/"+localID+"/person/REVIEWER")
+		if err != nil {
+			handleErr(err)
+			return
+		}
+		body := map[string]any{"userIds": ids}
+		handleErr(runJSONMutating(cmd.Context(), c, "codeup mrs reviewers add", risk.Write, "POST", path, nil, body, nil))
+	},
+}
+
 func numericOrEmpty(s string) string {
 	if _, err := strconv.ParseInt(s, 10, 64); err == nil {
 		return s
@@ -1270,8 +1319,12 @@ func init() {
 	codeupMrsLabelsAttachCmd.Flags().String("repo", "", "repository id or alias (required)")
 	codeupMrsLabelsAttachCmd.Flags().String("local-id", "", "MR local id (required)")
 	codeupMrsLabelsAttachCmd.Flags().String("label-ids", "", "comma-separated label ids (required)")
+	codeupMrsReviewersAddCmd.Flags().String("repo", "", "repository id or alias (required)")
+	codeupMrsReviewersAddCmd.Flags().String("local-id", "", "MR local id (required)")
+	codeupMrsReviewersAddCmd.Flags().String("reviewer", "", "reviewer userId(s), comma-separated (OpenAPI person/REVIEWER body userIds)")
 	codeupMrsCommentsCmd.AddCommand(codeupMrsCommentsListCmd, codeupMrsCommentsCreateCmd)
 	codeupMrsLabelsCmd.AddCommand(codeupMrsLabelsListCmd, codeupMrsLabelsAttachCmd)
-	codeupMrsCmd.AddCommand(codeupMrsListCmd, codeupMrsGetCmd, codeupMrsDiffsCmd, codeupMrsCommentsCmd, codeupMrsLabelsCmd, codeupMrsCreateCmd, codeupMrsMergeCmd, codeupMrsCloseCmd, codeupMrsReviewCmd, codeupMrsReopenCmd)
+	codeupMrsReviewersCmd.AddCommand(codeupMrsReviewersAddCmd)
+	codeupMrsCmd.AddCommand(codeupMrsListCmd, codeupMrsGetCmd, codeupMrsDiffsCmd, codeupMrsCommentsCmd, codeupMrsLabelsCmd, codeupMrsReviewersCmd, codeupMrsCreateCmd, codeupMrsMergeCmd, codeupMrsCloseCmd, codeupMrsReviewCmd, codeupMrsReopenCmd)
 	codeupCmd.AddCommand(codeupReposCmd, codeupBranchesCmd, codeupFilesCmd, codeupCommitsCmd, codeupCompareCmd, codeupMrsCmd, codeupOpenMrsShortcut)
 }
