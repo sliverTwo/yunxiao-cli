@@ -57,15 +57,17 @@ yunxiao schema codeup.mrs.create
 ```bash
 yunxiao codeup mrs create \
   --repo <repoId> --source feature/x --target master \
-  --title "feat: x" --description "..." --dry-run
+  --title "feat: x" --description "..." --reviewer <userId1,userId2> --dry-run
 
 # 用户明确同意后：
 yunxiao codeup mrs create \
   --repo <repoId> --source feature/x --target master \
-  --title "feat: x" --yes
+  --title "feat: x" --reviewer <userId1,userId2> --yes
 ```
 
 `--repo` 可为数字 id，或 `org/repo`（会编码）；非数字时 CLI 会尝试拉取仓库解析 `sourceProjectId`/`targetProjectId`。
+
+`--reviewer`：逗号分隔 userId，写入 OpenAPI `reviewerUserIds`；与 `mrs +create --reviewer` 语义一致。
 
 缺 `--yes` → exit **10** + `confirmation_required`（见 shared skill）。
 

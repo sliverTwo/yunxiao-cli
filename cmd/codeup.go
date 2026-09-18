@@ -18,7 +18,7 @@ var codeupCmd = &cobra.Command{
 
 +shortcuts:
   yunxiao codeup +open-mrs [--repo <id|alias>]
-  yunxiao codeup mrs +create --repo <alias|id> --source <br> --title "…" [--work-item ZYPT-…] [--wip]
+  yunxiao codeup mrs +create --repo <alias|id> --source <br> --title "…" [--work-item ZYPT-…] [--wip] [--reviewer <ids>]
 
 Typed:
   yunxiao codeup repos list|get --repo <id|alias>
@@ -166,7 +166,12 @@ var codeupMrsCreateCmd = &cobra.Command{
 
 Requires --yes after explicit user confirmation. Prefer --dry-run first.
 
-HTTP: POST .../repositories/{repo}/changeRequests`,
+HTTP: POST .../repositories/{repo}/changeRequests
+
+--reviewer accepts comma-separated userIds (OpenAPI reviewerUserIds), same as mrs +create.
+
+  yunxiao codeup mrs create --repo <id> --source feat/x --target master \
+    --title "feat: x" --reviewer <userId1,userId2> --dry-run`,
 	Run: func(cmd *cobra.Command, args []string) {
 		flagOrg(globalOrg)
 		repo, _ := cmd.Flags().GetString("repo")
@@ -174,6 +179,7 @@ HTTP: POST .../repositories/{repo}/changeRequests`,
 		target, _ := cmd.Flags().GetString("target")
 		title, _ := cmd.Flags().GetString("title")
 		desc, _ := cmd.Flags().GetString("description")
+		reviewer, _ := cmd.Flags().GetString("reviewer")
 		sourceProjectID, _ := cmd.Flags().GetString("source-project-id")
 		targetProjectID, _ := cmd.Flags().GetString("target-project-id")
 		createFrom, _ := cmd.Flags().GetString("create-from")
@@ -234,6 +240,9 @@ HTTP: POST .../repositories/{repo}/changeRequests`,
 		}
 		if desc != "" {
 			body["description"] = desc
+		}
+		if ids := zhiyi.SplitUserIDs(reviewer); len(ids) > 0 {
+			body["reviewerUserIds"] = ids
 		}
 		if globalDryRun {
 			handleErr(output.DryRunResult(string(risk.HighRiskWrite), c.Preview("POST", path, nil, body)))
@@ -1161,6 +1170,7 @@ func init() {
 	codeupMrsCreateCmd.Flags().String("source-project-id", "", "numeric source project id")
 	codeupMrsCreateCmd.Flags().String("target-project-id", "", "numeric target project id")
 	codeupMrsCreateCmd.Flags().String("create-from", "WEB", "createFrom, default WEB")
+	codeupMrsCreateCmd.Flags().String("reviewer", "", "optional reviewer userId(s), comma-separated (OpenAPI reviewerUserIds; same as mrs +create)")
 	codeupOpenMrsShortcut.Flags().String("state", "opened", "state")
 	codeupOpenMrsShortcut.Flags().String("search", "", "title search")
 	codeupOpenMrsShortcut.Flags().String("repo", "", "filter by repository id or alias")
